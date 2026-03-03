@@ -64,50 +64,74 @@ toNumber[x_] := x;
 (* Import and parse semicolon-separated EIS text file.
    Minimal assumptions: at least 4 semicolon-separated fields per row. *)
 importEISTxt[file_String] := Module[
-	{rawLines, lines, header, hasHeader, splitHeader, colMap, 
-	freqCol, zreCol, zimCol, splitRows, numRows, good, freqHz, zre, zimNeg, z},
+ {rawLines, lines, header, hasHeader, splitHeader, colMap,
+  freqCol, zreCol, zimCol, timeCol,
+  splitRows, numRows, good,
+  freqHz, zre, zimNeg, z, timeS},
 
-	rawLines = Import[file, "Lines"];
-	rawLines = Select[rawLines, StringTrim[#] =!= "" &];
+ rawLines = Import[file, "Lines"];
+ rawLines = Select[rawLines, StringTrim[#] =!= "" &];
 
-	(* Detect header: first line contains "Frequency" *)
-	header = First[rawLines];
-	hasHeader = StringContainsQ[header, "Frequency"];
+ header = First[rawLines];
+ hasHeader = StringContainsQ[header, "Frequency"];
 
-	lines = If[hasHeader, Rest[rawLines], rawLines];
+ lines = If[hasHeader, Rest[rawLines], rawLines];
 
-	(* If we have a header, locate columns by name; else fall back to old positions *)
-	If[hasHeader,
-		splitHeader = StringTrim /@ StringSplit[header, ";"];
-		colMap = AssociationThread[splitHeader -> Range[Length[splitHeader]]];
+ If[hasHeader,
+  
+  splitHeader = StringTrim /@ StringSplit[header, ";"];
+  colMap = AssociationThread[splitHeader -> Range[Length[splitHeader]]];
 
-		(* allow a couple common variants *)
-		freqCol = Lookup[colMap, "Frequency (Hz)", Missing["NoCol"]];
-		zreCol  = Lookup[colMap, "Z' (\[CapitalOmega])", Missing["NoCol"]];
-		zimCol  = Lookup[colMap, "-Z'' (\[CapitalOmega])", Missing["NoCol"]];
+  freqCol = Lookup[colMap, "Frequency (Hz)", Missing["NoCol"]];
+  zreCol  = Lookup[colMap, "Z' (\[CapitalOmega])", Missing["NoCol"]];
+  zimCol  = Lookup[colMap, "-Z'' (\[CapitalOmega])", Missing["NoCol"]];
+  timeCol = Lookup[colMap, "Time (s)", Missing["NoCol"]];
 
-		If[MemberQ[{freqCol, zreCol, zimCol}, Missing["NoCol"]],
-			Throw[Failure["DCTImport", <|"Message" -> "Header found but required columns not located."|>]]
-		],
-		(* no header: assume legacy positions *)
-		freqCol = 2; zreCol = 3; zimCol = 4;
-	];
+  If[MemberQ[{freqCol, zreCol, zimCol}, Missing["NoCol"]],
+   Throw[
+    Failure["DCTImport",
+     <|"Message" -> "Header found but required columns not located."|>
+    ]
+   ]
+  ],
 
-	splitRows = StringSplit[#, ";"] & /@ lines;
-	numRows = (toNumber /@ #) & /@ splitRows;
+  (* legacy format *)
+  freqCol = 2; 
+  zreCol = 3; 
+  zimCol = 4;
+  timeCol = Missing["NoCol"];
+ ];
 
-	good = Select[numRows, (Length[#] >= Max[freqCol, zreCol, zimCol] && 
-		NumericQ[#[[freqCol]]] && NumericQ[#[[zreCol]]] && NumericQ[#[[zimCol]]]) &];
+ splitRows = StringSplit[#, ";"] & /@ lines;
+ numRows = (toNumber /@ #) & /@ splitRows;
 
-	freqHz = good[[All, freqCol]];
-	zre    = good[[All, zreCol]];
-	zimNeg = good[[All, zimCol]];
+ good = Select[
+   numRows,
+   (Length[#] >= Max[freqCol, zreCol, zimCol] &&
+      NumericQ[#[[freqCol]]] &&
+      NumericQ[#[[zreCol]]] &&
+      NumericQ[#[[zimCol]]]) &
+   ];
 
-	z = zre + I*(-zimNeg);  (* file stores -Zim *)
+ freqHz = good[[All, freqCol]];
+ zre    = good[[All, zreCol]];
+ zimNeg = good[[All, zimCol]];
 
-	With[{ord = Ordering[freqHz]},
-		<|"FreqHz" -> freqHz[[ord]], "Z" -> z[[ord]]|>
-	]
+ z = zre + I*(-zimNeg);
+
+ timeS =
+  If[timeCol === Missing["NoCol"],
+   ConstantArray[Missing["NoTime"], Length[freqHz]],
+   good[[All, timeCol]]
+   ];
+
+ With[{ord = Ordering[freqHz]},
+  <|
+   "FreqHz" -> freqHz[[ord]],
+   "Z" -> z[[ord]],
+   "TimeS" -> timeS[[ord]]
+   |>
+ ]
 ];
 
 (* Estimate Rs from the highest-frequency points.
@@ -175,7 +199,7 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
     fMinUse, fMaxUse,
 
     (* imported data *)
-    dat, freqHz, zData, omega, keep,
+    dat, freqHz, zData, omega, keep, timeS, finishTime,
 
     (* series resistance + interface admittance *)
     rs, zInt, yInt, wY, wYsqrt,
@@ -205,11 +229,15 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
   fMinUse       = OptionValue["FMinUse"];
   fMaxUse       = OptionValue["FMaxUse"];
 
+
   (* ---------- Import ---------- *)
   dat    = importEISTxt[file];
   freqHz = dat["FreqHz"];
   zData  = Developer`ToPackedArray[dat["Z"]];
   omega  = Developer`ToPackedArray[2 Pi freqHz];
+
+timeS = dat["TimeS"];
+finishTime = Max[timeS];
 
   dbg[debug, "freqRangeHz BEFORE f-window", {Min[freqHz], Max[freqHz]}];
   With[{n = Min[10, Length[freqHz]]},
@@ -358,7 +386,9 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
       "ZData"    -> zData,
       "ZFit"     -> zFit,
       "YIntData" -> yInt,
-      "YIntFit"  -> yIntFit
+      "YIntFit"  -> yIntFit,
+      "FinishTimeS" -> finishTime
+
     |>;
 
   dbg[debug, "DCTSpectrum return head", Head[out]];

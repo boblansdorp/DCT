@@ -31,7 +31,7 @@ dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25";
 lambdaND = 1 10^-4;
 
 debugFlag = False;
-fileDecimation = 10;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
+fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
 
 
 
@@ -41,7 +41,7 @@ fMaxUse = 800;     (* Hz *)
 
 binsPerDecade = 25;
 
-weightPower = 0.75; (* how much do we weight each data point? around 0.5 or 1 works, has to do with SNR of potentiostat *)
+weightPower = 1.0; (* how much do we weight each data point? around 0.5 or 1 works, has to do with SNR of potentiostat *)
 
 
 (* Optional: restrict the frequency range (must match package options) *)
@@ -259,14 +259,19 @@ gGrid = Table[
    {i, 1, nExp}
 ];
 
+
+expTimesHr = (#[["Spec", "FinishTimeS"]]/3600) & /@ goodSpecs;
+
+
 (* gGrid is nExp x nK; build points (x,y)->g for ListDensityPlot *)
 pts = Flatten[
    Table[
-     {i, kGrid[[j]], gGrid[[i, j]]},
+     {expTimesHr[[i]], kGrid[[j]], gGrid[[i, j]]},
      {i, 1, nExp}, {j, 1, nK}
    ],
    1
 ];
+
 (* ---------- Styling knobs ---------- *)
 lblSize = 18;
 tickSize = 14;
@@ -277,7 +282,7 @@ ListDensityPlot[
   Frame -> True,
 
   FrameLabel -> {
-    Style["Experiment #", lblSize],
+	Style["Time (hours)", lblSize],
     Style["k (s^-1)", lblSize]
   },
 
@@ -291,11 +296,8 @@ ListDensityPlot[
 
   (* Less clutter: fewer ticks on x, decent ticks on log y *)
   FrameTicks -> {
-  {Automatic, None},  (* left/right ticks for y (k) *)
-  {
-    Table[{i, ToString[i]}, {i, 1, nExp, Max[1, Round[nExp/10]]}],
-    None
-  }                 (* bottom/top ticks for x (experiment #) *)
+  {Automatic, None},
+  {Automatic, None}
 },
 
   PlotLegends -> Placed[Automatic, Right],
@@ -472,7 +474,7 @@ If[showRawPoints,
 colors = ColorData["Rainbow"] /@ Rescale[Range[Length[nyqFitTraces]]];
 
 (* ---------- Plot ---------- *)
-Show[
+dataLogPlot = Show[
   {
     If[showRawPoints && rawTrace =!= {},
       ListLogLogPlot[
@@ -502,7 +504,7 @@ Show[
      rawLabel
   }]
 ]
-Show[
+dataLinPlot =Show[
   {
     If[showRawPoints && rawTrace =!= {},
       ListPlot[
@@ -563,7 +565,7 @@ fullFitNyqTraces =
 
 colors = ColorData["Rainbow"] /@ Rescale[Range[Length[fullFitNyqTraces]]];
 
-Show[
+fitLinPlot = Show[
   ListLinePlot[
     fullFitNyqTraces,
     PlotStyle -> colors
@@ -577,7 +579,7 @@ Show[
 ]
 
 
-Show[
+fitLogPlot = Show[
   ListLogLogPlot[
     fullFitNyqTraces,
     PlotStyle -> colors,
@@ -593,4 +595,4 @@ Show[
 ]
 
 
-
+GraphicsGrid[{{dataLinPlot, fitLinPlot},{dataLogPlot, fitLogPlot}}]
