@@ -27,8 +27,12 @@ Get[NNLSPackagePath]
 
 
 dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\test";
+
+
 dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25";
-lambdaND = 1 10^-4;
+dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25-titration";
+
+lambdaND = 1 10^-5;
 
 debugFlag = False;
 fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
@@ -39,7 +43,7 @@ fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
 fMinUse = 10;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
 fMaxUse = 800;     (* Hz *)
 
-binsPerDecade = 25;
+binsPerDecade = 35;
 
 weightPower = 1.0; (* how much do we weight each data point? around 0.5 or 1 works, has to do with SNR of potentiostat *)
 
@@ -207,7 +211,7 @@ Show[
     ScalingFunctions -> {"Log10", None},
     Frame -> True,
     FrameLabel -> {"k (s^-1)", "g(k) (F/decade)"},
-    PlotRange -> {Automatic, {0, 5 10^-6}},
+    PlotRange -> {Automatic, {0, 4 10^-6}},
     PlotLegends -> Placed[labels, Right],
     ImageSize -> 700
   ]
@@ -279,31 +283,40 @@ titleSize = 16;
 
 ListDensityPlot[
   pts,
-  Frame -> True,
 
+  (* --- make the whole graphic white --- *)
+  Background -> White,
+  PlotRangePadding -> Scaled[0.02],
+
+  Frame -> True,
+  FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
   FrameLabel -> {
-	Style["Time (hours)", lblSize],
-    Style["k (s^-1)", lblSize]
+    Style["Time (hours)", lblSize, Black],
+    Style["k (s^-1)",     lblSize, Black]
   },
 
   (* Log axis on k *)
   ScalingFunctions -> {None, "Log10"},
 
-  (* Make ticks readable *)
-  BaseStyle -> {FontFamily -> "Arial", tickSize},
-  FrameTicksStyle -> Directive[tickSize],
-  LabelStyle -> Directive[lblSize],
+  (* readable ticks and labels *)
+  BaseStyle -> {FontFamily -> "Arial", tickSize, Black},
+  LabelStyle -> Directive[lblSize, Black],
+  FrameTicksStyle -> Directive[tickSize, Black],
 
-  (* Less clutter: fewer ticks on x, decent ticks on log y *)
+  (* your ticks, but with black tick labels *)
   FrameTicks -> {
-  {Automatic, None},
-  {Automatic, None}
-},
+    {Automatic, None},  (* left/right ticks for y (k) *)
+    {Automatic, None}   (* bottom/top ticks for x (time) *)
+  },
 
-  PlotLegends -> Placed[Automatic, Right],
+  PlotLegends -> Placed[
+    BarLegend[Automatic, LabelStyle -> Directive[14, Black],
+      LegendMarkerSize -> 220
+    ],
+    Right
+  ],
 
-  PlotRange -> All,
-  InterpolationOrder -> 0,     (* pixel look; change to 1 for smoother *)
+  InterpolationOrder -> 0,
   ImageSize -> 900,
 
   PlotLabel -> Style[
@@ -311,7 +324,7 @@ ListDensityPlot[
       "g(k) heat map   nExp=", nExp,
       "   k-range=[", ScientificForm[kMin, 3], ", ", ScientificForm[kMax, 3], "] s^-1"
     }],
-    titleSize
+    titleSize, Black
   ]
 ]
 
@@ -596,3 +609,453 @@ fitLogPlot = Show[
 
 
 GraphicsGrid[{{dataLinPlot, fitLinPlot},{dataLogPlot, fitLogPlot}}]
+
+
+(* ============================== *)
+(* User control: midpoint split   *)
+(* ============================== *)
+
+fMid = 150/(2 \[Pi]);                 (* Hz, user-selected *)
+kMid = 2 Pi fMid;           (* s^-1 *)
+
+(* ============================== *)
+(* Helper: integrate g over log10(k) *)
+(* g is in F/decade, so integrate vs log10(k) *)
+(* ============================== *)
+
+areaOverLog10k[k_List, g_List] := Module[
+  {x, ord},
+  If[Length[k] < 2, Return[0.0]];
+  ord = Ordering[k];
+  x = Log10[k[[ord]]];
+  N @ Total[Differences[x] * MovingAverage[g[[ord]], 2]]
+];
+
+(* ============================== *)
+(* Compute areas for each dataset *)
+(* ============================== *)
+
+areaResults = Table[
+  Module[{spec, k, g, ord, kk, gg, idxSplit, cSlow, cFast, cTot},
+    spec = goodSpecs[[i, "Spec"]];
+    k = 1/spec["Tau"];
+    g = spec["g"];
+
+    (* sort by k increasing *)
+    ord = Ordering[k];
+    kk = k[[ord]];
+    gg = g[[ord]];
+
+    (* find last index with k <= kMid *)
+    idxSplit = LengthWhile[kk, # <= kMid &];
+
+    (* handle edge cases *)
+    cSlow = If[idxSplit >= 2, areaOverLog10k[kk[[;; idxSplit]], gg[[;; idxSplit]]], 0.0];
+    cFast = If[idxSplit <= Length[kk] - 2, areaOverLog10k[kk[[idxSplit ;;]], gg[[idxSplit ;;]]], 0.0];
+
+    cTot = cSlow + cFast;
+
+    <|
+      "i" -> i,
+      "File" -> goodSpecs[[i, "File"]],
+      "fMid_Hz" -> fMid,
+      "kMid_s^-1" -> kMid,
+      "cSlow_F" -> cSlow,     (* k <= kMid *)
+      "cFast_F" -> cFast,     (* k >= kMid *)
+      "cTotal_F" -> cTot,
+      "FractionBound"->cFast/cTot
+    |>
+  ],
+  {i, Length[goodSpecs]}
+];
+
+(* Quick look *)
+Dataset[areaResults]
+
+
+(* ============================== *)
+(* User control: Langmuir KD       *)
+(* ============================== *)
+KD = 250;
+KD = 144;  (* user-defined; same concentration units you want out, e.g. uM *)
+(* 144 uM was the published value measured with EIS https://pubs.acs.org/doi/full/10.1021/acssensors.3c00632 *)
+
+(* ============================== *)
+(* Helper: Langmuir inversion      *)
+(* ============================== *)
+langmuirConcFromF[f_?NumericQ, kd_?NumericQ] := Module[{eps = 10^-12, ff},
+  (* clip f away from exactly 0 or 1 to avoid division blowups *)
+  ff = Clip[f, {0 + eps, 1 - eps}];
+  kd * ff/(1 - ff)
+];
+
+(* ============================== *)
+(* Add concentration to each row   *)
+(* ============================== *)
+
+areaResultsWithConc =
+  Map[
+    Function[assoc,
+      Module[{f = assoc["FractionBound"], cEst},
+        cEst = langmuirConcFromF[f, KD];
+        Join[assoc, <|
+          "KD" -> KD,
+          "Conc_Est" -> cEst
+        |>]
+      ]
+    ],
+    areaResults
+  ];
+
+Dataset[areaResultsWithConc]
+
+
+
+
+
+
+
+
+(* ================================= *)
+(* Extract number before "uM"        *)
+(* ================================= *)
+
+getConcFromFile[file_String] := Module[
+  {name, hit},
+  
+  name = FileNameTake[file];
+  
+  hit = StringCases[
+    name,
+    RegularExpression["(\\d+(?:\\.\\d+)?)uM"] :> "$1"
+  ];
+  
+  If[hit === {},
+    Missing["NoMatch"],
+    ToExpression[First[hit]]
+  ]
+];
+
+(* ================================= *)
+(* Add column to areaResults         *)
+(* ================================= *)
+
+areaResultsWithConc =
+  Map[
+    Function[assoc,
+      Join[
+        assoc,
+        <|"Conc_Actual" -> getConcFromFile[assoc["File"]]|>
+      ]
+    ],
+    areaResults
+  ];
+
+Dataset[areaResultsWithConc]
+
+
+(* ============================== *)
+(* Combine actual + estimated conc *)
+(* ============================== *)
+
+areaResultsWithConc =
+  Map[
+    Function[assoc,
+      Module[{f, cEst, cAct},
+        f = assoc["FractionBound"];
+        cEst = langmuirConcFromF[f, KD];
+        cAct = getConcFromFile[assoc["File"]];
+
+        Join[assoc, <|
+          "KD" -> KD,
+          "Conc_Actual" -> cAct,
+          "Conc_Est" -> cEst
+        |>]
+      ]
+    ],
+    areaResults
+  ];
+
+Dataset[areaResultsWithConc]
+
+
+
+
+
+concTable = areaResultsWithConc[[All, {"File", "Conc_Actual", "Conc_Est"}]];
+Dataset[concTable]
+
+
+(* ============================================ *)
+(* 1) Helpers: parse concentration + electrode  *)
+(* ============================================ *)
+
+getConcFromFile[file_String] := Module[{name, hit},
+  name = FileNameTake[file];
+  hit = StringCases[
+    name,
+    RegularExpression["(?i)(\\d+(?:\\.\\d+)?)\\s*uM"] :> "$1"
+  ];
+  If[hit === {}, Missing["NoConc"], ToExpression[First[hit]]]
+];
+
+getElectrodeFromFile[file_String] := Module[{name, hit},
+  name = FileNameTake[file];
+  hit = StringCases[
+    name,
+    RegularExpression["E(\\d+)"] :> ("E" <> "$1")
+  ];
+  If[hit === {}, Missing["NoElectrode"], First[hit]]
+];
+
+(* ============================================ *)
+(* 2) Langmuir inversion                        *)
+(* ============================================ *)
+
+
+langmuirConcFromF[f_?NumericQ, kd_?NumericQ] := Module[{eps = 10^-12, ff},
+  ff = Clip[f, {eps, 1 - eps}];
+  kd * ff/(1 - ff)
+];
+
+(* ============================================ *)
+(* 3) Build one combined table                  *)
+(* ============================================ *)
+
+areaResultsFull =
+  Map[
+    Function[assoc,
+      Module[{f, cEst, cAct, elec},
+        f = assoc["FractionBound"];
+        cEst = If[NumericQ[f], langmuirConcFromF[f, KD], Missing["NoFrac"]];
+        cAct = getConcFromFile[assoc["File"]];
+        elec = getElectrodeFromFile[assoc["File"]];
+        Join[assoc, <|
+          "KD" -> KD,
+          "ConcEst" -> cEst,
+          "ConcActual" -> cAct,
+          "Electrode" -> elec
+        |>]
+      ]
+    ],
+    areaResults
+  ];
+
+Dataset[areaResultsFull]
+
+
+
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ============================================ *)
+(* Build plotting table from areaResultsWithConc *)
+(* Requires keys: "Conc_Actual", "Conc_Est", "File" *)
+(* ============================================ *)
+(* ============================================ *)
+(* Build plotting table                          *)
+(* areaResultsFull must contain: "Conc_Actual", "Conc_Est", "File" *)
+(* ============================================ *)
+
+plotRows =
+  Select[
+    Map[
+      Function[assoc,
+        Module[{x, y, e},
+          x = assoc["ConcActual"];
+          y = assoc["ConcEst"];
+          e = getElectrodeFromFile[assoc["File"]];
+          <|
+            "ConcActual" -> x,
+            "ConcEst" -> y,
+            "Electrode" -> e,
+            "File" -> assoc["File"]
+          |>
+        ]
+      ],
+      areaResultsFull
+    ],
+    (NumericQ[#["ConcActual"]] && NumericQ[#["ConcEst"]] && StringQ[#["Electrode"]]) &
+  ];
+
+Dataset[plotRows]
+
+
+(* ============================================ *)
+(* Plot: Conc_Est vs Conc_Actual, colored by electrode *)
+(* ============================================ *)
+groups = GroupBy[plotRows, #["Electrode"] &];
+
+traces =
+  AssociationMap[
+    ({#["ConcActual"], #["ConcEst"]} & /@ groups[#]) &,
+    Keys[groups]
+  ];
+
+traces;
+
+
+
+colors = <|
+  "E1" -> Red,
+  "E2" -> Blue,
+  "E3" -> Darker[Green]
+|>;
+
+ListPlot[
+  Values[traces],
+  PlotStyle -> (colors /@ Keys[traces]),
+  PlotMarkers -> {Automatic, 9},
+  Frame -> True,
+  FrameLabel -> {"Actual concentration (uM)", "Estimated concentration (uM)"},
+  PlotLegends -> Keys[traces],
+  PlotRange -> {{0,300},{0,300}},
+  ImageSize -> 700,
+  Background -> White,
+  Epilog -> {
+    {GrayLevel[0.5], Dashed, Line[{{10^-6, 10^-6}, {10^6, 10^6}}]}
+  }
+]
+
+
+(* ============================================ *)
+(* Build plotting table: FractionBound vs Actual *)
+(* Requires: areaResultsFull has keys:
+     "Conc_Actual", "FractionBound", "File"
+   and getElectrodeFromFile[file] returns "E1"/"E2"/"E3"
+*)
+(* ============================================ *)
+
+plotRowsFB =
+  Select[
+    Map[
+      Function[assoc,
+        Module[{x, f, e},
+          x = assoc["ConcActual"];
+          f = assoc["FractionBound"];
+          e = getElectrodeFromFile[assoc["File"]];
+          <|
+            "ConcActual" -> x,
+            "FractionBound" -> f,
+            "Electrode" -> e,
+            "File" -> assoc["File"]
+          |>
+        ]
+      ],
+      areaResultsFull
+    ],
+    (NumericQ[#["ConcActual"]] &&
+     NumericQ[#["FractionBound"]] &&
+     StringQ[#["Electrode"]]) &
+  ];
+
+Dataset[plotRowsFB]
+
+
+tracesFB = GroupBy[
+  plotRowsFB,
+  #["Electrode"] &,
+  ( {#["ConcActual"], #["FractionBound"]} & /@ # ) &
+]
+
+Keys[tracesFB]
+
+
+
+
+
+ListPlot[tracesFB]
+
+
+ListLogLinearPlot[tracesFB]
+
+
+(* ============================================ *)
+(* Plot: FractionBound vs Actual Concentration  *)
+(* + overlay Langmuir prediction                *)
+(* ============================================ *)
+
+colors = <|
+  "E1" -> Red,
+  "E2" -> Blue,
+  "E3" -> Darker[Green]
+|>;
+
+(* Domain for the Langmuir curve: based on your data *)
+allConc = Flatten[Values[tracesFB], 1][[All, 1]];
+cMin = Max[100, Min[Select[allConc, NumericQ]]]   (* avoid 0 on log scale *)
+cMax = Max[Select[allConc, NumericQ]]
+
+langmuirFB[c_?NumericQ, kd_?NumericQ] := c/(c + kd);
+
+Show[
+  {
+    ListLogLinearPlot[
+      Values[tracesFB],
+      PlotStyle -> (colors /@ Keys[tracesFB]),
+      PlotMarkers -> {Automatic, 9},
+      Joined -> False,
+      PlotRange -> {{cMin, cMax}, {0, 1}}
+    ],
+    LogLinearPlot[
+      langmuirFB[c, KD],
+      {c, cMin, cMax},
+      PlotStyle -> {GrayLevel[0.35], Thick}
+    ]
+  },
+  Frame -> True,
+  FrameLabel -> {"Actual concentration (uM)", "Fraction bound"},
+  PlotLegends -> Placed[
+    LineLegend[
+      Join[
+        (Style[#, colors[#]] & /@ Keys[tracesFB]),
+        {Style["Langmuir (KD=" <> ToString[KD] <> " uM)", GrayLevel[0.35]]}
+      ]
+    ],
+    Right
+  ],
+    ImageSize -> 700,
+  Background -> White
+]
+
+
+
+Show[
+  {
+    ListPlot[
+      Values[tracesFB],
+      PlotStyle -> (colors /@ Keys[tracesFB]),
+      PlotMarkers -> {Automatic, 9},
+      Joined -> False,
+      PlotRange -> {{0, 5 cMax}, {0, 1}}
+    ],
+    Plot[
+      langmuirFB[c, KD],
+      {c, 0, 5 cMax},
+      PlotStyle -> {GrayLevel[0.35], Thick}
+    ]
+  },
+  Frame -> True,
+  FrameLabel -> {"Actual concentration (uM)", "Fraction bound"},
+  PlotLegends -> Placed[
+    LineLegend[
+      Join[
+        (Style[#, colors[#]] & /@ Keys[tracesFB]),
+        {Style["Langmuir (KD=" <> ToString[KD] <> " uM)", GrayLevel[0.35]]}
+      ]
+    ],
+    Right
+  ],
+    ImageSize -> 700,
+  Background -> White
+]
