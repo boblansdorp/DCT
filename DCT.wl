@@ -134,16 +134,18 @@ importEISTxt[file_String] := Module[
  ]
 ];
 
-(* Estimate Rs from the highest-frequency points.
-   This is intentionally simple: take the median of Re[Z] over the top N points. *)
-estimateRs[freqHz_List, z_List, nTop_Integer] := Module[
-	{n = Length[freqHz], ord, top, rs},
-	ord = Ordering[freqHz, -Min[nTop, n]];
-	top = Re[z[[ord]]];
-	rs = Median[top];
-	If[NumericQ[rs] && rs >= 0, rs, 0.]
-];
 
+(* Estimate Rs from points in a specified frequency window.
+   Returns the median Re[Z] over minFreqRsFit <= f <= maxFreqRsFit. *)
+estimateRs[freqHz_List, z_List, minFreqRsFit_?NumericQ, maxFreqRsFit_?NumericQ] := Module[
+  {keep, top, rs},
+  keep = (minFreqRsFit <= # <= maxFreqRsFit) & /@ freqHz;
+  top = Re[Pick[z, keep]];
+  top = Select[top, NumericQ];
+  If[top === {}, Return[0.]];
+  rs = Median[top];
+  If[NumericQ[rs] && rs >= 0., rs, 0.]
+];
 (* Build a log-spaced tau grid. *)
 buildTauGrid[freqHz_List, binsPerDecade_Integer, tauMinFactor_?NumericQ, tauMaxFactor_?NumericQ] := Module[
 	{fMax, fMin, tauMin, tauMax, tauMinUse, tauMaxUse, taus},
@@ -186,6 +188,8 @@ Options[DCTSpectrum] = {
 	"TauMaxFactor"  -> 10.0,          (* tauMaxUse = tauMax * factor *)
 	"LambdaND"      -> 10^-2,       (* dimensionless regularization strength *)
 	"TopPointsForRs"-> 7,           (* how many highest-f points to use for Rs estimate *)
+	"MinFreqRsFit" -> minFreqRsFit,
+"MaxFreqRsFit" -> maxFreqRsFit
 	"WeightMode"    -> "AbsYHalf",   (* choose one of: "AbsYHalf","AbsZHalf","AbsYOne","AbsInvZOne" *)
 	"WeightPower"   -> 3/4,          (* wY = |Yint|^(-WeightPower); use 1/2 as a robust default *)
 	"Debug" -> False
@@ -200,7 +204,10 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 
     (* imported data *)
     dat, freqHz, zData, omega, keep, timeS, finishTime,
-
+	
+	(*  frequency range for Rs fit *)
+	minFreqRsFit, maxFreqRsFit,
+    
     (* series resistance + interface admittance *)
     rs, zInt, yInt, wY, wYsqrt,
 
@@ -228,7 +235,8 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
   wPow          = OptionValue["WeightPower"];
   fMinUse       = OptionValue["FMinUse"];
   fMaxUse       = OptionValue["FMaxUse"];
-
+	minFreqRsFit = OptionValue["MinFreqRsFit"];
+	maxFreqRsFit = OptionValue["MaxFreqRsFit"];
 
   (* ---------- Import ---------- *)
   dat    = importEISTxt[file];
@@ -243,6 +251,13 @@ finishTime = Max[timeS];
   With[{n = Min[10, Length[freqHz]]},
     dbg[debug, "highest 10 freqs", Take[Sort[freqHz], -n]];
   ];
+  
+  
+  (* ---------- Rs estimate ---------- *)
+  (* rs = estimateRs[freqHz, zData, nTopRs]; *)
+  rs = estimateRs[freqHz, zData, minFreqRsFit, maxFreqRsFit];
+
+  dbg[debug, "estimated rs", rs];
 
   (* ---------- Restrict frequency range ---------- *)
   dbg[debug, "fMinUse", fMinUse];
@@ -261,9 +276,6 @@ finishTime = Max[timeS];
   assert[VectorQ[zData, NumericQ], "zData not numeric"];
   dbg[debug, "firstZ", zData[[1]]];
 
-  (* ---------- Rs estimate ---------- *)
-  rs = estimateRs[freqHz, zData, nTopRs];
-  dbg[debug, "estimated rs", rs];
 
   zInt = zData - rs;
 
@@ -381,7 +393,7 @@ finishTime = Max[timeS];
       "Tau"      -> tauBins,
       "g"        -> gFit,
       "C0"       -> c0,
-      "Rs"       -> rs,
+      "Rs"       -> rs ,
       "FreqHz"   -> freqHz,
       "ZData"    -> zData,
       "ZFit"     -> zFit,

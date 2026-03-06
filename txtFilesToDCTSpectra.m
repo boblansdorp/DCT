@@ -29,25 +29,31 @@ Get[NNLSPackagePath]
 dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\test";
 
 
-dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25";
-dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25-titration";
 
-lambdaND = 1 10^-5;
+
+dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25";
+
+dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25-titration";
 
 debugFlag = False;
 fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
 
 
 
-(* fMinUse = 0.1; *)     (* Hz *)
-fMinUse = 10;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
-fMaxUse = 800;     (* Hz *)
+topPointsForRs = 7;           (* how many highest-f points to use for Rs estimate *)
+
+minFreqRsFit = 500;   (* Hz *)
+maxFreqRsFit = 800;  (* Hz *)
+
+
+lambdaND = 5 10^-3;
+
+fMinUse = 0.5;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
+fMaxUse = 500;     (* Hz *)
 
 binsPerDecade = 35;
 
-weightPower = 1.0; (* how much do we weight each data point? around 0.5 or 1 works, has to do with SNR of potentiostat *)
-
-
+weightPower = -0.5; (* how much do we weight each data point? around 0.5 or 1 works, has to do with SNR of potentiostat *)
 (* Optional: restrict the frequency range (must match package options) *)
 paddingDecades = 1.0; (* sets how many decades beyond the measured frequency range the tau values extend *)
 (* 0 = no padding, 1 = a decdade of apadding. *)
@@ -117,7 +123,10 @@ results = Monitor[
             "TauMinFactor" -> tauMinFactor,
             "TauMaxFactor" -> tauMaxFactor,
             "BinsPerDecade" -> binsPerDecade,
-            "WeightPower" -> weightPower
+            "WeightPower" -> weightPower,
+			"TopPointsForRs"-> topPointsForRs,           (* how many highest-f points to use for Rs estimate *)
+	"MinFreqRsFit" -> minFreqRsFit,
+"MaxFreqRsFit" -> maxFreqRsFit
           ],
           $Failed
         ],
