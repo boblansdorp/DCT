@@ -24,7 +24,7 @@
 (* Load NNLSFit package from the same folder as this DCT .wl file *)
 Module[{here, nnlsPathWL, nnlsPathM},
   here = DirectoryName[$InputFileName];
-  nnlsPathM = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\NNLSFit.m";
+  nnlsPathM = "C:\\Users\\bobla\\Documents\\DCT\\NNLSFit.m";
 
   If[FileExistsQ[nnlsPathWL],
     Get[nnlsPathWL],
@@ -136,16 +136,17 @@ importEISTxt[file_String] := Module[
 
 
 (* Estimate Rs from points in a specified frequency window.
-   Returns the median Re[Z] over minFreqRsFit <= f <= maxFreqRsFit. *)
+   Used only as an INITIAL GUESS for the OUTER LOOP. *)
 estimateRs[freqHz_List, z_List, minFreqRsFit_?NumericQ, maxFreqRsFit_?NumericQ] := Module[
-  {keep, top, rs},
-  keep = (minFreqRsFit <= # <= maxFreqRsFit) & /@ freqHz;
-  top = Re[Pick[z, keep]];
-  top = Select[top, NumericQ];
-  If[top === {}, Return[0.]];
-  rs = Median[top];
-  If[NumericQ[rs] && rs >= 0., rs, 0.]
+	{keep, top, rs},
+	keep = (minFreqRsFit <= # <= maxFreqRsFit) & /@ freqHz;
+	top = Re[Pick[z, keep]];
+	top = Select[top, NumericQ];
+	If[top === {}, Return[0.]];
+	rs = Median[top];
+	If[NumericQ[rs] && rs >= 0., rs, 0.]
 ];
+
 (* Build a log-spaced tau grid. *)
 buildTauGrid[freqHz_List, binsPerDecade_Integer, tauMinFactor_?NumericQ, tauMaxFactor_?NumericQ] := Module[
 	{fMax, fMin, tauMin, tauMax, tauMinUse, tauMaxUse, taus},
@@ -158,7 +159,6 @@ buildTauGrid[freqHz_List, binsPerDecade_Integer, tauMinFactor_?NumericQ, tauMaxF
 	tauMinUse = tauMin * tauMinFactor;
 	tauMaxUse = tauMax * tauMaxFactor;
 
-	(* Ensure monotonic valid range *)
 	If[tauMinUse <= 0, tauMinUse = tauMin];
 	If[tauMaxUse <= tauMinUse, tauMaxUse = tauMax];
 
@@ -169,9 +169,9 @@ buildTauGrid[freqHz_List, binsPerDecade_Integer, tauMinFactor_?NumericQ, tauMaxF
 (* Second-difference matrix for smoothing the distribution (not C0). *)
 secondDifferenceMatrix[nBins_Integer] := SparseArray[
 	Join[
-		Table[{k, k}   ->  1, {k, 1, nBins - 2}],
-		Table[{k, k+1} -> -2, {k, 1, nBins - 2}],
-		Table[{k, k+2} ->  1, {k, 1, nBins - 2}]
+		Table[{k, k} -> 1, {k, 1, nBins - 2}],
+		Table[{k, k + 1} -> -2, {k, 1, nBins - 2}],
+		Table[{k, k + 2} -> 1, {k, 1, nBins - 2}]
 	],
 	{nBins - 2, nBins}
 ];
@@ -181,233 +181,410 @@ secondDifferenceMatrix[nBins_Integer] := SparseArray[
 (* ========================= *)
 
 Options[DCTSpectrum] = {
-	"BinsPerDecade" -> 25,          (* tau grid density *)
+	"BinsPerDecade" -> 25,
 	"FMinUse" -> 0.5,
 	"FMaxUse" -> 5000,
-	"TauMinFactor"  -> 0.1,         (* tauMinUse = tauMin * factor *)
-	"TauMaxFactor"  -> 10.0,          (* tauMaxUse = tauMax * factor *)
-	"LambdaND"      -> 10^-2,       (* dimensionless regularization strength *)
-	"TopPointsForRs"-> 7,           (* how many highest-f points to use for Rs estimate *)
-	"MinFreqRsFit" -> minFreqRsFit,
-"MaxFreqRsFit" -> maxFreqRsFit
-	"WeightMode"    -> "AbsYHalf",   (* choose one of: "AbsYHalf","AbsZHalf","AbsYOne","AbsInvZOne" *)
-	"WeightPower"   -> 3/4,          (* wY = |Yint|^(-WeightPower); use 1/2 as a robust default *)
+	"TauMinFactor" -> 0.1,
+	"TauMaxFactor" -> 10.0,
+	"LambdaND" -> 10^-2,
+	"TopPointsForRs" -> 7,
+	"MinFreqRsFit" -> 500.,
+	"MaxFreqRsFit" -> 800.,
+	"WeightMode" -> "AbsYHalf",
+	"WeightPower" -> 3/4,
+	"WeightPowerResistance"->10,
 	"Debug" -> False
 };
+
 DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
-  {
-    debug,
+	{
+		debug,
 
-    (* options *)
-    binsPerDecade, tauMinFactor, tauMaxFactor, lambdaND, nTopRs, wPow,
-    fMinUse, fMaxUse,
+		(* options *)
+		binsPerDecade, tauMinFactor, tauMaxFactor, lambdaND, nTopRs, wPow,
+		fMinUse, fMaxUse, minFreqRsFit, maxFreqRsFit,
 
-    (* imported data *)
-    dat, freqHz, zData, omega, keep, timeS, finishTime,
-	
-	(*  frequency range for Rs fit *)
-	minFreqRsFit, maxFreqRsFit,
-    
-    (* series resistance + interface admittance *)
-    rs, zInt, yInt, wY, wYsqrt,
+		(* imported data *)
+		dat, freqHzAll, zDataAll, timeS, finishTime,
 
-    (* tau grid + kernels *)
-    tauBins, nBins, dLog10, kMat, kUse, aMat, aW, bW, aRI, bRI,
+		(* INNER LOOP data: DCT fit range *)
+		keepDCT, freqHzDCT, zDataDCT, omegaDCT,
 
-    (* smoothing + NNLS *)
-    d2, dFull, aCols, colNormSq, sA2, lambda, dFullN, aAug, bAug, xBest,
-    c0, gFit, ciFit,
+		(* OUTER LOOP data: Rs-fit range *)
+		keepRs, freqHzRs, zDataRs, omegaRs,
 
-    (* reconstruct fit *)
-    yIntFit, zFit,
+		(* OUTER LOOP quantities *)
+		rs0, rsLower, rsUpper, rsBest, rsWindowRe,
+		outerObjective, bestSolve,
 
-    out
-  },
+		(* INNER LOOP helper *)
+		solveLadderGivenRs,
 
-  debug = OptionValue["Debug"];
-  dbg[debug, "File", file];
+		out
+	},
 
-  binsPerDecade = OptionValue["BinsPerDecade"];
-  tauMinFactor  = OptionValue["TauMinFactor"];
-  tauMaxFactor  = OptionValue["TauMaxFactor"];
-  lambdaND      = OptionValue["LambdaND"];
-  nTopRs        = OptionValue["TopPointsForRs"];
-  wPow          = OptionValue["WeightPower"];
-  fMinUse       = OptionValue["FMinUse"];
-  fMaxUse       = OptionValue["FMaxUse"];
-	minFreqRsFit = OptionValue["MinFreqRsFit"];
-	maxFreqRsFit = OptionValue["MaxFreqRsFit"];
+	debug = OptionValue["Debug"];
+	dbg[debug, "File", file];
 
-  (* ---------- Import ---------- *)
-  dat    = importEISTxt[file];
-  freqHz = dat["FreqHz"];
-  zData  = Developer`ToPackedArray[dat["Z"]];
-  omega  = Developer`ToPackedArray[2 Pi freqHz];
+	binsPerDecade = OptionValue["BinsPerDecade"];
+	tauMinFactor = OptionValue["TauMinFactor"];
+	tauMaxFactor = OptionValue["TauMaxFactor"];
+	lambdaND = OptionValue["LambdaND"];
+	nTopRs = OptionValue["TopPointsForRs"];
+	wPow = OptionValue["WeightPower"];
+	wPowR = OptionValue["WeightPowerResistance"]; 
+	fMinUse = N[OptionValue["FMinUse"]];
+	fMaxUse = N[OptionValue["FMaxUse"]];
+	minFreqRsFit = N[OptionValue["MinFreqRsFit"]];
+	maxFreqRsFit = N[OptionValue["MaxFreqRsFit"]];
 
-timeS = dat["TimeS"];
-finishTime = Max[timeS];
+	(* ---------- Import full data ---------- *)
+	dat = importEISTxt[file];
+	freqHzAll = dat["FreqHz"];
+	zDataAll = Developer`ToPackedArray[dat["Z"]];
 
-  dbg[debug, "freqRangeHz BEFORE f-window", {Min[freqHz], Max[freqHz]}];
-  With[{n = Min[10, Length[freqHz]]},
-    dbg[debug, "highest 10 freqs", Take[Sort[freqHz], -n]];
-  ];
-  
-  
-  (* ---------- Rs estimate ---------- *)
-  (* rs = estimateRs[freqHz, zData, nTopRs]; *)
-  rs = estimateRs[freqHz, zData, minFreqRsFit, maxFreqRsFit];
+	timeS = dat["TimeS"];
+	finishTime = Max[timeS];
 
-  dbg[debug, "estimated rs", rs];
+	dbg[debug, "full freq range", {Min[freqHzAll], Max[freqHzAll]}];
 
-  (* ---------- Restrict frequency range ---------- *)
-  dbg[debug, "fMinUse", fMinUse];
-  dbg[debug, "fMaxUse", fMaxUse];
+	(* ======================================================== *)
+	(* Build INNER LOOP data: DCT fit range                     *)
+	(* Maxwell ladder admittance is fit ONLY on this range      *)
+	(* ======================================================== *)
+	keepDCT = (fMinUse <= # <= fMaxUse) & /@ freqHzAll;
+	freqHzDCT = Pick[freqHzAll, keepDCT];
+	zDataDCT = Pick[zDataAll, keepDCT];
+	omegaDCT = Developer`ToPackedArray[2 Pi freqHzDCT];
 
-  keep = (fMinUse <= # <= fMaxUse) & /@ freqHz;
-  freqHz = Pick[freqHz, keep];
-  zData  = Pick[zData,  keep];
-  omega  = Developer`ToPackedArray[2 Pi freqHz];
+	dbg[debug, "INNER LOOP fMinUse", fMinUse];
+	dbg[debug, "INNER LOOP fMaxUse", fMaxUse];
+	dbg[debug, "INNER LOOP nPoints", Length[freqHzDCT]];
+	dbg[debug, "INNER LOOP freq range", {Min[freqHzDCT], Max[freqHzDCT]}];
 
-  dbg[debug, "nPoints after f-window", Length[freqHz]];
-  dbg[debug, "freqRangeHz after f-window", {Min[freqHz], Max[freqHz]}];
+	assert[Length[freqHzDCT] >= 5, "Too few points in DCT fit range"];
+	assert[VectorQ[freqHzDCT, NumericQ], "freqHzDCT not numeric"];
+	assert[VectorQ[zDataDCT, NumericQ], "zDataDCT not numeric"];
 
-  assert[Length[freqHz] >= 5, "Too few points after f-window"];
-  assert[VectorQ[freqHz, NumericQ], "freqHz not numeric"];
-  assert[VectorQ[zData, NumericQ], "zData not numeric"];
-  dbg[debug, "firstZ", zData[[1]]];
+	(* ======================================================== *)
+	(* Build OUTER LOOP data: Rs fit range                      *)
+	(* impedance residual for Rs is evaluated ONLY on this      *)
+	(* separate frequency window                                *)
+	(* ======================================================== *)
+	keepRs = (minFreqRsFit <= # <= maxFreqRsFit) & /@ freqHzAll;
+	freqHzRs = Pick[freqHzAll, keepRs];
+	zDataRs = Pick[zDataAll, keepRs];
+	omegaRs = Developer`ToPackedArray[2 Pi freqHzRs];
 
+	dbg[debug, "OUTER LOOP MinFreqRsFit", minFreqRsFit];
+	dbg[debug, "OUTER LOOP MaxFreqRsFit", maxFreqRsFit];
+	dbg[debug, "OUTER LOOP nPoints", Length[freqHzRs]];
+	dbg[debug, "OUTER LOOP freq range", If[Length[freqHzRs] > 0, {Min[freqHzRs], Max[freqHzRs]}, Missing["NoPoints"]]];
 
-  zInt = zData - rs;
+	assert[Length[freqHzRs] >= 1, "Too few points in Rs fit range"];
+	assert[VectorQ[freqHzRs, NumericQ], "freqHzRs not numeric"];
+	assert[VectorQ[zDataRs, NumericQ], "zDataRs not numeric"];
 
-  (* drop pathological zeros *)
-  With[{good = Select[Range[Length[zInt]], Abs[zInt[[#]]] > 0 &]},
-    zInt   = zInt[[good]];
-    zData  = zData[[good]];
-    freqHz = freqHz[[good]];
-    omega  = omega[[good]];
-  ];
+	(* ======================================================== *)
+	(* INNER LOOP: solve Maxwell ladder in admittance space     *)
+	(* for a FIXED candidate Rs                                 *)
+	(* Uses ONLY DCT range and ONLY DCT tau grid                *)
+	(* ======================================================== *)
+	solveLadderGivenRs[rsCand_?NumericQ] := Module[
+		{
+			zIntDCT, yIntDCT, wY, wYsqrt,
+			tauBins, nBins, dLog10,
+			kMatDCT, kUseDCT, aMat, aW, bW, aRI, bRI,
+			d2, dFull, aCols, colNormSq, sA2, lambda, dFullN, aAug, bAug, xBest,
+			c0, gFit, ciFit, yIntFitDCT, zFitDCT,
+			kMatRs, kUseRs, yIntFitRs, zFitRs,
+			objZ, objY
+		},
 
-  yInt = Developer`ToPackedArray[1/zInt];
+		zIntDCT = zDataDCT - rsCand;
 
-  (* ---------- Weights ---------- *)
-  wY = Abs[zData];
-  wY = Developer`ToPackedArray[wY];
-  wYsqrt = wY^wPow;
+		If[Min[Abs[zIntDCT]] <= 10^-15,
+			Return[<|"OK" -> False, "Message" -> "Z - Rs too small in DCT range", "ObjZ" -> Infinity|>]
+		];
 
-  dbg[debug, "WeightPower", wPow];
-  dbg[debug, "wYsqrt finite?", FreeQ[wYsqrt, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity]];
-  assert[VectorQ[wYsqrt, NumericQ], "wYsqrt not numeric"];
+(*
+		yIntDCT = Developer`ToPackedArray[1/zIntDCT];
 
-  (* ---------- Tau grid ---------- *)
-  tauBins = buildTauGrid[freqHz, binsPerDecade, tauMinFactor, tauMaxFactor];
-  nBins   = Length[tauBins];
-  dLog10  = Developer`ToPackedArray[ConstantArray[1./binsPerDecade, nBins]];
+		(* ---------- Weights on DCT range ---------- *)
+		(* wY = Developer`ToPackedArray[Abs[zDataDCT]]; *)
+		wY = Developer`ToPackedArray[Abs[zIntDCT]];
+		wYsqrt = wY^wPow;
+*)		
 
-  dbg[debug, "nBins", nBins];
-  dbg[debug, "tauRange", {Min[tauBins], Max[tauBins]}];
+		yIntDCT = Developer`ToPackedArray[1/zIntDCT];
+		wYsqrt = Developer`ToPackedArray[Abs[yIntDCT]^wPow];
 
-  (* ---------- Kernel and design matrix ---------- *)
-  kMat = Developer`ToPackedArray@Table[
-    (I*omega[[j]])/(1 + I*omega[[j]]*tauBins[[k]]),
-    {j, Length[omega]}, {k, nBins}
-  ];
+		If[!VectorQ[wYsqrt, NumericQ],
+			Return[<|"OK" -> False, "Message" -> "wYsqrt not numeric", "ObjZ" -> Infinity|>]
+		];
+		If[!FreeQ[wYsqrt, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity],
+			Return[<|"OK" -> False, "Message" -> "wYsqrt non-finite", "ObjZ" -> Infinity|>]
+		];
 
-  kUse = kMat . SparseArray@DiagonalMatrix[dLog10];
-  aMat = Join[Transpose[{I*omega}], kUse, 2];
+		(* ---------- Tau grid built ONLY from DCT range ---------- *)
+		tauBins = buildTauGrid[freqHzDCT, binsPerDecade, tauMinFactor, tauMaxFactor];
+		nBins = Length[tauBins];
+		dLog10 = Developer`ToPackedArray[ConstantArray[1./binsPerDecade, nBins]];
 
-  aW = DiagonalMatrix[wYsqrt] . aMat;
-  bW = wYsqrt * yInt;
+		(* ---------- Kernel and design matrix on DCT range ---------- *)
+		kMatDCT = Developer`ToPackedArray@Table[
+			(I*omegaDCT[[j]])/(1 + I*omegaDCT[[j]]*tauBins[[k]]),
+			{j, Length[omegaDCT]}, {k, nBins}
+		];
 
-  aRI = Join[Re[aW], Im[aW]];
-  bRI = Join[Re[bW], Im[bW]];
+		kUseDCT = kMatDCT . SparseArray@DiagonalMatrix[dLog10];
+		aMat = Join[Transpose[{I*omegaDCT}], kUseDCT, 2];
 
-  dbg[debug, "Dimensions(aRI)", Dimensions[aRI]];
-  dbg[debug, "Length(bRI)", Length[bRI]];
-  assert[MatrixQ[aRI, NumericQ], "aRI not numeric matrix"];
-  assert[VectorQ[bRI, NumericQ], "bRI not numeric vector"];
-  assert[Dimensions[aRI][[1]] == Length[bRI], "aRI rows != bRI length"];
+		aW = DiagonalMatrix[wYsqrt] . aMat;
+		bW = wYsqrt * yIntDCT;
 
-  (* ---------- Tikhonov smoothing ---------- *)
-  d2    = secondDifferenceMatrix[nBins];
-  dFull = ArrayFlatten[{{ConstantArray[0., {nBins - 2, 1}], d2}}];
+		aRI = Join[Re[aW], Im[aW]];
+		bRI = Join[Re[bW], Im[bW]];
 
-  aCols     = aRI[[All, 2 ;;]];
-  colNormSq = Total[aCols^2, {1}];
-  sA2       = Median[colNormSq];
-  lambda    = lambdaND * sA2;
+		If[!MatrixQ[aRI, NumericQ] || !VectorQ[bRI, NumericQ],
+			Return[<|"OK" -> False, "Message" -> "aRI/bRI not numeric", "ObjZ" -> Infinity|>]
+		];
+		If[Dimensions[aRI][[1]] =!= Length[bRI],
+			Return[<|"OK" -> False, "Message" -> "aRI rows != bRI length", "ObjZ" -> Infinity|>]
+		];
 
-  dbg[debug, "lambdaND", lambdaND];
-  dbg[debug, "sA2", sA2];
-  dbg[debug, "lambda", lambda];
+		(* ---------- Tikhonov smoothing on ladder only ---------- *)
+		d2 = secondDifferenceMatrix[nBins];
+		dFull = ArrayFlatten[{{ConstantArray[0., {nBins - 2, 1}], d2}}];
 
-  dFullN = N @ Normal @ dFull;
+		aCols = aRI[[All, 2 ;;]];
+		colNormSq = Total[aCols^2, {1}];
+		sA2 = Median[colNormSq];
+		lambda = lambdaND * sA2;
 
-  aAug = Join[aRI, Sqrt[lambda] * dFullN];
-  bAug = Join[bRI, ConstantArray[0., nBins - 2]];
+		dFullN = N @ Normal @ dFull;
+		aAug = Join[aRI, Sqrt[lambda] * dFullN, 1];
+		bAug = Join[bRI, ConstantArray[0., nBins - 2]];
 
-  dbg[debug, "Dimensions(aAug)", Dimensions[aAug]];
-  dbg[debug, "Length(bAug)", Length[bAug]];
-  assert[MatrixQ[aAug, NumericQ], "aAug not numeric matrix"];
-  assert[VectorQ[bAug, NumericQ], "bAug not numeric vector"];
-  assert[Dimensions[aAug][[1]] == Length[bAug], "aAug rows != bAug length"];
+		If[
+			!MatrixQ[aAug, NumericQ] || !VectorQ[bAug, NumericQ] ||
+			Dimensions[aAug][[1]] =!= Length[bAug],
+			Return[<|"OK" -> False, "Message" -> "aAug/bAug invalid", "ObjZ" -> Infinity|>]
+		];
 
-  dbg[debug, "NNLS: A finite?", FreeQ[aAug, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity]];
-  dbg[debug, "NNLS: b finite?", FreeQ[bAug, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity]];
+		If[
+			!FreeQ[aAug, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity] ||
+			!FreeQ[bAug, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity],
+			Return[<|"OK" -> False, "Message" -> "aAug/bAug non-finite", "ObjZ" -> Infinity|>]
+		];
 
-  If[
-    !FreeQ[aAug, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity] ||
-    !FreeQ[bAug, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity],
-    Throw[Failure["DCTFit", <|"Message" -> "Non-finite values in A or b before NNLS."|>]]
-  ];
+		(* ---------- NNLS solve ---------- *)
+		xBest = Quiet @ Check[NNLSFit`NNLS[aAug, bAug], $Failed];
 
-  (* ---------- NNLS solve (vetted package) ---------- *)
-  xBest = Quiet @ Check[NNLSFit`NNLS[aAug, bAug], $Failed];
+		If[xBest === $Failed,
+			Return[<|"OK" -> False, "Message" -> "NNLS returned $Failed", "ObjZ" -> Infinity|>]
+		];
+		If[!VectorQ[xBest, NumericQ],
+			Return[<|"OK" -> False, "Message" -> "NNLS returned non-numeric", "ObjZ" -> Infinity|>]
+		];
+		If[Length[xBest] =!= (nBins + 1),
+			Return[<|"OK" -> False, "Message" -> "NNLS returned wrong-size xBest", "ObjZ" -> Infinity|>]
+		];
 
-  dbg[debug, "NNLS: xBest head", Head[xBest]];
-  dbg[debug, "NNLS: xBest length", If[ListQ[xBest], Length[xBest], Missing["NotAList"]]];
+		c0 = xBest[[1]];
+		gFit = xBest[[2 ;;]];
+		ciFit = gFit * dLog10;
 
-  If[xBest === $Failed,
-    Throw[Failure["DCTFit", <|"Message" -> "NNLSFit`NNLS returned $Failed"|>]]
-  ];
-  If[!VectorQ[xBest, NumericQ],
-    Throw[Failure["DCTFit", <|"Message" -> "NNLSFit`NNLS returned non-numeric xBest"|>]]
-  ];
-  If[Length[xBest] =!= (nBins + 1),
-    Throw[Failure["DCTFit", <|"Message" -> "NNLSFit`NNLS returned wrong-size xBest"|>]]
-  ];
+		(* ---------- Reconstruct fit on DCT range ---------- *)
+		yIntFitDCT = (I*omegaDCT)*c0 + kUseDCT . gFit;
+		If[Min[Abs[yIntFitDCT]] <= 10^-30,
+			Return[<|"OK" -> False, "Message" -> "YintFit too small", "ObjZ" -> Infinity|>]
+		];
 
-  dbg[debug, "NNLS: min(xBest)", Min[xBest]];
-  dbg[debug, "NNLS: max(xBest)", Max[xBest]];
+		zFitDCT = rsCand + 1/yIntFitDCT;
 
-  (* ---------- Unpack solution ---------- *)
-  c0   = xBest[[1]];
-  gFit = xBest[[2 ;;]];
-  ciFit = gFit * dLog10;
+		(* ---------- Reconstruct SAME ladder on Rs-fit range ---------- *)
+		kMatRs = Developer`ToPackedArray@Table[
+			(I*omegaRs[[j]])/(1 + I*omegaRs[[j]]*tauBins[[k]]),
+			{j, Length[omegaRs]}, {k, nBins}
+		];
 
-  (* ---------- Reconstruct fit ---------- *)
-  yIntFit = (I*omega)*c0 + kUse . gFit;
-  zFit    = rs + 1/yIntFit;
+		kUseRs = kMatRs . SparseArray@DiagonalMatrix[dLog10];
+		yIntFitRs = (I*omegaRs)*c0 + kUseRs . gFit;
 
-  out =
-    <|
-      "Tau"      -> tauBins,
-      "g"        -> gFit,
-      "C0"       -> c0,
-      "Rs"       -> rs ,
-      "FreqHz"   -> freqHz,
-      "ZData"    -> zData,
-      "ZFit"     -> zFit,
-      "YIntData" -> yInt,
-      "YIntFit"  -> yIntFit,
-      "FinishTimeS" -> finishTime
+		If[Min[Abs[yIntFitRs]] <= 10^-30,
+			Return[<|"OK" -> False, "Message" -> "YintFitRs too small", "ObjZ" -> Infinity|>]
+		];
 
-    |>;
+		zFitRs = rsCand + 1/yIntFitRs;
 
-  dbg[debug, "DCTSpectrum return head", Head[out]];
-  dbg[debug, "DCTSpectrum keys", Keys[out]];
+		(* ---------- OUTER LOOP objective in impedance space, ONLY on Rs range ---------- *)
+		(* objZ = Total[Re[zDataRs - zFitRs]^2 + Im[zDataRs - zFitRs]^2]; *)
+		
+		(* ---------- OUTER LOOP weighted objective in impedance space ---------- *)
 
-  out
+		wZsqrt = Developer`ToPackedArray[Abs[zDataRs]^wPowR];
+		
+		If[!VectorQ[wZsqrt, NumericQ] ||
+		   !FreeQ[wZsqrt, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity],
+		   Return[<|"OK" -> False, "Message" -> "bad Rs weights", "ObjZ" -> Infinity|>]
+		];
+		
+		objZ =
+		   Total[
+		      wZsqrt^2 *
+		      ( Re[zDataRs - zFitRs]^2 +
+		        Im[zDataRs - zFitRs]^2 )
+		   ];
+		   
+
+		(* ---------- diagnostic objective in admittance space, ONLY on DCT range ---------- *)
+		objY = Total[Re[yIntDCT - yIntFitDCT]^2 + Im[yIntDCT - yIntFitDCT]^2];
+
+		<|
+			"OK" -> True,
+			"Message" -> "",
+			"Rs" -> rsCand,
+			"Tau" -> tauBins,
+			"g" -> gFit,
+			"C0" -> c0,
+			"FreqHz" -> freqHzDCT,
+			"ZData" -> zDataDCT,
+			"ZFit" -> zFitDCT,
+			"YIntData" -> yIntDCT,
+			"YIntFit" -> yIntFitDCT,
+			"FinishTimeS" -> finishTime,
+			"ObjZ" -> objZ,
+			"ObjY" -> objY
+		|>
+	];
+
+	(* ======================================================== *)
+	(* OUTER LOOP: solve for Rs using ONLY Rs-fit frequency band *)
+	(* ======================================================== *)
+	rs0 = estimateRs[freqHzAll, zDataAll, minFreqRsFit, maxFreqRsFit];
+	If[!NumericQ[rs0], rs0 = Max[0., Min[Re[zDataRs]]]];
+	dbg[debug, "initial Rs guess", rs0];
+
+	rsWindowRe = Re[zDataRs];
+	rsWindowRe = Select[rsWindowRe, NumericQ];
+
+	rsLower = Max[0., Min[rsWindowRe] - 0.5 (Max[rsWindowRe] - Min[rsWindowRe])];
+	rsUpper = Max[rsLower + 1., Max[rsWindowRe] + 0.5 (Max[rsWindowRe] - Min[rsWindowRe])];
+
+	dbg[debug, "OUTER LOOP Rs bounds", {rsLower, rsUpper}];
+
+	Module[
+		{
+			callCount = 0,
+			rsCache = <||>,
+			rsKey,
+			t0, sol, objVal,
+			refineSol
+		},
+
+		outerObjective[rsVar_?NumericQ] := Module[{},
+
+			callCount++;
+			rsKey = ToString @ NumberForm[N[rsVar], {16, 6}];
+
+			If[KeyExistsQ[rsCache, rsKey],
+				If[debug,
+					Print[
+						"[OUTER DEBUG] cached call ", callCount,
+						"   Rs=", N[rsVar],
+						"   Obj=", rsCache[rsKey]
+					];
+				];
+				Return[rsCache[rsKey]];
+			];
+
+			t0 = AbsoluteTime[];
+			sol = solveLadderGivenRs[rsVar];
+
+			objVal =
+				If[TrueQ[sol["OK"]],
+					N[sol["ObjZ"]],
+					Infinity
+				];
+
+			rsCache[rsKey] = objVal;
+
+			If[debug,
+				Print[
+					"[OUTER DEBUG] call ", callCount,
+					"   Rs=", N[rsVar],
+					"   Obj=", objVal,
+					"   dt=", NumberForm[AbsoluteTime[] - t0, {6, 3}], " s",
+					"   cache size=", Length[rsCache]
+				];
+			];
+
+			objVal
+		];
+
+		dbg[debug, "OUTER LOOP objective at initial Rs", outerObjective[rs0]];
+
+		refineSol = Quiet @ Check[
+			FindMinimum[
+				{
+					outerObjective[r],
+					rsLower <= r <= rsUpper
+				},
+				{{r, rs0}},
+				Method -> "Brent",
+				MaxIterations -> 40,
+				WorkingPrecision -> MachinePrecision
+			],
+			$Failed
+		];
+
+		If[refineSol === $Failed || !MatchQ[refineSol, {_?NumericQ, {__Rule}}],
+			rsBest = rs0;,
+			rsBest = r /. refineSol[[2]]
+		];
+
+		If[!NumericQ[rsBest], rsBest = rs0];
+		rsBest = N[rsBest];
+
+		dbg[debug, "OUTER LOOP best Rs", rsBest];
+		dbg[debug, "OUTER LOOP best objective", outerObjective[rsBest]];
+		dbg[debug, "OUTER LOOP total objective calls", callCount];
+		dbg[debug, "OUTER LOOP unique cached Rs values", Length[rsCache]];
+	];
+
+	If[rsBest === $Failed || !NumericQ[rsBest],
+		Throw[Failure["DCTFit", <|"Message" -> "OUTER LOOP Rs optimization failed."|>]]
+	];
+
+	bestSolve = solveLadderGivenRs[rsBest];
+
+	If[!TrueQ[bestSolve["OK"]],
+		Throw[Failure["DCTFit", <|"Message" -> "INNER LOOP solve failed at optimized Rs."|>]]
+	];
+
+	out =
+		<|
+			"Tau" -> bestSolve["Tau"],
+			"g" -> bestSolve["g"],
+			"C0" -> bestSolve["C0"],
+			"Rs" -> bestSolve["Rs"],
+			"FreqHz" -> bestSolve["FreqHz"],
+			"ZData" -> bestSolve["ZData"],
+			"ZFit" -> bestSolve["ZFit"],
+			"YIntData" -> bestSolve["YIntData"],
+			"YIntFit" -> bestSolve["YIntFit"],
+			"FinishTimeS" -> bestSolve["FinishTimeS"],
+			"ObjZ" -> bestSolve["ObjZ"],
+			"ObjY" -> bestSolve["ObjY"],
+			"RsFitFreqHz" -> freqHzRs,
+			"RsFitZData" -> zDataRs
+		|>;
+
+	dbg[debug, "DCTSpectrum return head", Head[out]];
+	dbg[debug, "DCTSpectrum keys", Keys[out]];
+
+	out
 ];
-
 End[];
 EndPackage[];

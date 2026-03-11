@@ -10,11 +10,11 @@
 
 (* ---------- LOAD PACKAGE ---------- *)
 ClearAll["DCT`*"]; (* first unload it *)
-dctPackagePath = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\DCT.wl";
+dctPackagePath = "C:\\Users\\bobla\\Documents\\DCT\\DCT.wl";
 Get[dctPackagePath]
 
 ClearAll["NNLS`*"]; (* first unload it *)
-NNLSPackagePath = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\NNLSFit.m";
+NNLSPackagePath = "C:\\Users\\bobla\\Documents\\DCT\\NNLSFit.m";
 Get[NNLSPackagePath]
 
 
@@ -26,40 +26,47 @@ Get[NNLSPackagePath]
 
 
 
-dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\test";
+dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data";
 
 
 
 
-dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25";
 
-dataDir = "C:\\Users\\Bob Lansdorp\\Documents\\DCT\\data\\2026-02-25-titration";
+dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25-titration";
+dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25";
 
 debugFlag = False;
 fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
 
-
-
-topPointsForRs = 7;           (* how many highest-f points to use for Rs estimate *)
-
-minFreqRsFit = 500;   (* Hz *)
-maxFreqRsFit = 800;  (* Hz *)
-
-
-lambdaND = 5 10^-3;
-
-fMinUse = 0.5;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
-fMaxUse = 500;     (* Hz *)
+lambdaND = 1 10^-3;
+constantPhaseElementFlag = False;
 
 binsPerDecade = 35;
 
+
+
 weightPower = -0.5; (* how much do we weight each data point? around 0.5 or 1 works, has to do with SNR of potentiostat *)
+
+weightPowerResistance = -1.5;
+
+fMinUse = 0.5;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
+fMaxUse = 200;     (* Hz *)
+
+minFreqRsFit = 200;  (* Hz *)
+maxFreqRsFit = 500;  (* Hz *)
+
+
+
 (* Optional: restrict the frequency range (must match package options) *)
-paddingDecades = 1.0; (* sets how many decades beyond the measured frequency range the tau values extend *)
+paddingDecades = 0.0; (* sets how many decades beyond the measured frequency range the tau values extend *)
 (* 0 = no padding, 1 = a decdade of apadding. *)
 
 tauMinFactor = 10^-paddingDecades;
 tauMaxFactor = 10^paddingDecades;          (* tauMaxUse = tauMax * factor *) (* add factor of 10 to the maximum as padding *)
+(* 
+minFreqRsFit = fMaxUse 10^paddingDecades;   (* Hz *)
+maxFreqRsFit = 300 + minFreqRsFit;  (* Hz *)
+*)
 
 
 
@@ -124,9 +131,9 @@ results = Monitor[
             "TauMaxFactor" -> tauMaxFactor,
             "BinsPerDecade" -> binsPerDecade,
             "WeightPower" -> weightPower,
-			"TopPointsForRs"-> topPointsForRs,           (* how many highest-f points to use for Rs estimate *)
-	"MinFreqRsFit" -> minFreqRsFit,
-"MaxFreqRsFit" -> maxFreqRsFit
+            "WeightPowerResistance" -> weightPowerResistance,
+            "MinFreqRsFit" -> minFreqRsFit,
+            "MaxFreqRsFit" -> maxFreqRsFit
           ],
           $Failed
         ],
@@ -229,6 +236,16 @@ Show[
 
 (* ::InheritFromParent:: *)
 (**)
+
+
+(#Spec["CPEAlpha"] &) /@ goodSpecs
+(#Spec["Y0"] &) /@ goodSpecs
+(#Spec["C0"] &) /@ goodSpecs
+(#Spec["Rs"] &) /@ goodSpecs
+Min[(1/#Spec["Tau"] &) /@ goodSpecs]
+Max[(1/#Spec["Tau"] &) /@ goodSpecs]
+Min[(1/#Spec["Tau"] &) /@ goodSpecs]/(2 \[Pi])
+Max[(1/#Spec["Tau"] &) /@ goodSpecs]/(2 \[Pi])
 
 
 (* ============================================================ *)
@@ -339,16 +356,79 @@ ListDensityPlot[
 
 
 
-(* ::InheritFromParent:: *)
-(**)
+(* ============================================================ *)
+(* Rs vs time                                                   *)
+(* ============================================================ *)
+
+rsVsTime = Table[
+	{
+		goodSpecs[[i, "Spec", "FinishTimeS"]]/3600.,
+		goodSpecs[[i, "Spec", "Rs"]]
+	},
+	{i, Length[goodSpecs]}
+];
+
+(* ============================================================ *)
+(* C0 vs time                                                   *)
+(* ============================================================ *)
+
+c0VsTime = Table[
+	{
+		goodSpecs[[i, "Spec", "FinishTimeS"]]/3600.,
+		goodSpecs[[i, "Spec", "C0"]]
+	},
+	{i, Length[goodSpecs]}
+];
+
+GraphicsGrid[
+	{
+		{
+			ListLinePlot[
+				rsVsTime,
+				Background -> White,
+				Frame -> True,
+				FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+				FrameLabel -> {
+					Style["Time (hours)", 18, Black],
+					Style["Solution resistance Rs (\[CapitalOmega])", 18, Black]
+				},
+				BaseStyle -> {FontFamily -> "Arial", 14, Black},
+				LabelStyle -> Directive[18, Black],
+				FrameTicksStyle -> Directive[14, Black],
+				PlotStyle -> Directive[Thick],
+				PlotMarkers -> {Automatic, 8},
+				PlotRange -> {0, Automatic},
+				PlotRangePadding -> Scaled[0.02],
+				PlotLabel -> Style["Rs vs time", 16, Black]
+			],
+
+			ListLinePlot[
+				c0VsTime,
+				Background -> White,
+				Frame -> True,
+				FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+				FrameLabel -> {
+					Style["Time (hours)", 18, Black],
+					Style["C0 (F)", 18, Black]
+				},
+				BaseStyle -> {FontFamily -> "Arial", 14, Black},
+				LabelStyle -> Directive[18, Black],
+				FrameTicksStyle -> Directive[14, Black],
+				PlotStyle -> Directive[Thick],
+				PlotMarkers -> {Automatic, 8},
+				PlotRange -> {0, Automatic},
+				PlotRangePadding -> Scaled[0.02],
+				PlotLabel -> Style["C0 vs time", 16, Black]
+			]
+		}
+	}, ImageSize -> 900
+]
 
 
 (* ============================================================ *)
-(* Import raw EIS txt (Gamry-style semicolon separated)          *)
-(* Works for:                                                    *)
-(*   Index;Frequency (Hz);Z'...                                  *)
-(*   Frequency (Hz);Z'...                                        *)
-(* Returns <|"FreqHz"->..., "Z"->...|>                            *)
+(* Rainbow Bode overlays: RAW data for ALL files                *)
+(*   Col 1: RAW                                                 *)
+(*   Col 2: FIT                                                 *)
 (* ============================================================ *)
 
 ImportEISRaw[file_String] := Module[
@@ -385,246 +465,1100 @@ ImportEISRaw[file_String] := Module[
   ]
 ];
 
-(* ============================================================ *)
-(* Nyquist sanity plot: raw-from-file points + spec fit line     *)
-(* ============================================================ *)
-
-selector = 41;
-
-selector = Clip[selector, {1, Length[goodSpecs]}];
-file = goodSpecs[[selector, "File"]];
-spec = goodSpecs[[selector, "Spec"]];
-
-raw = ImportEISRaw[file];
-If[raw === $Failed,
-  Print["Could not parse raw file: ", file];
-  Abort[];
-];
-
-fRaw = raw["FreqHz"];
-zRaw = raw["Z"];
-
-fUse = spec["FreqHz"];
-zFit = spec["ZFit"];
-
-(* Print both ranges so it\[CloseCurlyQuote]s obvious what\[CloseCurlyQuote]s being compared *)
-Print["Nyquist selector = ", selector, " / ", Length[goodSpecs], " : ", FileNameTake[file]];
-Print["Raw f range (Hz)  = {", Min[fRaw], ", ", Max[fRaw], "}  (n=", Length[fRaw], ")"];
-Print["Used f range (Hz) = {", Min[fUse], ", ", Max[fUse], "}  (n=", Length[fUse], ")"];
-Print["Rs (fit, \[CapitalOmega]) = ", spec["Rs"]];
-
-Show[
-  ListPlot[
-    Transpose[{Re[zRaw], -Im[zRaw]}],
-    PlotMarkers -> {Automatic, 7},
-    PlotStyle -> GrayLevel[0.35]
-  ],
-  ListLinePlot[
-    Transpose[{Re[zFit], -Im[zFit]}],
-    PlotStyle -> {Red, Thick}
-  ],
-  Frame -> True,
-  FrameLabel -> {"Z' (\[CapitalOmega])", "-Z'' (\[CapitalOmega])"},
-  PlotRange -> {{0,500000},{0,500000}},
-  ImageSize -> 650,
-  AspectRatio -> 1,
-  PlotLabel -> Row[{
-     FileNameTake[file], "    Rs=", NumberForm[spec["Rs"], {8, 3}],
-     " \[CapitalOmega]    used f=[", Min[fUse], ", ", Max[fUse], "] Hz"
-  }]
-]
 
 
 (* ============================================================ *)
-(* Rainbow Nyquist overlay: all fitted spectra on one plot       *)
-(* Optionally overlay raw points for one selected file           *)
+(* Impedance Bode overlays                                      *)
+(*   Col 1: RAW impedance                                       *)
+(*   Col 2: FIT impedance                                       *)
+(*   Col 3: ABS residual error                                  *)
+(*   Row 1: |Z|                                                 *)
+(*   Row 2: Phase(Z)                                            *)
+(*   Row 3: Re(Z)                                               *)
+(*   Row 4: -Im(Z)                                              *)
+(* accommodates useConstantPhaseElementFlag                     *)
 (* ============================================================ *)
 
-(* ---------- USER CONTROLS ---------- *)
-selector = 1;                 (* which file to show raw points for, if enabled *)
-showRawPoints = False;        (* True to overlay raw points for selector file *)
-useOnlyFitRange = True;       (* True: plot only ZFit from each spec *)
-
-(* ---------- SAFETY ---------- *)
 If[Length[goodSpecs] == 0,
-  Print["No goodSpecs to plot."];
-  Abort[];
+	Print["No goodSpecs to plot."];
+	Abort[];
 ];
 
-selector = Clip[selector, {1, Length[goodSpecs]}];
-
-(* ---------- Collect fit Nyquist traces ---------- *)
 labels = FileNameTake /@ (goodSpecs[[All, "File"]]);
+files  = goodSpecs[[All, "File"]];
 
-nyqFitTraces =
-  Table[
-    Module[{spec = goodSpecs[[k, "Spec"]], zFit},
-      zFit = spec["ZFit"];
-      Transpose[{Re[zFit], -Im[zFit]}]
-    ],
-    {k, Length[goodSpecs]}
-  ];
+(* ---------- RAW impedance ---------- *)
+rawZResults =
+	Table[
+		Module[
+			{
+				file, raw, fRaw, zRaw,
+				magTrace, phaseTrace, reTrace, imTrace, ok, msg
+			},
 
-(* ---------- Stats for annotation ---------- *)
-rsList = goodSpecs[[All, "Spec", "Rs"]];
-fMinList = Min /@ (goodSpecs[[All, "Spec", "FreqHz"]]);
-fMaxList = Max /@ (goodSpecs[[All, "Spec", "FreqHz"]]);
+			file = files[[k]];
+			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
 
-Print["Nyquist overlay: nCurves = ", Length[goodSpecs]];
-Print["Used f range across curves (Hz): min = ", Min[fMinList], "   max = ", Max[fMaxList]];
-Print["Rs across curves (\[CapitalOmega]): min = ", Min[rsList], "   max = ", Max[rsList]];
+			If[
+				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"] || !KeyExistsQ[raw, "Z"],
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "raw parse failed"
+					|>
+				]
+			];
 
-(* ---------- Optional raw points for one file ---------- *)
-rawTrace = {};
-rawLabel = "";
+			fRaw = raw["FreqHz"];
+			zRaw = raw["Z"];
 
-If[showRawPoints,
-  fileSel = goodSpecs[[selector, "File"]];
-  raw = ImportEISRaw[fileSel];
-  If[raw === $Failed,
-    Print["Could not parse raw file: ", fileSel];
-    rawTrace = {};
-    rawLabel = " (raw parse failed)";
-    ,
-    zRaw = raw["Z"];
-    rawTrace = Transpose[{Re[zRaw], -Im[zRaw]}];
-    rawLabel = " (raw points shown for " <> FileNameTake[fileSel] <> ")";
-  ];
+			magTrace   = Transpose[{fRaw, Abs[zRaw]}];
+			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[zRaw]}];
+			reTrace    = Transpose[{fRaw, Re[zRaw]}];
+			imTrace    = Transpose[{fRaw, -Im[zRaw]}];
+
+			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+			msg = If[ok, "", "raw impedance trace non-numeric"];
+
+			<|
+				"File" -> file,
+				"Label" -> labels[[k]],
+				"FreqHz" -> fRaw,
+				"ZRaw" -> zRaw,
+				"OK" -> ok,
+				"MagTrace" -> magTrace,
+				"PhaseTrace" -> phaseTrace,
+				"ReTrace" -> reTrace,
+				"ImTrace" -> imTrace,
+				"Message" -> msg
+			|>
+		],
+		{k, Length[files]}
+	];
+
+goodRawZ = Select[rawZResults, TrueQ[#["OK"]] &];
+badRawZ  = Select[rawZResults, !TrueQ[#["OK"]] &];
+
+Print["Raw impedance overlay: parsed OK = ", Length[goodRawZ], " / ", Length[rawZResults]];
+
+If[Length[badRawZ] > 0,
+	Print["Failures:"];
+	Scan[
+		(Print["\t", FileNameTake[#["File"]], " : ", #["Message"]]) &,
+		badRawZ
+	];
 ];
 
-(* ---------- Rainbow colors ---------- *)
-colors = ColorData["Rainbow"] /@ Rescale[Range[Length[nyqFitTraces]]];
+If[Length[goodRawZ] == 0,
+	Print["No raw impedance spectra could be parsed."];
+	Abort[];
+];
 
-(* ---------- Plot ---------- *)
-dataLogPlot = Show[
-  {
-    If[showRawPoints && rawTrace =!= {},
-      ListLogLogPlot[
-        rawTrace,
-        Joined->True,
-        PlotStyle -> GrayLevel[0.65],
-        PlotMarkers -> {Automatic, 6}
-      ],
-      Nothing
-    ],
+rawZMagTraces   = goodRawZ[[All, "MagTrace"]];
+rawZPhaseTraces = goodRawZ[[All, "PhaseTrace"]];
+rawZReTraces    = goodRawZ[[All, "ReTrace"]];
+rawZImTraces    = goodRawZ[[All, "ImTrace"]];
+rawZLabels      = goodRawZ[[All, "Label"]];
+rawZColors      = ColorData["Rainbow"] /@ Rescale[Range[Length[goodRawZ]]];
 
-    ListLogLogPlot[
-      nyqFitTraces,
-      PlotStyle -> colors,
-      Joined->True
-    ]
-  },
-  Frame -> True,
-  FrameLabel -> {"Z' (\[CapitalOmega])", "-Z'' (\[CapitalOmega])"},
-  PlotRange -> All,
-  ImageSize -> 750,
-  AspectRatio -> 1,
-  PlotLabel -> Row[{
-     "Nyquist fit overlay (rainbow)  n=", Length[goodSpecs],
-     "   Rs=[", NumberForm[Min[rsList], {8, 3}], ", ", NumberForm[Max[rsList], {8, 3}], "] \[CapitalOmega]",
-     "   used f overall=[", Min[fMinList], ", ", Max[fMaxList], "] Hz",
-     rawLabel
-  }]
-]
-dataLinPlot =Show[
-  {
-    If[showRawPoints && rawTrace =!= {},
-      ListPlot[
-        rawTrace,
-        Joined->True,
-        PlotStyle -> GrayLevel[0.65],
-        PlotMarkers -> {Automatic, 6}
-      ],
-      Nothing
-    ],
+(* ---------- FIT impedance ---------- *)
+fullFitZResults =
+	Table[
+		Module[
+			{
+				spec, raw, tau, g, c0, y0, alphaCPE, useCPE, rs,
+				fRaw, \[Omega], \[CapitalDelta]log, Kmat, YintFit, Zfit,
+				magTrace, phaseTrace, reTrace, imTrace, file, ok, msg
+			},
 
-    ListPlot[
-      nyqFitTraces,
-      PlotStyle -> colors,
-      Joined->True
-    ]
-  },
-  Frame -> True,
-  FrameLabel -> {"Z' (\[CapitalOmega])", "-Z'' (\[CapitalOmega])"},
-  PlotRange -> All,
-  ImageSize -> 750,
-  AspectRatio -> 1,
-  PlotLabel -> Row[{
-     "Nyquist fit overlay (rainbow)  n=", Length[goodSpecs],
-     "   Rs=[", NumberForm[Min[rsList], {8, 3}], ", ", NumberForm[Max[rsList], {8, 3}], "] \[CapitalOmega]",
-     "   used f overall=[", Min[fMinList], ", ", Max[fMaxList], "] Hz",
-     rawLabel
-  }]
+			spec = goodSpecs[[k, "Spec"]];
+			file = goodSpecs[[k, "File"]];
+			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
+
+			If[
+				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"],
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "raw parse failed or missing FreqHz"
+					|>
+				]
+			];
+
+			tau = spec["Tau"];
+			g   = spec["g"];
+			c0  = Lookup[spec, "C0", Missing["NotFound"]];
+			y0  = Lookup[spec, "Y0", Missing["NotFound"]];
+			alphaCPE = Lookup[spec, "CPEAlpha", Missing["NotFound"]];
+			useCPE = TrueQ[Lookup[spec, "useConstantPhaseElementFlag", False]];
+			rs = spec["Rs"];
+
+			fRaw = raw["FreqHz"];
+			\[Omega] = 2 Pi fRaw;
+
+			\[CapitalDelta]log = Mean[Differences[Log10[tau]]];
+
+			Kmat = Table[
+				(I*\[Omega][[j]])/(1 + I*\[Omega][[j]]*tau[[m]]),
+				{j, Length[\[Omega]]}, {m, Length[tau]}
+			];
+
+			YintFit =
+				If[useCPE,
+					If[!NumericQ[y0] || !NumericQ[alphaCPE],
+						$Failed,
+						y0*(I*\[Omega])^alphaCPE + Kmat . (g * \[CapitalDelta]log)
+					],
+					If[!NumericQ[c0],
+						$Failed,
+						(I*\[Omega])*c0 + Kmat . (g * \[CapitalDelta]log)
+					]
+				];
+
+			If[YintFit === $Failed,
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "missing fit parameters for impedance reconstruction"
+					|>
+				]
+			];
+
+			If[Min[Abs[YintFit]] < 10^-30,
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "YintFit too small"
+					|>
+				]
+			];
+
+			Zfit = rs + 1/YintFit;
+
+			magTrace   = Transpose[{fRaw, Abs[Zfit]}];
+			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[Zfit]}];
+			reTrace    = Transpose[{fRaw, Re[Zfit]}];
+			imTrace    = Transpose[{fRaw, -Im[Zfit]}];
+
+			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+			msg = If[ok, "", "fit impedance trace non-numeric"];
+
+			<|
+				"File" -> file,
+				"Label" -> labels[[k]],
+				"FreqHz" -> fRaw,
+				"ZFit" -> Zfit,
+				"MagTrace" -> magTrace,
+				"PhaseTrace" -> phaseTrace,
+				"ReTrace" -> reTrace,
+				"ImTrace" -> imTrace,
+				"OK" -> ok,
+				"Message" -> msg
+			|>
+		],
+		{k, Length[goodSpecs]}
+	];
+
+goodFullFitZ = Select[fullFitZResults, TrueQ[#["OK"]] &];
+badFullFitZ  = Select[fullFitZResults, !TrueQ[#["OK"]] &];
+
+If[Length[badFullFitZ] > 0,
+	Print["Failures:"];
+	Scan[
+		(Print["\t", #["File"], " : ", #["Message"]]) &,
+		badFullFitZ
+	];
+];
+
+If[Length[goodFullFitZ] == 0,
+	Print["No fit impedance spectra could be computed."];
+	Abort[];
+];
+
+fullFitZMagTraces   = goodFullFitZ[[All, "MagTrace"]];
+fullFitZPhaseTraces = goodFullFitZ[[All, "PhaseTrace"]];
+fullFitZReTraces    = goodFullFitZ[[All, "ReTrace"]];
+fullFitZImTraces    = goodFullFitZ[[All, "ImTrace"]];
+fitZColors          = ColorData["Rainbow"] /@ Rescale[Range[Length[goodFullFitZ]]];
+
+(* ---------- Residual traces ---------- *)
+residualZResults =
+	Table[
+		Module[
+			{
+				rawAssoc, fitAssoc, fRaw, zRaw, zFit,
+				magResTrace, phaseResTrace, reResTrace, imResTrace
+			},
+
+			rawAssoc = rawZResults[[k]];
+			fitAssoc = fullFitZResults[[k]];
+
+			If[!TrueQ[rawAssoc["OK"]] || !TrueQ[fitAssoc["OK"]],
+				Return[
+					<|
+						"OK" -> False,
+						"Message" -> "raw/fit pair unavailable"
+					|>
+				]
+			];
+
+			fRaw = rawAssoc["FreqHz"];
+			zRaw = rawAssoc["ZRaw"];
+			zFit = fitAssoc["ZFit"];
+
+			If[Length[fRaw] =!= Length[zRaw] || Length[zRaw] =!= Length[zFit],
+				Return[
+					<|
+						"OK" -> False,
+						"Message" -> "raw and fit lengths mismatch"
+					|>
+				]
+			];
+
+			magResTrace   = Transpose[{fRaw, Abs[zRaw - zFit]}];
+			phaseResTrace = Transpose[{fRaw, Abs[(180./Pi) Arg[zRaw] - (180./Pi) Arg[zFit]]}];
+			reResTrace    = Transpose[{fRaw, Abs[Re[zRaw] - Re[zFit]]}];
+			imResTrace    = Transpose[{fRaw, Abs[(-Im[zRaw]) - (-Im[zFit])]}];
+
+			<|
+				"OK" -> True,
+				"MagResTrace" -> magResTrace,
+				"PhaseResTrace" -> phaseResTrace,
+				"ReResTrace" -> reResTrace,
+				"ImResTrace" -> imResTrace
+			|>
+		],
+		{k, Length[files]}
+	];
+
+goodResidualZ = Select[residualZResults, TrueQ[#["OK"]] &];
+
+If[Length[goodResidualZ] == 0,
+	Print["No residual impedance traces could be computed."];
+	Abort[];
+];
+
+residualZMagTraces   = goodResidualZ[[All, "MagResTrace"]];
+residualZPhaseTraces = goodResidualZ[[All, "PhaseResTrace"]];
+residualZReTraces    = goodResidualZ[[All, "ReResTrace"]];
+residualZImTraces    = goodResidualZ[[All, "ImResTrace"]];
+resZColors           = ColorData["Rainbow"] /@ Rescale[Range[Length[goodResidualZ]]];
+
+(* ---------- Shared y-axis ranges ---------- *)
+
+allMagY = Select[
+	Join[
+		Flatten[rawZMagTraces[[All, All, 2]]],
+		Flatten[fullFitZMagTraces[[All, All, 2]]]
+	],
+	NumericQ[#] && # > 0 &
+];
+
+allPhaseY = Select[
+	Join[
+		Flatten[rawZPhaseTraces[[All, All, 2]]],
+		Flatten[fullFitZPhaseTraces[[All, All, 2]]]
+	],
+	NumericQ
+];
+
+allReY = Select[
+	Join[
+		Flatten[rawZReTraces[[All, All, 2]]],
+		Flatten[fullFitZReTraces[[All, All, 2]]]
+	],
+	NumericQ
+];
+
+allImY = Select[
+	Join[
+		Flatten[rawZImTraces[[All, All, 2]]],
+		Flatten[fullFitZImTraces[[All, All, 2]]]
+	],
+	NumericQ
+];
+
+allMagResY = Select[Flatten[residualZMagTraces[[All, All, 2]]], NumericQ[#] && # > 0 &];
+allPhaseResY = Select[Flatten[residualZPhaseTraces[[All, All, 2]]], NumericQ];
+allReResY = Select[Flatten[residualZReTraces[[All, All, 2]]], NumericQ];
+allImResY = Select[Flatten[residualZImTraces[[All, All, 2]]], NumericQ];
+
+If[
+	allMagY === {} || allPhaseY === {} || allReY === {} || allImY === {} ||
+	allMagResY === {} || allPhaseResY === {} || allReResY === {} || allImResY === {},
+	Print["Could not determine shared axis ranges."];
+	Abort[];
+];
+
+magYRange      = {Min[allMagY], Max[allMagY]};
+phaseYRange    = {Min[allPhaseY], Max[allPhaseY]};
+reYRange       = {Min[allReY], Max[allReY]};
+imYRange       = {Min[allImY], Max[allImY]};
+magResYRange   = {Min[allMagResY], Max[allMagResY]};
+phaseResYRange = {Min[allPhaseResY], Max[allPhaseResY]};
+reResYRange    = {Min[allReResY], Max[allReResY]};
+imResYRange    = {Min[allImResY], Max[allImResY]};
+
+Print["Shared |Z| y-range = ", magYRange];
+Print["Shared phase y-range = ", phaseYRange];
+Print["Shared Re(Z) y-range = ", reYRange];
+Print["Shared -Im(Z) y-range = ", imYRange];
+
+(* ---------- Plots ---------- *)
+
+rawZMagPlot =
+	ListLogLogPlot[
+		rawZMagTraces,
+		PlotStyle -> rawZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Zraw| (\[CapitalOmega])"},
+		PlotRange -> {All, magYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> Row[{"RAW |Z|   n=", Length[goodRawZ]}]
+	];
+
+fitZMagPlot =
+	ListLogLogPlot[
+		fullFitZMagTraces,
+		PlotStyle -> fitZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Zfit| (\[CapitalOmega])"},
+		PlotRange -> {All, magYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> Row[{"FIT |Z|   n=", Length[goodFullFitZ]}]
+	];
+
+resZMagPlot =
+	ListLogLogPlot[
+		residualZMagTraces,
+		PlotStyle -> resZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Zraw - Zfit| (\[CapitalOmega])"},
+		PlotRange -> {All, magResYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "ABS residual |Zraw - Zfit|"
+	];
+
+rawZPhasePlot =
+	ListLogLinearPlot[
+		rawZPhaseTraces,
+		PlotStyle -> rawZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Phase(Zraw) (deg)"},
+		PlotRange -> {All, phaseYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> Row[{"RAW phase(Z)   n=", Length[goodRawZ]}]
+	];
+
+fitZPhasePlot =
+	ListLogLinearPlot[
+		fullFitZPhaseTraces,
+		PlotStyle -> fitZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Phase(Zfit) (deg)"},
+		PlotRange -> {All, phaseYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> Row[{"FIT phase(Z)   n=", Length[goodFullFitZ]}]
+	];
+
+resZPhasePlot =
+	ListLogLinearPlot[
+		residualZPhaseTraces,
+		PlotStyle -> resZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Phase raw - fit| (deg)"},
+		PlotRange -> {All, phaseResYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "ABS phase residual"
+	];
+
+rawZRePlot =
+	ListLogLogPlot[
+		rawZReTraces,
+		PlotStyle -> rawZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Re(Zraw) (\[CapitalOmega])"},
+		PlotRange -> {All, reYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "RAW Re(Z)"
+	];
+
+fitZRePlot =
+	ListLogLogPlot[
+		fullFitZReTraces,
+		PlotStyle -> fitZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Re(Zfit) (\[CapitalOmega])"},
+		PlotRange -> {All, reYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "FIT Re(Z)"
+	];
+
+resZRePlot =
+	ListLogLogPlot[
+		residualZReTraces,
+		PlotStyle -> resZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Re raw - fit| (\[CapitalOmega])"},
+		PlotRange -> {All, reResYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "ABS Re residual"
+	];
+
+rawZImPlot =
+	ListLogLogPlot[
+		rawZImTraces,
+		PlotStyle -> rawZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "-Im(Zraw) (\[CapitalOmega])"},
+		PlotRange -> {All, imYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "RAW -Im(Z)"
+	];
+
+fitZImPlot =
+	ListLogLogPlot[
+		fullFitZImTraces,
+		PlotStyle -> fitZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "-Im(Zfit) (\[CapitalOmega])"},
+		PlotRange -> {All, imYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "FIT -Im(Z)"
+	];
+
+resZImPlot =
+	ListLogLogPlot[
+		residualZImTraces,
+		PlotStyle -> resZColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|(-Im raw) - (-Im fit)| (\[CapitalOmega])"},
+		PlotRange -> {All, imResYRange},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "ABS -Im residual"
+	];
+
+GraphicsGrid[
+	{
+		{rawZMagPlot, fitZMagPlot, resZMagPlot},
+		{rawZPhasePlot, fitZPhasePlot, resZPhasePlot},
+		{rawZRePlot, fitZRePlot, resZRePlot},
+		{rawZImPlot, fitZImPlot, resZImPlot}
+	}, ImageSize->1200
 ]
 
 
 (* ============================================================ *)
-(* Rainbow Nyquist overlay: FULL reconstructed fit from ladder   *)
-(*   Zfit(\[Omega])=Rs + 1 / (i\[Omega] C0 + Sum_k gk \[CapitalDelta]log10 (i\[Omega])/(1+i\[Omega]\[Tau]k))     *)
+(* Admittance Bode overlays after removing Rs                   *)
+(*   Col 1: RAW interface admittance                            *)
+(*   Col 2: FIT interface admittance                            *)
+(*   Col 3: ABS residual error                                  *)
+(*   Row 1: |Yint|                                              *)
+(*   Row 2: Phase(Yint)                                         *)
+(*   Row 3: Re(Yint)                                            *)
+(*   Row 4: -Im(Yint)                                           *)
+(* accommodates useConstantPhaseElementFlag                     *)
 (* ============================================================ *)
 
-fullFitNyqTraces =
-  Table[
-    Module[{spec, tau, g, c0, rs, f, \[Omega], \[CapitalDelta]log, Kmat, YintFit, Zfit},
-      spec = goodSpecs[[k, "Spec"]];
-      tau = spec["Tau"];
-      g   = spec["g"];
-      c0  = spec["C0"];
-      rs  = spec["Rs"];
-      f   = spec["FreqHz"];
-      \[Omega]   = 2 Pi f;
+If[Length[goodSpecs] == 0,
+	Print["No goodSpecs to plot."];
+	Abort[];
+];
 
-      \[CapitalDelta]log = Mean[Differences[Log10[tau]]];
-      Kmat = Table[(I*\[Omega][[j]])/(1 + I*\[Omega][[j]]*tau[[m]]), {j, Length[\[Omega]]}, {m, Length[tau]}];
+labels = FileNameTake /@ (goodSpecs[[All, "File"]]);
+files  = goodSpecs[[All, "File"]];
 
-      YintFit = (I*\[Omega])*c0 + Kmat . (g * \[CapitalDelta]log);
-      Zfit    = rs + 1/YintFit;
+(* ---------- RAW admittance after removing Rs ---------- *)
+rawYintResults =
+	Table[
+		Module[
+			{
+				file, raw, spec, rs, fRaw, zRaw, zIntRaw, yIntRaw,
+				magTrace, phaseTrace, reTrace, imTrace, ok, msg
+			},
 
-      Transpose[{Re[Zfit], -Im[Zfit]}]
-    ],
-    {k, Length[goodSpecs]}
-  ];
+			file = files[[k]];
+			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
+			spec = goodSpecs[[k, "Spec"]];
 
-colors = ColorData["Rainbow"] /@ Rescale[Range[Length[fullFitNyqTraces]]];
+			If[
+				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"] || !KeyExistsQ[raw, "Z"],
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "raw parse failed"
+					|>
+				]
+			];
 
-fitLinPlot = Show[
-  ListLinePlot[
-    fullFitNyqTraces,
-    PlotStyle -> colors
-  ],
-  Frame -> True,
-  FrameLabel -> {"Z' (\[CapitalOmega])", "-Z'' (\[CapitalOmega])"},
-  PlotRange -> All,
-  ImageSize -> 750,
-  AspectRatio -> 1,
-  PlotLabel -> Row[{"FULL Maxwell ladder fit Nyquist overlay   n=", Length[goodSpecs]}]
+			rs   = spec["Rs"];
+			fRaw = raw["FreqHz"];
+			zRaw = raw["Z"];
+
+			zIntRaw = zRaw - rs;
+
+			If[Min[Abs[zIntRaw]] < 10^-15,
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "Zraw - Rs too small"
+					|>
+				]
+			];
+
+			yIntRaw = 1/zIntRaw;
+
+			magTrace   = Transpose[{fRaw, Abs[yIntRaw]}];
+			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[yIntRaw]}];
+			reTrace    = Transpose[{fRaw, Re[yIntRaw]}];
+			imTrace    = Transpose[{fRaw, -Im[yIntRaw]}];
+
+			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+			msg = If[ok, "", "raw admittance trace non-numeric"];
+
+			<|
+				"File" -> file,
+				"Label" -> labels[[k]],
+				"FreqHz" -> fRaw,
+				"YIntRaw" -> yIntRaw,
+				"OK" -> ok,
+				"MagTrace" -> magTrace,
+				"PhaseTrace" -> phaseTrace,
+				"ReTrace" -> reTrace,
+				"ImTrace" -> imTrace,
+				"Message" -> msg
+			|>
+		],
+		{k, Length[files]}
+	];
+
+goodRawYint = Select[rawYintResults, TrueQ[#["OK"]] &];
+badRawYint  = Select[rawYintResults, !TrueQ[#["OK"]] &];
+
+Print["Raw admittance overlay: parsed OK = ", Length[goodRawYint], " / ", Length[rawYintResults]];
+
+If[Length[badRawYint] > 0,
+	Print["Failures:"];
+	Scan[
+		(Print["\t", FileNameTake[#["File"]], " : ", #["Message"]]) &,
+		badRawYint
+	];
+];
+
+If[Length[goodRawYint] == 0,
+	Print["No raw admittance spectra could be parsed."];
+	Abort[];
+];
+
+rawYintMagTraces   = goodRawYint[[All, "MagTrace"]];
+rawYintPhaseTraces = goodRawYint[[All, "PhaseTrace"]];
+rawYintReTraces    = goodRawYint[[All, "ReTrace"]];
+rawYintImTraces    = goodRawYint[[All, "ImTrace"]];
+rawYintLabels      = goodRawYint[[All, "Label"]];
+rawYintColors      = ColorData["Rainbow"] /@ Rescale[Range[Length[goodRawYint]]];
+
+(* ---------- FIT admittance after removing Rs ---------- *)
+fullFitYintResults =
+	Table[
+		Module[
+			{
+				spec, raw, tau, g, c0, y0, alphaCPE, useCPE,
+				fRaw, \[Omega], \[CapitalDelta]log, Kmat, YintFit,
+				magTrace, phaseTrace, reTrace, imTrace, file, ok, msg
+			},
+
+			spec = goodSpecs[[k, "Spec"]];
+			file = goodSpecs[[k, "File"]];
+			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
+
+			If[
+				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"],
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "raw parse failed or missing FreqHz"
+					|>
+				]
+			];
+
+			tau = spec["Tau"];
+			g   = spec["g"];
+			c0  = Lookup[spec, "C0", Missing["NotFound"]];
+			y0  = Lookup[spec, "Y0", Missing["NotFound"]];
+			alphaCPE = Lookup[spec, "CPEAlpha", Missing["NotFound"]];
+			useCPE = TrueQ[Lookup[spec, "useConstantPhaseElementFlag", False]];
+
+			fRaw = raw["FreqHz"];
+			\[Omega] = 2 Pi fRaw;
+
+			\[CapitalDelta]log = Mean[Differences[Log10[tau]]];
+
+			Kmat = Table[
+				(I*\[Omega][[j]])/(1 + I*\[Omega][[j]]*tau[[m]]),
+				{j, Length[\[Omega]]}, {m, Length[tau]}
+			];
+
+			YintFit =
+				If[useCPE,
+					If[!NumericQ[y0] || !NumericQ[alphaCPE],
+						$Failed,
+						y0*(I*\[Omega])^alphaCPE + Kmat . (g * \[CapitalDelta]log)
+					],
+					If[!NumericQ[c0],
+						$Failed,
+						(I*\[Omega])*c0 + Kmat . (g * \[CapitalDelta]log)
+					]
+				];
+
+			If[YintFit === $Failed,
+				Return[
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "missing fit parameters for admittance reconstruction"
+					|>
+				]
+			];
+
+			magTrace   = Transpose[{fRaw, Abs[YintFit]}];
+			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[YintFit]}];
+			reTrace    = Transpose[{fRaw, Re[YintFit]}];
+			imTrace    = Transpose[{fRaw, -Im[YintFit]}];
+
+			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+			msg = If[ok, "", "fit admittance trace non-numeric"];
+
+			<|
+				"File" -> file,
+				"Label" -> labels[[k]],
+				"FreqHz" -> fRaw,
+				"YIntFit" -> YintFit,
+				"MagTrace" -> magTrace,
+				"PhaseTrace" -> phaseTrace,
+				"ReTrace" -> reTrace,
+				"ImTrace" -> imTrace,
+				"OK" -> ok,
+				"Message" -> msg
+			|>
+		],
+		{k, Length[goodSpecs]}
+	];
+
+goodFullFitYint = Select[fullFitYintResults, TrueQ[#["OK"]] &];
+badFullFitYint  = Select[fullFitYintResults, !TrueQ[#["OK"]] &];
+
+If[Length[badFullFitYint] > 0,
+	Print["Failures:"];
+	Scan[
+		(Print["\t", #["File"], " : ", #["Message"]]) &,
+		badFullFitYint
+	];
+];
+
+If[Length[goodFullFitYint] == 0,
+	Print["No fit admittance spectra could be computed."];
+	Abort[];
+];
+
+fullFitYintMagTraces   = goodFullFitYint[[All, "MagTrace"]];
+fullFitYintPhaseTraces = goodFullFitYint[[All, "PhaseTrace"]];
+fullFitYintReTraces    = goodFullFitYint[[All, "ReTrace"]];
+fullFitYintImTraces    = goodFullFitYint[[All, "ImTrace"]];
+fitYintColors          = ColorData["Rainbow"] /@ Rescale[Range[Length[goodFullFitYint]]];
+
+(* ---------- Residual traces ---------- *)
+residualYintResults =
+	Table[
+		Module[
+			{
+				rawAssoc, fitAssoc, fRaw, yRaw, yFit,
+				magResTrace, phaseResTrace, reResTrace, imResTrace
+			},
+
+			rawAssoc = rawYintResults[[k]];
+			fitAssoc = fullFitYintResults[[k]];
+
+			If[!TrueQ[rawAssoc["OK"]] || !TrueQ[fitAssoc["OK"]],
+				Return[
+					<|
+						"OK" -> False,
+						"Message" -> "raw/fit pair unavailable"
+					|>
+				]
+			];
+
+			fRaw = rawAssoc["FreqHz"];
+			yRaw = rawAssoc["YIntRaw"];
+			yFit = fitAssoc["YIntFit"];
+
+			If[Length[fRaw] =!= Length[yRaw] || Length[yRaw] =!= Length[yFit],
+				Return[
+					<|
+						"OK" -> False,
+						"Message" -> "raw and fit lengths mismatch"
+					|>
+				]
+			];
+
+			magResTrace   = Transpose[{fRaw, Abs[yRaw - yFit]}];
+			phaseResTrace = Transpose[{fRaw, Abs[(180./Pi) Arg[yRaw] - (180./Pi) Arg[yFit]]}];
+			reResTrace    = Transpose[{fRaw, Abs[Re[yRaw] - Re[yFit]]}];
+			imResTrace    = Transpose[{fRaw, Abs[(-Im[yRaw]) - (-Im[yFit])]}];
+
+			<|
+				"OK" -> True,
+				"MagResTrace" -> magResTrace,
+				"PhaseResTrace" -> phaseResTrace,
+				"ReResTrace" -> reResTrace,
+				"ImResTrace" -> imResTrace
+			|>
+		],
+		{k, Length[files]}
+	];
+
+goodResidualYint = Select[residualYintResults, TrueQ[#["OK"]] &];
+
+If[Length[goodResidualYint] == 0,
+	Print["No residual admittance traces could be computed."];
+	Abort[];
+];
+
+residualYintMagTraces   = goodResidualYint[[All, "MagResTrace"]];
+residualYintPhaseTraces = goodResidualYint[[All, "PhaseResTrace"]];
+residualYintReTraces    = goodResidualYint[[All, "ReResTrace"]];
+residualYintImTraces    = goodResidualYint[[All, "ImResTrace"]];
+resYintColors           = ColorData["Rainbow"] /@ Rescale[Range[Length[goodResidualYint]]];
+
+(* ---------- Shared y-axis ranges ---------- *)
+
+allMagY = Select[
+	Join[
+		Flatten[rawYintMagTraces[[All, All, 2]]],
+		Flatten[fullFitYintMagTraces[[All, All, 2]]]
+	],
+	NumericQ[#] && # > 0 &
+];
+
+allPhaseY = Select[
+	Join[
+		Flatten[rawYintPhaseTraces[[All, All, 2]]],
+		Flatten[fullFitYintPhaseTraces[[All, All, 2]]]
+	],
+	NumericQ
+];
+
+allReY = Select[
+	Join[
+		Flatten[rawYintReTraces[[All, All, 2]]],
+		Flatten[fullFitYintReTraces[[All, All, 2]]]
+	],
+	NumericQ
+];
+
+allImY = Select[
+	Join[
+		Flatten[rawYintImTraces[[All, All, 2]]],
+		Flatten[fullFitYintImTraces[[All, All, 2]]]
+	],
+	NumericQ
+];
+
+allMagResY = Select[Flatten[residualYintMagTraces[[All, All, 2]]], NumericQ[#] && # > 0 &];
+allPhaseResY = Select[Flatten[residualYintPhaseTraces[[All, All, 2]]], NumericQ];
+allReResY = Select[Flatten[residualYintReTraces[[All, All, 2]]], NumericQ];
+allImResY = Select[Flatten[residualYintImTraces[[All, All, 2]]], NumericQ];
+
+If[
+	allMagY === {} || allPhaseY === {} || allReY === {} || allImY === {} ||
+	allMagResY === {} || allPhaseResY === {} || allReResY === {} || allImResY === {},
+	Print["Could not determine shared axis ranges."];
+	Abort[];
+];
+
+magYRange      = {Min[allMagY], Max[allMagY]};
+phaseYRange    = {Min[allPhaseY], Max[allPhaseY]};
+reYRange       = {Min[allReY], Max[allReY]};
+imYRange       = {Min[allImY], Max[allImY]};
+magResYRange   = {Min[allMagResY], Max[allMagResY]};
+phaseResYRange = {Min[allPhaseResY], Max[allPhaseResY]};
+reResYRange    = {Min[allReResY], Max[allReResY]};
+imResYRange    = {Min[allImResY], Max[allImResY]};
+
+Print["Shared |Y| y-range = ", magYRange];
+Print["Shared phase y-range = ", phaseYRange];
+Print["Shared Re(Y) y-range = ", reYRange];
+Print["Shared -Im(Y) y-range = ", imYRange];
+
+(* ---------- Plots ---------- *)
+
+rawYintMagPlot =
+	ListLogLogPlot[
+		rawYintMagTraces,
+		PlotStyle -> rawYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Yint,raw| (S)"},
+		PlotRange -> {All, magYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> Row[{"RAW |Yint|   n=", Length[goodRawYint]}]
+	];
+
+fitYintMagPlot =
+	ListLogLogPlot[
+		fullFitYintMagTraces,
+		PlotStyle -> fitYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Yint,fit| (S)"},
+		PlotRange -> {All, magYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> Row[{"FIT |Yint|   n=", Length[goodFullFitYint]}]
+	];
+
+resYintMagPlot =
+	ListLogLogPlot[
+		residualYintMagTraces,
+		PlotStyle -> resYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Yraw - Yfit| (S)"},
+		PlotRange -> {All, magResYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "ABS residual |Yraw - Yfit|"
+	];
+
+rawYintPhasePlot =
+	ListLogLinearPlot[
+		rawYintPhaseTraces,
+		PlotStyle -> rawYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Phase(Yint,raw) (deg)"},
+		PlotRange -> {All, phaseYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> Row[{"RAW phase(Yint)   n=", Length[goodRawYint]}]
+	];
+
+fitYintPhasePlot =
+	ListLogLinearPlot[
+		fullFitYintPhaseTraces,
+		PlotStyle -> fitYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Phase(Yint,fit) (deg)"},
+		PlotRange -> {All, phaseYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> Row[{"FIT phase(Yint)   n=", Length[goodFullFitYint]}]
+	];
+
+resYintPhasePlot =
+	ListLogLinearPlot[
+		residualYintPhaseTraces,
+		PlotStyle -> resYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Phase raw - fit| (deg)"},
+		PlotRange -> {All, phaseResYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "ABS phase residual"
+	];
+
+rawYintRePlot =
+	ListLogLinearPlot[
+		rawYintReTraces,
+		PlotStyle -> rawYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Re(Yint,raw) (S)"},
+		PlotRange -> {All, reYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "RAW Re(Yint)"
+	];
+
+fitYintRePlot =
+	ListLogLinearPlot[
+		fullFitYintReTraces,
+		PlotStyle -> fitYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Re(Yint,fit) (S)"},
+		PlotRange -> {All, reYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "FIT Re(Yint)"
+	];
+
+resYintRePlot =
+	ListLogLinearPlot[
+		residualYintReTraces,
+		PlotStyle -> resYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Re raw - fit| (S)"},
+		(* PlotRange -> {All, reResYRange}, *)
+		PlotRange -> {All, {0,0.0001}},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "ABS Re residual"
+	];
+
+rawYintImPlot =
+	ListLogLinearPlot[
+		rawYintImTraces,
+		PlotStyle -> rawYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "-Im(Yint,raw) (S)"},
+		PlotRange -> {All, imYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "RAW -Im(Yint)"
+	];
+
+fitYintImPlot =
+	ListLogLinearPlot[
+		fullFitYintImTraces,
+		PlotStyle -> fitYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "-Im(Yint,fit) (S)"},
+		PlotRange -> {All, imYRange},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "FIT -Im(Yint)"
+	];
+
+resYintImPlot =
+	ListLogLinearPlot[
+		residualYintImTraces,
+		PlotStyle -> resYintColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|(-Im raw) - (-Im fit)| (S)"},
+		(* PlotRange -> {All, imResYRange}, *)
+		PlotRange -> {All, {0,0.0001}},
+		ImageSize -> 900,
+		Background -> White,
+		PlotLabel -> "ABS -Im residual"
+	];
+
+GraphicsGrid[
+	{
+		{rawYintMagPlot, fitYintMagPlot, resYintMagPlot},
+		{rawYintPhasePlot, fitYintPhasePlot, resYintPhasePlot},
+		{rawYintRePlot, fitYintRePlot, resYintRePlot},
+		{rawYintImPlot, fitYintImPlot, resYintImPlot}
+	}, ImageSize->1200
 ]
 
 
-fitLogPlot = Show[
-  ListLogLogPlot[
-    fullFitNyqTraces,
-    PlotStyle -> colors,
-    Joined->True
-  ],
-  Frame -> True,
-  FrameLabel -> {"Z' (\[CapitalOmega])", "-Z'' (\[CapitalOmega])"},
-  PlotRange -> All,
-  Joined->True,
-  ImageSize -> 750,
-  AspectRatio -> 1,
-  PlotLabel -> Row[{"FULL Maxwell ladder fit Nyquist overlay   n=", Length[goodSpecs]}]
-]
+(* ::InheritFromParent:: *)
+(**)
 
 
-GraphicsGrid[{{dataLinPlot, fitLinPlot},{dataLogPlot, fitLogPlot}}]
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
 
 
 (* ============================== *)
-(* User control: midpoint split   *)
+(* User control: area window      *)
 (* ============================== *)
+fMinArea = 10/(2 Pi);
+fMaxArea = 1000/(2 Pi);
+fMid = 150/(2 Pi);   (* Hz, user-selected split point *)
 
-fMid = 150/(2 \[Pi]);                 (* Hz, user-selected *)
+kMinArea = 2 Pi fMinArea;   (* s^-1 *)
+kMaxArea = 2 Pi fMaxArea;   (* s^-1 *)
 kMid = 2 Pi fMid;           (* s^-1 *)
 
 (* ============================== *)
@@ -633,19 +1567,28 @@ kMid = 2 Pi fMid;           (* s^-1 *)
 (* ============================== *)
 
 areaOverLog10k[k_List, g_List] := Module[
-  {x, ord},
-  If[Length[k] < 2, Return[0.0]];
+  {ord, kk, gg, x},
+  If[Length[k] < 2 || Length[g] < 2, Return[0.0]];
   ord = Ordering[k];
-  x = Log10[k[[ord]]];
-  N @ Total[Differences[x] * MovingAverage[g[[ord]], 2]]
+  kk = k[[ord]];
+  gg = g[[ord]];
+  x = Log10[kk];
+  N @ Total[Differences[x] * MovingAverage[gg, 2]]
 ];
 
 (* ============================== *)
 (* Compute areas for each dataset *)
+(* restricted to kMinArea <= k <= kMaxArea *)
+(* then split at kMid             *)
 (* ============================== *)
 
 areaResults = Table[
-  Module[{spec, k, g, ord, kk, gg, idxSplit, cSlow, cFast, cTot},
+  Module[
+    {
+      spec, k, g, ord, kk, gg, keep,
+      kkUse, ggUse, idxSplit, cSlow, cFast, cTot
+    },
+
     spec = goodSpecs[[i, "Spec"]];
     k = 1/spec["Tau"];
     g = spec["g"];
@@ -655,33 +1598,48 @@ areaResults = Table[
     kk = k[[ord]];
     gg = g[[ord]];
 
-    (* find last index with k <= kMid *)
-    idxSplit = LengthWhile[kk, # <= kMid &];
+    (* restrict to requested area window *)
+    keep = (kMinArea <= # <= kMaxArea) & /@ kk;
+    kkUse = Pick[kk, keep];
+    ggUse = Pick[gg, keep];
 
-    (* handle edge cases *)
-    cSlow = If[idxSplit >= 2, areaOverLog10k[kk[[;; idxSplit]], gg[[;; idxSplit]]], 0.0];
-    cFast = If[idxSplit <= Length[kk] - 2, areaOverLog10k[kk[[idxSplit ;;]], gg[[idxSplit ;;]]], 0.0];
+    (* split inside restricted window *)
+    idxSplit = LengthWhile[kkUse, # <= kMid &];
+
+    cSlow =
+      If[idxSplit >= 2,
+        areaOverLog10k[kkUse[[;; idxSplit]], ggUse[[;; idxSplit]]],
+        0.0
+      ];
+
+    cFast =
+      If[idxSplit + 1 <= Length[kkUse] - 1,
+        areaOverLog10k[kkUse[[idxSplit + 1 ;;]], ggUse[[idxSplit + 1 ;;]]],
+        0.0
+      ];
 
     cTot = cSlow + cFast;
 
     <|
       "i" -> i,
       "File" -> goodSpecs[[i, "File"]],
+      "fMinArea_Hz" -> fMinArea,
       "fMid_Hz" -> fMid,
+      "fMaxArea_Hz" -> fMaxArea,
+      "kMinArea_s^-1" -> kMinArea,
       "kMid_s^-1" -> kMid,
-      "cSlow_F" -> cSlow,     (* k <= kMid *)
-      "cFast_F" -> cFast,     (* k >= kMid *)
+      "kMaxArea_s^-1" -> kMaxArea,
+      "cSlow_F" -> cSlow,   (* kMinArea <= k <= kMid *)
+      "cFast_F" -> cFast,   (* kMid < k <= kMaxArea *)
       "cTotal_F" -> cTot,
-      "FractionBound"->cFast/cTot
+      "FractionBound" -> If[cTot > 0, cFast/cTot, Indeterminate]
     |>
   ],
   {i, Length[goodSpecs]}
 ];
 
 (* Quick look *)
-Dataset[areaResults]
-
-
+Dataset[areaResults];
 (* ============================== *)
 (* User control: Langmuir KD       *)
 (* ============================== *)
@@ -716,14 +1674,7 @@ areaResultsWithConc =
     areaResults
   ];
 
-Dataset[areaResultsWithConc]
-
-
-
-
-
-
-
+Dataset[areaResultsWithConc];
 
 (* ================================= *)
 (* Extract number before "uM"        *)
@@ -760,9 +1711,7 @@ areaResultsWithConc =
     areaResults
   ];
 
-Dataset[areaResultsWithConc]
-
-
+Dataset[areaResultsWithConc];
 (* ============================== *)
 (* Combine actual + estimated conc *)
 (* ============================== *)
@@ -785,16 +1734,12 @@ areaResultsWithConc =
     areaResults
   ];
 
-Dataset[areaResultsWithConc]
-
-
+Dataset[areaResultsWithConc];
 
 
 
 concTable = areaResultsWithConc[[All, {"File", "Conc_Actual", "Conc_Est"}]];
-Dataset[concTable]
-
-
+Dataset[concTable];
 (* ============================================ *)
 (* 1) Helpers: parse concentration + electrode  *)
 (* ============================================ *)
@@ -820,8 +1765,6 @@ getElectrodeFromFile[file_String] := Module[{name, hit},
 (* ============================================ *)
 (* 2) Langmuir inversion                        *)
 (* ============================================ *)
-
-
 langmuirConcFromF[f_?NumericQ, kd_?NumericQ] := Module[{eps = 10^-12, ff},
   ff = Clip[f, {eps, 1 - eps}];
   kd * ff/(1 - ff)
@@ -831,42 +1774,45 @@ langmuirConcFromF[f_?NumericQ, kd_?NumericQ] := Module[{eps = 10^-12, ff},
 (* 3) Build one combined table                  *)
 (* ============================================ *)
 
-areaResultsFull =
-  Map[
-    Function[assoc,
-      Module[{f, cEst, cAct, elec},
-        f = assoc["FractionBound"];
-        cEst = If[NumericQ[f], langmuirConcFromF[f, KD], Missing["NoFrac"]];
-        cAct = getConcFromFile[assoc["File"]];
-        elec = getElectrodeFromFile[assoc["File"]];
-        Join[assoc, <|
-          "KD" -> KD,
-          "ConcEst" -> cEst,
-          "ConcActual" -> cAct,
-          "Electrode" -> elec
-        |>]
-      ]
-    ],
-    areaResults
-  ];
+areaResultsFull = Table[
+  Module[{spec, file, k, g, ord, kk, gg, keep, kkUse, ggUse, idx, cSlow, cFast, cTot, frac},
+    spec = goodSpecs[[i, "Spec"]];
+    file = goodSpecs[[i, "File"]];
+    k = 1/spec["Tau"];
+    g = spec["g"];
 
-Dataset[areaResultsFull]
+    ord = Ordering[k];
+    kk = k[[ord]];
+    gg = g[[ord]];
 
+    keep = (kMinArea <= # <= kMaxArea) & /@ kk;
+    kkUse = Pick[kk, keep];
+    ggUse = Pick[gg, keep];
 
+    idx = LengthWhile[kkUse, # <= kMid &];
 
+    cSlow = If[idx >= 2, areaOverLog10k[kkUse[[;; idx]], ggUse[[;; idx]]], 0.0];
+    cFast = If[idx + 1 <= Length[kkUse] - 1, areaOverLog10k[kkUse[[idx + 1 ;;]], ggUse[[idx + 1 ;;]]], 0.0];
+    cTot = cSlow + cFast;
+    frac = If[cTot > 0, cFast/cTot, Indeterminate];
 
-
-(* ::InheritFromParent:: *)
-(**)
-
-
-
-
-
-(* ::InheritFromParent:: *)
-(**)
-
-
+    <|
+      "i" -> i,
+      "TimeHr" -> expTimesHr[[i]],
+      "File" -> file,
+      "Electrode" -> getElectrodeFromFile[file],
+      "ConcActual" -> getConcFromFile[file],
+      "KD" -> KD,
+      "cSlow_F" -> cSlow,
+      "cFast_F" -> cFast,
+      "cTotal_F" -> cTot,
+      "FractionBound" -> frac,
+      "ConcEst" -> If[NumericQ[frac], langmuirConcFromF[frac, KD], Missing["NoFrac"]]
+    |>
+  ],
+  {i, Length[goodSpecs]}
+];
+Dataset[areaResultsFull];
 (* ============================================ *)
 (* Build plotting table from areaResultsWithConc *)
 (* Requires keys: "Conc_Actual", "Conc_Est", "File" *)
@@ -897,9 +1843,7 @@ plotRows =
     (NumericQ[#["ConcActual"]] && NumericQ[#["ConcEst"]] && StringQ[#["Electrode"]]) &
   ];
 
-Dataset[plotRows]
-
-
+Dataset[plotRows];
 (* ============================================ *)
 (* Plot: Conc_Est vs Conc_Actual, colored by electrode *)
 (* ============================================ *)
@@ -913,29 +1857,11 @@ traces =
 
 traces;
 
-
-
 colors = <|
   "E1" -> Red,
   "E2" -> Blue,
   "E3" -> Darker[Green]
 |>;
-
-ListPlot[
-  Values[traces],
-  PlotStyle -> (colors /@ Keys[traces]),
-  PlotMarkers -> {Automatic, 9},
-  Frame -> True,
-  FrameLabel -> {"Actual concentration (uM)", "Estimated concentration (uM)"},
-  PlotLegends -> Keys[traces],
-  PlotRange -> {{0,300},{0,300}},
-  ImageSize -> 700,
-  Background -> White,
-  Epilog -> {
-    {GrayLevel[0.5], Dashed, Line[{{10^-6, 10^-6}, {10^6, 10^6}}]}
-  }
-]
-
 
 (* ============================================ *)
 (* Build plotting table: FractionBound vs Actual *)
@@ -968,26 +1894,12 @@ plotRowsFB =
      StringQ[#["Electrode"]]) &
   ];
 
-Dataset[plotRowsFB]
-
-
+Dataset[plotRowsFB];
 tracesFB = GroupBy[
   plotRowsFB,
   #["Electrode"] &,
   ( {#["ConcActual"], #["FractionBound"]} & /@ # ) &
-]
-
-Keys[tracesFB]
-
-
-
-
-
-ListPlot[tracesFB]
-
-
-ListLogLinearPlot[tracesFB]
-
+];
 
 (* ============================================ *)
 (* Plot: FractionBound vs Actual Concentration  *)
@@ -1002,42 +1914,10 @@ colors = <|
 
 (* Domain for the Langmuir curve: based on your data *)
 allConc = Flatten[Values[tracesFB], 1][[All, 1]];
-cMin = Max[100, Min[Select[allConc, NumericQ]]]   (* avoid 0 on log scale *)
-cMax = Max[Select[allConc, NumericQ]]
+cMin = Max[100, Min[Select[allConc, NumericQ]]];   (* avoid 0 on log scale *)
+cMax = Max[Select[allConc, NumericQ]];
 
 langmuirFB[c_?NumericQ, kd_?NumericQ] := c/(c + kd);
-
-Show[
-  {
-    ListLogLinearPlot[
-      Values[tracesFB],
-      PlotStyle -> (colors /@ Keys[tracesFB]),
-      PlotMarkers -> {Automatic, 9},
-      Joined -> False,
-      PlotRange -> {{cMin, cMax}, {0, 1}}
-    ],
-    LogLinearPlot[
-      langmuirFB[c, KD],
-      {c, cMin, cMax},
-      PlotStyle -> {GrayLevel[0.35], Thick}
-    ]
-  },
-  Frame -> True,
-  FrameLabel -> {"Actual concentration (uM)", "Fraction bound"},
-  PlotLegends -> Placed[
-    LineLegend[
-      Join[
-        (Style[#, colors[#]] & /@ Keys[tracesFB]),
-        {Style["Langmuir (KD=" <> ToString[KD] <> " uM)", GrayLevel[0.35]]}
-      ]
-    ],
-    Right
-  ],
-    ImageSize -> 700,
-  Background -> White
-]
-
-
 
 Show[
   {
@@ -1050,6 +1930,11 @@ Show[
     ],
     Plot[
       langmuirFB[c, KD],
+      {c, 0, 5 cMax},
+      PlotStyle -> {GrayLevel[0.35], Thick}
+    ],
+    Plot[
+      langmuirFB[c, KD] + 0.08,
       {c, 0, 5 cMax},
       PlotStyle -> {GrayLevel[0.35], Thick}
     ]
@@ -1068,3 +1953,744 @@ Show[
     ImageSize -> 700,
   Background -> White
 ]
+
+
+
+(* ---------- Fraction bound vs time ---------- *)
+
+timeSeriesRows = SortBy[
+  Select[
+    areaResultsFull,
+    NumericQ[#["FractionBound"]] && IntegerQ[#["i"]] &
+  ],
+  #["i"] &
+];
+
+fbTimeData = Transpose[{timeSeriesRows[[All, "i"]], timeSeriesRows[[All, "FractionBound"]]}];
+
+fbTimeRows = SortBy[
+  Select[
+    areaResultsFull,
+    NumericQ[#["TimeHr"]] && NumericQ[#["FractionBound"]] &
+  ],
+  #["TimeHr"] &
+];
+
+fbTimeData = ({#["TimeHr"], #["FractionBound"]} & /@ fbTimeRows);
+
+ListPlot[
+  fbTimeData,
+  Joined -> True,
+  PlotMarkers -> {Automatic, 8},
+  Background -> White,
+  PlotRangePadding -> Scaled[0.02],
+  Frame -> True,
+  FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+  FrameLabel -> {
+    Style["Time (hours)", 18, Black],
+    Style["Fraction bound", 18, Black]
+  },
+  BaseStyle -> {FontFamily -> "Arial", 14, Black},
+  LabelStyle -> Directive[18, Black],
+  FrameTicksStyle -> Directive[14, Black],
+  FrameTicks -> {
+    {Automatic, None},
+    {Automatic, None}
+  },
+  PlotRange -> {All, {0, 1}},
+  ImageSize -> 900,
+  PlotLabel -> Style["Fraction bound vs time", 16, Black]
+]
+
+
+(* ============================================================ *)
+(* TIME-SERIES / PSD ANALYSIS OF EIS FOURIER COMPONENTS         *)
+(* Uses already-built goodRawZ and goodSpecs                    *)
+(* Last 10 hours only                                           *)
+(* Outputs:                                                     *)
+(*   1) Overlay PSD plot for all EIS frequencies               *)
+(*   2) Table of mean Z quantities vs frequency                *)
+(*   3) Variance vs mean for impedance                         *)
+(*   4) Variance vs mean for admittance after subtracting Rs   *)
+(* ============================================================ *)
+
+If[Length[goodRawZ] == 0 || Length[goodSpecs] == 0,
+	Print["goodRawZ or goodSpecs is empty."];
+	Abort[];
+];
+
+(* ---------- helper to pull finish times ---------- *)
+finishTimesS = Lookup[goodSpecs[[All, "Spec"]], "FinishTimeS", Missing["NoTime"]];
+
+validTimeIdx = Select[
+	Range[Length[goodRawZ]],
+	NumericQ[finishTimesS[[#]]] &
+];
+
+If[Length[validTimeIdx] < 20,
+	Print["Too few spectra with valid FinishTimeS."];
+	Abort[];
+];
+
+timesSAll = finishTimesS[[validTimeIdx]];
+rawSubsetAll = goodRawZ[[validTimeIdx]];
+specSubsetAll = goodSpecs[[validTimeIdx]];
+
+tMax = Max[timesSAll];
+tMinKeep = tMax - 20.*3600.;
+
+keepLast10h = Map[# >= tMinKeep &, timesSAll];
+
+timesS = Pick[timesSAll, keepLast10h];
+rawSubset = Pick[rawSubsetAll, keepLast10h];
+specSubset = Pick[specSubsetAll, keepLast10h];
+
+If[Length[rawSubset] < 20,
+	Print["Too few spectra in last 20 hours."];
+	Abort[];
+];
+
+(* ---------- sort by time ---------- *)
+ord = Ordering[timesS];
+timesS = timesS[[ord]];
+rawSubset = rawSubset[[ord]];
+specSubset = specSubset[[ord]];
+
+timesHr = (timesS - Min[timesS])/3600.0;
+nSpec = Length[rawSubset];
+
+Print["Using ", nSpec, " spectra from last 10 hours."];
+
+(* ---------- common frequency grid check ---------- *)
+freqTemplate = rawSubset[[1, "FreqHz"]];
+
+sameFreqGridQ = And @@ Table[
+	rawSubset[[k, "FreqHz"]] === freqTemplate,
+	{k, 2, nSpec}
+];
+
+If[!sameFreqGridQ,
+	Print["Frequency grids are not identical across spectra."];
+	Abort[];
+];
+
+freqList = N[freqTemplate];
+nFreq = Length[freqList];
+
+(* ---------- build matrices ---------- *)
+zMat = Table[
+	rawSubset[[k, "ZRaw"]],
+	{k, 1, nSpec}
+];
+
+rsVec = Table[
+	specSubset[[k, "Spec", "Rs"]],
+	{k, 1, nSpec}
+];
+
+If[!VectorQ[rsVec, NumericQ],
+	Print["Could not extract numeric Rs values from goodSpecs."];
+	Abort[];
+];
+
+yMat = Table[
+	1/(zMat[[k]] - rsVec[[k]]),
+	{k, 1, nSpec}
+];
+
+(* ---------- sampling interval estimate ---------- *)
+dtList = Differences[timesS];
+dtMed = Median[dtList];
+
+If[!NumericQ[dtMed] || dtMed <= 0,
+	Print["Could not determine positive sampling interval."];
+	Abort[];
+];
+
+fsTime = 1./dtMed;
+Print["Median sampling interval = ", NumberForm[dtMed, {8, 2}], " s"];
+Print["Effective time-series sample rate = ", NumberForm[fsTime, {8, 5}], " Hz"];
+
+(* ---------- simple periodogram PSD helper ---------- *)
+clearPSD[x_List, dt_?NumericQ] := Module[
+	{
+		x0, n, fs, fft, kmax, psd, ff
+	},
+	n = Length[x];
+	If[n < 4, Return[<|"PSDfreq" -> {}, "PSD" -> {}|>]];
+
+	fs = 1./dt;
+	x0 = N[x - Mean[x]];
+	fft = Fourier[x0, FourierParameters -> {1, -1}];
+
+	kmax = Floor[n/2];
+
+	ff = Range[0, kmax] * fs/n;
+	psd = (1./(fs*n)) * Abs[fft[[1 ;; kmax + 1]]]^2;
+
+	If[kmax >= 1,
+		psd[[2 ;; -2]] = 2.0 * psd[[2 ;; -2]];
+	];
+
+	<|"PSDfreq" -> ff, "PSD" -> psd|>
+];
+
+(* ---------- compute PSD and statistics at each EIS frequency ---------- *)
+psdResults = Table[
+	Module[
+		{
+			f = freqList[[j]],
+			zSeries, ySeries,
+			zMagSeries, zReSeries, zImSeries,
+			yMagSeries, yReSeries, yImSeries,
+			psdZMag, meanZMag, varZMagRaw, varZMagPSD,
+			psdYMag, meanYMag, varYMagRaw, varYMagPSD,
+			meanZRe, meanNegZIm, varZReRaw, varNegZImRaw,
+			meanYRe, meanNegYIm, varYReRaw, varNegYImRaw
+		},
+
+		zSeries = zMat[[All, j]];
+		ySeries = yMat[[All, j]];
+
+		zMagSeries = Abs[zSeries];
+		zReSeries = Re[zSeries];
+		zImSeries = -Im[zSeries];
+
+		yMagSeries = Abs[ySeries];
+		yReSeries = Re[ySeries];
+		yImSeries = -Im[ySeries];
+
+		psdZMag = clearPSD[zMagSeries, dtMed];
+		psdYMag = clearPSD[yMagSeries, dtMed];
+
+		meanZMag = Mean[zMagSeries];
+		varZMagRaw = Variance[zMagSeries];
+		varZMagPSD = Total[Most[psdZMag["PSD"]] * Differences[psdZMag["PSDfreq"]]];
+
+		meanYMag = Mean[yMagSeries];
+		varYMagRaw = Variance[yMagSeries];
+		varYMagPSD = Total[Most[psdYMag["PSD"]] * Differences[psdYMag["PSDfreq"]]];
+
+		meanZRe = Mean[zReSeries];
+		meanNegZIm = Mean[zImSeries];
+		varZReRaw = Variance[zReSeries];
+		varNegZImRaw = Variance[zImSeries];
+
+		meanYRe = Mean[yReSeries];
+		meanNegYIm = Mean[yImSeries];
+		varYReRaw = Variance[yReSeries];
+		varNegYImRaw = Variance[yImSeries];
+
+		<|
+			"Freq" -> f,
+
+			"PSDfreq" -> psdZMag["PSDfreq"],
+			"PSD" -> psdZMag["PSD"],
+
+			"MeanZMag" -> meanZMag,
+			"VarZMagRaw" -> varZMagRaw,
+			"VarZMagPSD" -> varZMagPSD,
+			"MeanZRe" -> meanZRe,
+			"MeanNegZIm" -> meanNegZIm,
+			"VarZReRaw" -> varZReRaw,
+			"VarNegZImRaw" -> varNegZImRaw,
+
+			"MeanYMag" -> meanYMag,
+			"VarYMagRaw" -> varYMagRaw,
+			"VarYMagPSD" -> varYMagPSD,
+			"MeanYRe" -> meanYRe,
+			"MeanNegYIm" -> meanNegYIm,
+			"VarYReRaw" -> varYReRaw,
+			"VarNegYImRaw" -> varNegYImRaw
+		|>
+	],
+	{j, 1, nFreq}
+];
+
+goodPSDResults = Select[
+	psdResults,
+	AssociationQ[#] &&
+	KeyExistsQ[#, "PSDfreq"] &&
+	KeyExistsQ[#, "PSD"] &&
+	VectorQ[#["PSDfreq"], NumericQ] &&
+	VectorQ[#["PSD"], NumericQ] &&
+	Length[#["PSDfreq"]] == Length[#["PSD"]] &&
+	Length[#["PSDfreq"]] > 2 &
+];
+
+If[Length[goodPSDResults] == 0,
+	Print["No valid PSD results found."];
+	Abort[];
+];
+
+(* ---------- overlay PSD plot ---------- *)
+psdCurves = Transpose[{#["PSDfreq"]*3600, #["PSD"]}] & /@ goodPSDResults;
+
+psdLabels = Table[
+	ToString@NumberForm[goodPSDResults[[k, "Freq"]], {7, 2}] <> " Hz",
+	{k, Length[goodPSDResults]}
+];
+
+psdColors = ColorData["Rainbow"] /@ Rescale[Range[Length[psdCurves]]];
+
+psdOverlayPlot =
+	ListLogLogPlot[
+		psdCurves,
+		PlotStyle -> psdColors,
+		Frame -> True,
+		Joined->True,
+		Axes -> False,
+		FrameLabel -> {"Temporal frequency (Hz)", "PSD of |Z|"},
+		PlotRange -> All,
+		ImageSize -> 900,
+		Background -> White,
+		PlotLegends -> Placed[
+			LineLegend[
+				psdColors,
+				psdLabels,
+				LegendLayout -> "Column",
+				LabelStyle -> Directive[11]
+			],
+			Right
+		],
+		PlotLabel -> "Overlay PSD of |Z| for each EIS Fourier component"
+	];
+psdOverlayPlot
+
+
+
+
+(* ---------- table of means ---------- *)
+meanTable = Table[
+	{
+		psdResults[[j, "Freq"]],
+		psdResults[[j, "MeanZMag"]],
+		psdResults[[j, "MeanZRe"]],
+		psdResults[[j, "MeanNegZIm"]],
+		psdResults[[j, "MeanYMag"]],
+		psdResults[[j, "MeanYRe"]],
+		psdResults[[j, "MeanNegYIm"]]
+	},
+	{j, 1, Length[psdResults]}
+];
+
+meanTableHeader = {
+	"Freq (Hz)",
+	"Mean |Z|",
+	"Mean Re[Z]",
+	"Mean -Im[Z]",
+	"Mean |Y|",
+	"Mean Re[Y]",
+	"Mean -Im[Y]"
+};
+
+meanTableGrid =
+	Grid[
+		Prepend[
+			NumberForm[#, {10, 4}] & /@ meanTable,
+			meanTableHeader
+		],
+		Frame -> All,
+		Background -> {None, {White}},
+		ItemStyle -> Directive[12]
+	];
+
+(* ---------- variance vs mean traces ---------- *)
+zVarMeanRaw = Select[
+	Table[
+		{psdResults[[j, "MeanZMag"]], psdResults[[j, "VarZMagRaw"]]},
+		{j, 1, Length[psdResults]}
+	],
+	NumericQ[#[[1]]] && NumericQ[#[[2]]] && #[[1]] > 0 && #[[2]] > 0 &
+];
+
+zVarMeanPSD = Select[
+	Table[
+		{psdResults[[j, "MeanZMag"]], psdResults[[j, "VarZMagPSD"]]},
+		{j, 1, Length[psdResults]}
+	],
+	NumericQ[#[[1]]] && NumericQ[#[[2]]] && #[[1]] > 0 && #[[2]] > 0 &
+];
+
+yVarMeanRaw = Select[
+	Table[
+		{psdResults[[j, "MeanYMag"]], psdResults[[j, "VarYMagRaw"]]},
+		{j, 1, Length[psdResults]}
+	],
+	NumericQ[#[[1]]] && NumericQ[#[[2]]] && #[[1]] > 0 && #[[2]] > 0 &
+];
+
+yVarMeanPSD = Select[
+	Table[
+		{psdResults[[j, "MeanYMag"]], psdResults[[j, "VarYMagPSD"]]},
+		{j, 1, Length[psdResults]}
+	],
+	NumericQ[#[[1]]] && NumericQ[#[[2]]] && #[[1]] > 0 && #[[2]] > 0 &
+];
+
+(* ---------- reference scaling lines ---------- *)
+makeReferenceLine[data_List, slope_?NumericQ] := Module[
+	{x0, y0, a, xs},
+	If[Length[data] < 2, Return[{}]];
+	x0 = data[[Ceiling[Length[data]/2], 1]];
+	y0 = data[[Ceiling[Length[data]/2], 2]];
+	a = y0/(x0^slope);
+	xs = {Min[data[[All, 1]]], Max[data[[All, 1]]]};
+	{{xs[[1]], a*xs[[1]]^slope}, {xs[[2]], a*xs[[2]]^slope}}
+];
+
+zShotLine = makeReferenceLine[zVarMeanRaw, 3];
+zAltLine  = makeReferenceLine[zVarMeanRaw, 1];
+
+yShotLine = makeReferenceLine[yVarMeanRaw, 1];
+yAltLine  = makeReferenceLine[yVarMeanRaw, 2];
+
+(* ---------- label helper ---------- *)
+targetFreqs = {1., 10., 100., 1000., 10000.};
+
+closestIndexToFreq[f_] := First @ Ordering[Abs[N[psdResults[[All, "Freq"]]] - f], 1];
+
+zLabelData = Table[
+	Module[{idx, f, x, y},
+		idx = closestIndexToFreq[targetFreqs[[k]]];
+		f = psdResults[[idx, "Freq"]];
+		x = psdResults[[idx, "MeanZMag"]];
+		y = psdResults[[idx, "VarZMagRaw"]];
+		{f, x, y}
+	],
+	{k, 1, Length[targetFreqs]}
+];
+
+yLabelData = Table[
+	Module[{idx, f, x, y},
+		idx = closestIndexToFreq[targetFreqs[[k]]];
+		f = psdResults[[idx, "Freq"]];
+		x = psdResults[[idx, "MeanYMag"]];
+		y = psdResults[[idx, "VarYMagRaw"]];
+		{f, x, y}
+	],
+	{k, 1, Length[targetFreqs]}
+];
+
+zLabelData = Select[
+	zLabelData,
+	NumericQ[#[[2]]] && NumericQ[#[[3]]] && #[[2]] > 0 && #[[3]] > 0 &
+];
+
+yLabelData = Select[
+	yLabelData,
+	NumericQ[#[[2]]] && NumericQ[#[[3]]] && #[[2]] > 0 && #[[3]] > 0 &
+];
+
+zLabelPrimitives = Flatten@Table[
+	With[
+		{
+			f = zLabelData[[k, 1]],
+			pt = zLabelData[[k, {2, 3}]],
+			offset = {{1.2, 1.0}, {1.2, -1.0}, {-1.2, 1.0}, {-1.2, -1.0}, {1.2, 0.0}}[[k]]
+		},
+		{
+			Black,
+			PointSize[0.018],
+			Point[pt],
+			Text[
+				Style[ToString@NumberForm[f, {6, 0}] <> " Hz", 12, Black, Background -> White],
+				pt,
+				offset
+			]
+		}
+	],
+	{k, 1, Length[zLabelData]}
+];
+
+yLabelPrimitives = Flatten@Table[
+	With[
+		{
+			f = yLabelData[[k, 1]],
+			pt = yLabelData[[k, {2, 3}]],
+			offset = {{1.2, 1.0}, {1.2, -1.0}, {-1.2, 1.0}, {-1.2, -1.0}, {1.2, 0.0}}[[k]]
+		},
+		{
+			Black,
+			PointSize[0.018],
+			Point[pt],
+			Text[
+				Style[ToString@NumberForm[f, {6, 0}] <> " Hz", 12, Black, Background -> White],
+				pt,
+				offset
+			]
+		}
+	],
+	{k, 1, Length[yLabelData]}
+];
+
+zVarPlot =
+	ListLogLogPlot[
+		{
+			zVarMeanRaw,
+			zVarMeanPSD,
+			zShotLine,
+			zAltLine
+		},
+		Joined -> {False, False, True, True},
+		PlotMarkers -> {
+			{Automatic, Medium},
+			{Automatic, Medium},
+			None,
+			None
+		},
+		PlotStyle -> {
+			Directive[Black],
+			Directive[Red],
+			Directive[Blue, Dashed, Thick],
+			Directive[Darker[Green], Dashed, Thick]
+		},
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Mean |Z|", "Variance of |Z|"},
+		PlotRange -> All,
+		ImageSize -> 800,
+		Background -> White,
+		PlotLegends -> Placed[
+			{
+				"Raw variance",
+				"PSD-integrated variance",
+				"Shot-noise expectation  Var[Z] \[Proportional] |Z|^3",
+				"Alternative  Var[Z] \[Proportional] |Z|^1"
+			},
+			Right
+		],
+		PlotLabel -> "Impedance variance vs mean",
+		Epilog -> zLabelPrimitives
+	];
+
+yVarPlot =
+	ListLogLogPlot[
+		{
+			yVarMeanRaw,
+			yVarMeanPSD,
+			yShotLine,
+			yAltLine
+		},
+		Joined -> {False, False, True, True},
+		PlotMarkers -> {
+			{Automatic, Medium},
+			{Automatic, Medium},
+			None,
+			None
+		},
+		PlotStyle -> {
+			Directive[Black],
+			Directive[Red],
+			Directive[Blue, Dashed, Thick],
+			Directive[Darker[Green], Dashed, Thick]
+		},
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Mean |Y|", "Variance of |Y|"},
+		PlotRange -> All,
+		ImageSize -> 800,
+		Background -> White,
+		PlotLegends -> Placed[
+			{
+				"Raw variance",
+				"PSD-integrated variance",
+				"Shot-noise expectation  Var[Y] \[Proportional] |Y|^1",
+				"Alternative  Var[Y] \[Proportional] |Y|^2"
+			},
+			Right
+		],
+		PlotLabel -> "Admittance variance vs mean",
+		Epilog -> yLabelPrimitives
+	];
+
+(* ---------- display ---------- *)
+
+meanTableGrid;
+zVarPlot;
+yVarPlot;
+
+
+ 
+
+
+(* ------------------------------------------------------------ *)
+(* Build labeled subset of Z variance data                      *)
+(* ------------------------------------------------------------ *)
+
+targetFreqs = {1, 10, 100, 300,500,1000, 10000};
+
+(* extract mean-Z vs variance pairs with their frequencies *)
+zVarFull = Table[
+	{
+		psdResults[[j, "Freq"]],
+		psdResults[[j, "MeanZMag"]],
+		psdResults[[j, "VarZMagRaw"]]
+	},
+	{j, Length[psdResults]}
+];
+
+zVarFull = Select[
+	zVarFull,
+	NumericQ[#[[2]]] && NumericQ[#[[3]]] && #[[2]] > 0 && #[[3]] > 0 &
+];
+
+(* find closest frequency rows *)
+labelRows =
+	Table[
+		First @ MinimalBy[zVarFull, Abs[#[[1]] - f] &],
+		{f, targetFreqs}
+	];
+
+(* convert to Callout points *)
+zLabelPoints =
+	Table[
+		Callout[
+			{row[[2]], row[[3]]},
+			Style[ToString[Round[row[[1]]]] <> " Hz", 14, Black],
+			Above,
+			Appearance -> "Leader"
+		],
+		{row, labelRows}
+	];
+
+(* unlabeled base data *)
+zBasePoints = zVarFull[[All, {2, 3}]];
+
+(* ------------------------------------------------------------ *)
+(* Final impedance variance plot with labels                    *)
+(* ------------------------------------------------------------ *)
+
+zVarPlot =
+	ListLogLogPlot[
+		{
+			zBasePoints,
+			zLabelPoints,
+			zShotLine,
+			zAltLine
+		},
+		Joined -> {False, False, True, True},
+		PlotMarkers -> {
+			{Automatic, Medium},
+			None,
+			None,
+			None
+		},
+		PlotStyle -> {
+			Directive[Black],
+			Directive[Black],
+			Directive[Blue, Dashed, Thick],
+			Directive[Darker[Green], Dashed, Thick]
+		},
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Mean |Z|", "Variance of |Z|"},
+		PlotRange -> All,
+		ImageSize -> 800,
+		Background -> White,
+		PlotLegends -> Placed[
+			{
+				"Raw variance",
+				"Labeled representative frequencies",
+				"Shot noise slope",
+				"Alternative slope"
+			},
+			Right
+		],
+		PlotLabel -> "Impedance variance vs mean (labeled)"
+	];
+
+
+
+(* ------------------------------------------------------------ *)
+(* Build labeled subset of Y variance data                      *)
+(* ------------------------------------------------------------ *)
+
+
+(* extract mean-Y vs variance pairs with their frequencies *)
+yVarFull = Table[
+	{
+		psdResults[[j, "Freq"]],
+		psdResults[[j, "MeanYMag"]],
+		psdResults[[j, "VarYMagRaw"]]
+	},
+	{j, Length[psdResults]}
+];
+
+yVarFull = Select[
+	yVarFull,
+	NumericQ[#[[2]]] && NumericQ[#[[3]]] && #[[2]] > 0 && #[[3]] > 0 &
+];
+
+(* find closest frequency rows *)
+labelRowsY =
+	Table[
+		First @ MinimalBy[yVarFull, Abs[#[[1]] - f] &],
+		{f, targetFreqs}
+	];
+
+(* convert to Callout points *)
+yLabelPoints =
+	Table[
+		Callout[
+			{row[[2]], row[[3]]},
+			Style[ToString[Round[row[[1]]]] <> " Hz", 14, Black],
+			Above,
+			Appearance -> "Leader"
+		],
+		{row, labelRowsY}
+	];
+
+(* unlabeled base data *)
+yBasePoints = yVarFull[[All, {2, 3}]];
+
+(* ------------------------------------------------------------ *)
+(* Final admittance variance plot with labels                   *)
+(* ------------------------------------------------------------ *)
+
+yVarPlot =
+	ListLogLogPlot[
+		{
+			yBasePoints,
+			yShotLine,
+			yAltLine,
+			yLabelPoints
+		},
+		Joined -> {False,  True, True, False},
+		PlotMarkers -> {
+			{Automatic, Medium},
+			None,
+			None,
+			None
+		},
+		PlotStyle -> {
+			Directive[Black],
+
+			Directive[Blue, Dashed, Thick],
+			Directive[Darker[Green], Dashed, Thick],
+						Directive[Black]
+		},
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Mean |Y|", "Variance of |Y|"},
+		PlotRange -> All,
+		ImageSize -> 800,
+		Background -> White,
+		PlotLegends -> Placed[
+			{
+				"Raw variance",
+				
+				"Shot noise slope",
+				"Alternative slope",
+				"Labeled representative frequencies"
+			},
+			Right
+		],
+		PlotLabel -> "Admittance variance vs mean (labeled)"
+	];
+
+zVarPlot
+yVarPlot
+
+
+
