@@ -2722,17 +2722,17 @@ makeReferenceLine[data_List, slope_?NumericQ] := Module[
 	{x0, y0, a, xs},
 	If[Length[data] < 2, Return[{}]];
 	x0 = data[[Ceiling[Length[data]/2], 1]];
-	y0 = data[[Ceiling[Length[data]/2], 2]];
+(* 	y0 = data[[Ceiling[Length[data]/2], 2]]; *);
+	y0 = 0.4 data[[Ceiling[Length[data]/2], 2]];
+
 	a = y0/(x0^slope);
 	xs = {Min[data[[All, 1]]], Max[data[[All, 1]]]};
 	{{xs[[1]], a*xs[[1]]^slope}, {xs[[2]], a*xs[[2]]^slope}}
 ];
 
 zShotLine = makeReferenceLine[zVarMeanRaw, 3];
-zAltLine  = makeReferenceLine[zVarMeanRaw, 1];
 
 yShotLine = makeReferenceLine[yVarMeanRaw, 1];
-yAltLine  = makeReferenceLine[yVarMeanRaw, 2];
 
 (* ---------- label helper ---------- *)
 targetFreqs = {1., 10., 100., 1000., 10000.};
@@ -2900,9 +2900,6 @@ zVarPlot;
 yVarPlot;
 
 
- 
-
-
 (* ------------------------------------------------------------ *)
 (* Build labeled subset of Z variance data                      *)
 (* ------------------------------------------------------------ *)
@@ -2955,21 +2952,18 @@ zVarPlot =
 		{
 			zBasePoints,
 			zLabelPoints,
-			zShotLine,
-			zAltLine
+			zShotLine
 		},
 		Joined -> {False, False, True, True},
 		PlotMarkers -> {
 			{Automatic, Medium},
-			None,
 			None,
 			None
 		},
 		PlotStyle -> {
 			Directive[Black],
 			Directive[Black],
-			Directive[Blue, Dashed, Thick],
-			Directive[Darker[Green], Dashed, Thick]
+			Directive[Blue, Dashed, Thick]
 		},
 		Frame -> True,
 		Axes -> False,
@@ -2981,8 +2975,7 @@ zVarPlot =
 			{
 				"Raw variance",
 				"Labeled representative frequencies",
-				"Shot noise slope",
-				"Alternative slope"
+				"Shot noise slope"
 			},
 			Right
 		],
@@ -3042,22 +3035,18 @@ yVarPlot =
 		{
 			yBasePoints,
 			yShotLine,
-			yAltLine,
 			yLabelPoints
 		},
-		Joined -> {False,  True, True, False},
+		Joined -> {False,  True,  False},
 		PlotMarkers -> {
 			{Automatic, Medium},
-			None,
 			None,
 			None
 		},
 		PlotStyle -> {
 			Directive[Black],
-
 			Directive[Blue, Dashed, Thick],
-			Directive[Darker[Green], Dashed, Thick],
-						Directive[Black]
+			Directive[Black]
 		},
 		Frame -> True,
 		Axes -> False,
@@ -3068,9 +3057,7 @@ yVarPlot =
 		PlotLegends -> Placed[
 			{
 				"Raw variance",
-				
 				"Shot noise slope",
-				"Alternative slope",
 				"Labeled representative frequencies"
 			},
 			Right
