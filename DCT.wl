@@ -292,7 +292,7 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 	(* ======================================================== *)
 	solveLadderGivenRs[rsCand_?NumericQ] := Module[
 		{
-			zIntDCT, yIntDCT, wY, wYsqrt,
+			zIntDCT, yIntDCT, wY, wYsqrt,wZ,
 			tauBins, nBins, dLog10,
 			kMatDCT, kUseDCT, aMat, aW, bW, aRI, bRI,
 			d2, dFull, aCols, colNormSq, sA2, lambda, dFullN, aAug, bAug, xBest,
@@ -422,7 +422,7 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 		(* objZ = Total[Re[zDataRs - zFitRs]^2 + Im[zDataRs - zFitRs]^2]; *)
 		
 		(* ---------- OUTER LOOP weighted objective in impedance space ---------- *)
-
+(* 
 		wZsqrt = Developer`ToPackedArray[Abs[zDataRs]^wPowR];
 		
 		If[!VectorQ[wZsqrt, NumericQ] ||
@@ -436,7 +436,18 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 		      ( Re[zDataRs - zFitRs]^2 +
 		        Im[zDataRs - zFitRs]^2 )
 		   ];
-		   
+	*)
+		wZ = Developer`ToPackedArray[Abs[zDataRs]^wPowR];
+	
+	objZ =
+		Total[
+			wZ *
+			(
+				Re[zDataRs - zFitRs]^2 +
+				Im[zDataRs - zFitRs]^2
+			)
+		];
+			   
 
 		(* ---------- diagnostic objective in admittance space, ONLY on DCT range ---------- *)
 		objY = Total[Re[yIntDCT - yIntFitDCT]^2 + Im[yIntDCT - yIntFitDCT]^2];

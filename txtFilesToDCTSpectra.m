@@ -18,42 +18,40 @@ NNLSPackagePath = "C:\\Users\\bobla\\Documents\\DCT\\NNLSFit.m";
 Get[NNLSPackagePath]
 
 
-
-
-
-
 (* ---------- USER SETTINGS ---------- *)
+
+
+
 
 
 
 dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data";
 
 
-
-
-
 dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25-titration";
+
 dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25";
 
 debugFlag = False;
 fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
 
 lambdaND = 1 10^-3;
+
 constantPhaseElementFlag = False;
 
 binsPerDecade = 35;
 
 
+weightPower = -0.5; (* weight each point inverse to variance *)
 
-weightPower = -0.5; (* how much do we weight each data point? around 0.5 or 1 works, has to do with SNR of potentiostat *)
-
-weightPowerResistance = -1.5;
+(* weightPowerResistance = -3.5; *)
+weightPowerResistance = weightPower + 4;
 
 fMinUse = 0.5;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
 fMaxUse = 200;     (* Hz *)
 
 minFreqRsFit = 200;  (* Hz *)
-maxFreqRsFit = 500;  (* Hz *)
+maxFreqRsFit = 350;  (* Hz *)
 
 
 
@@ -67,7 +65,6 @@ tauMaxFactor = 10^paddingDecades;          (* tauMaxUse = tauMax * factor *) (* 
 minFreqRsFit = fMaxUse 10^paddingDecades;   (* Hz *)
 maxFreqRsFit = 300 + minFreqRsFit;  (* Hz *)
 *)
-
 
 
 (* ============================================================ *)
@@ -423,6 +420,398 @@ GraphicsGrid[
 		}
 	}, ImageSize -> 900
 ]
+
+
+(* ============================================================ *)
+(* FAST + MORE ACCURATE: peak picking with sub-grid refinement  *)
+(* ============================================================ *)
+
+fitKMin = 10.;
+fitKMax = 1000.;
+
+smoothRadius = 1;      (* 0,1,2 ... *)
+minSepDec = 0.20;      (* minimum separation in log10(k) *)
+minPeakFrac = 0.01;    (* peak must exceed this fraction of max signal *)
+
+(* ---------- helper: simple smoothing ---------- *)
+smooth1D[v_List, r_Integer?NonNegative] := Module[{ker},
+	If[r == 0, Return[N[v]]];
+	ker = ConstantArray[1./(2 r + 1), 2 r + 1];
+	ListCorrelate[ker, N[v], {r + 1, -(r + 1)}, 0]
+];
+
+(* ---------- helper: local maxima indices ---------- *)
+localMaxIndices[y_List] := Select[
+	Range[2, Length[y] - 1],
+	y[[#]] >= y[[# - 1]] && y[[#]] >= y[[# + 1]] &
+];
+
+(* ---------- helper: quadratic peak refinement on 3 points ---------- *)
+refinePeakQuadratic[x_List, y_List, idx_Integer] := Module[
+	{x1, x2, x3, y1, y2, y3, denom, a, b, xPeak, yPeak},
+
+	If[idx <= 1 || idx >= Length[x],
+		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
+	];
+
+	x1 = N[x[[idx - 1]]]; x2 = N[x[[idx]]]; x3 = N[x[[idx + 1]]];
+	y1 = N[y[[idx - 1]]]; y2 = N[y[[idx]]]; y3 = N[y[[idx + 1]]];
+
+	denom = (x1 - x2) (x1 - x3) (x2 - x3);
+	If[denom == 0,
+		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
+	];
+
+	a = (x3 (y2 - y1) + x2 (y1 - y3) + x1 (y3 - y2))/denom;
+	b = (x3^2 (y1 - y2) + x2^2 (y3 - y1) + x1^2 (y2 - y3))/denom;
+
+	If[!NumericQ[a] || !NumericQ[b] || a >= 0,
+		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
+	];
+
+	xPeak = -b/(2. a);
+
+	If[xPeak < Min[x1, x3] || xPeak > Max[x1, x3],
+		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
+	];
+
+	yPeak = a xPeak^2 + b xPeak +
+		(y1 - a x1^2 - b x1);
+
+	<|"xPeak" -> xPeak, "yPeak" -> yPeak, "Refined" -> True|>
+];
+
+(* ---------- helper: interpolate x where y crosses target ---------- *)
+interpCrossingX[x1_, y1_, x2_, y2_, yTarget_] := Module[{t},
+	If[!And @@ (NumericQ /@ {x1, y1, x2, y2, yTarget}), Return[Missing["NonNumeric"]]];
+	If[y2 == y1, Return[Missing["FlatSegment"]]];
+	t = (yTarget - y1)/(y2 - y1);
+	x1 + t (x2 - x1)
+];
+
+(* ---------- helper: FWHM from interpolated half-height crossings ---------- *)
+estimateFWHMFromHalfHeightRefined[x_List, y_List, idx_Integer, yPeakOverride_: Automatic] := Module[
+	{ypeak, half, iL, iR, xL, xR},
+
+	If[idx < 1 || idx > Length[x], Return[Missing["BadIndex"]]];
+
+	ypeak = If[yPeakOverride === Automatic, y[[idx]], yPeakOverride];
+	If[!NumericQ[ypeak] || ypeak <= 0, Return[Missing["BadPeak"]]];
+
+	half = ypeak/2.0;
+
+	iL = idx;
+	While[iL > 1 && y[[iL]] > half, iL--];
+
+	iR = idx;
+	While[iR < Length[y] && y[[iR]] > half, iR++];
+
+	If[iL == 1 || iR == Length[y], Return[Missing["NoHalfHeightCrossing"]]];
+
+	xL = interpCrossingX[x[[iL]], y[[iL]], x[[iL + 1]], y[[iL + 1]], half];
+	xR = interpCrossingX[x[[iR - 1]], y[[iR - 1]], x[[iR]], y[[iR]], half];
+
+	If[!NumericQ[xL] || !NumericQ[xR], Return[Missing["BadCrossing"]]];
+
+	xR - xL
+];
+
+(* ---------- helper: choose two separated strongest peaks ---------- *)
+pickTwoPeaks[xDec_List, y_List, minSep_?NumericQ, minFrac_?NumericQ] := Module[
+	{cand, yMax, goodCand, idx1, remaining, idx2},
+	cand = localMaxIndices[y];
+	If[cand === {}, Return[{}]];
+
+	yMax = Max[y];
+	goodCand = Select[cand, y[[#]] >= minFrac yMax &];
+	If[goodCand === {}, Return[{}]];
+
+	idx1 = First @ Ordering[y[[goodCand]], -1];
+	idx1 = goodCand[[idx1]];
+
+	remaining = Select[goodCand, Abs[xDec[[#]] - xDec[[idx1]]] >= minSep &];
+	If[remaining === {}, Return[{idx1}]];
+
+	idx2 = First @ Ordering[y[[remaining]], -1];
+	idx2 = remaining[[idx2]];
+
+	SortBy[{idx1, idx2}, xDec[[#]] &]
+];
+
+(* ---------- analyze one trace ---------- *)
+analyzeOneTraceFastRefined[selector_Integer] := Module[
+	{
+		kUse0, gUse0, xDec, yRaw, ySm, peakIdx, idx1, idx2,
+		ref1, ref2, xPeakDec1, xPeakDec2, yPeak1, yPeak2,
+		kPeak1, kPeak2, fwhmDec1, fwhmDec2, fwhmK1, fwhmK2
+	},
+
+	kUse0 = Pick[kGrid, Map[fitKMin <= # <= fitKMax &, kGrid]];
+	gUse0 = Pick[gGrid[[selector, All]], Map[fitKMin <= # <= fitKMax &, kGrid]];
+
+	If[Length[kUse0] < 8,
+		Return[<|"OK" -> False, "Selector" -> selector, "Message" -> "Too few points in fit range."|>]
+	];
+
+	xDec = Log10[kUse0];
+	yRaw = N[gUse0];
+	ySm = smooth1D[yRaw, smoothRadius];
+	peakIdx = pickTwoPeaks[xDec, ySm, minSepDec, minPeakFrac];
+
+	If[Length[peakIdx] < 2,
+		Return[<|"OK" -> False, "Selector" -> selector, "Message" -> "Could not find two separated peaks."|>]
+	];
+
+	idx1 = peakIdx[[1]];
+	idx2 = peakIdx[[2]];
+
+	ref1 = refinePeakQuadratic[xDec, ySm, idx1];
+	ref2 = refinePeakQuadratic[xDec, ySm, idx2];
+
+	xPeakDec1 = ref1["xPeak"];
+	xPeakDec2 = ref2["xPeak"];
+	yPeak1 = ref1["yPeak"];
+	yPeak2 = ref2["yPeak"];
+
+	kPeak1 = 10.^xPeakDec1;
+	kPeak2 = 10.^xPeakDec2;
+
+	fwhmDec1 = estimateFWHMFromHalfHeightRefined[xDec, ySm, idx1, yPeak1];
+	fwhmDec2 = estimateFWHMFromHalfHeightRefined[xDec, ySm, idx2, yPeak2];
+
+	fwhmK1 = If[NumericQ[fwhmDec1],
+		10.^(xPeakDec1 + fwhmDec1/2) - 10.^(xPeakDec1 - fwhmDec1/2),
+		Missing["NoFWHM"]
+	];
+
+	fwhmK2 = If[NumericQ[fwhmDec2],
+		10.^(xPeakDec2 + fwhmDec2/2) - 10.^(xPeakDec2 - fwhmDec2/2),
+		Missing["NoFWHM"]
+	];
+
+	<|
+		"OK" -> True,
+		"Selector" -> selector,
+		"TimeHr" -> expTimesHr[[selector]],
+
+		"kGridUsed" -> kUse0,
+		"xDecUsed" -> xDec,
+		"yRaw" -> yRaw,
+		"ySm" -> ySm,
+
+		"idx1" -> idx1,
+		"idx2" -> idx2,
+
+		"xPeakDec1" -> xPeakDec1,
+		"xPeakDec2" -> xPeakDec2,
+		"yPeak1" -> yPeak1,
+		"yPeak2" -> yPeak2,
+
+		"kPeak1" -> kPeak1,
+		"kPeak2" -> kPeak2,
+
+		"FWHMDec1" -> fwhmDec1,
+		"FWHMDec2" -> fwhmDec2,
+		"FWHMK1" -> fwhmK1,
+		"FWHMK2" -> fwhmK2
+	|>
+];
+
+(* ---------- run across all traces with progress ---------- *)
+nTraces = Length[gGrid];
+fitCounter = 0;
+currentSelector = 0;
+
+allPeakPicks = ConstantArray[Missing["NotComputed"], nTraces];
+
+Monitor[
+	Do[
+		currentSelector = i;
+		fitCounter = i;
+		allPeakPicks[[i]] = analyzeOneTraceFastRefined[i];
+	,
+		{i, 1, nTraces}
+	],
+	Column[{
+		Style["Fast refined peak-picking progress", 14, Bold],
+		Row[{
+			ProgressIndicator[N[fitCounter/nTraces], {0, 1}],
+			"  ",
+			NumberForm[100.0 fitCounter/nTraces, {4, 1}],
+			"%   (", fitCounter, "/", nTraces, ")"
+		}],
+		Row[{"Current selector: ", currentSelector}]
+	}]
+];
+
+goodPeakPicks = Select[allPeakPicks, AssociationQ[#] && TrueQ[#["OK"]] &];
+badPeakPicks  = Select[allPeakPicks, AssociationQ[#] && !TrueQ[#["OK"]] &];
+
+Print["Succeeded on ", Length[goodPeakPicks], " / ", nTraces, " traces."];
+
+If[Length[badPeakPicks] > 0,
+	Print["Failures:"];
+	Scan[
+		(Print["  selector ", #["Selector"], ": ", #["Message"]]) &,
+		badPeakPicks
+	];
+];
+
+If[Length[goodPeakPicks] == 0,
+	Print["No successful peak picks."];
+	Abort[];
+];
+
+(* ---------- build time series ---------- *)
+peak1VsTime = Table[
+	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "kPeak1"]]},
+	{i, Length[goodPeakPicks]}
+];
+
+peak2VsTime = Table[
+	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "kPeak2"]]},
+	{i, Length[goodPeakPicks]}
+];
+
+fwhm1VsTime = Select[
+	Table[
+		{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "FWHMK1"]]},
+		{i, Length[goodPeakPicks]}
+	],
+	NumericQ[#[[2]]] && #[[2]] > 0 &
+];
+
+fwhm2VsTime = Select[
+	Table[
+		{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "FWHMK2"]]},
+		{i, Length[goodPeakPicks]}
+	],
+	NumericQ[#[[2]]] && #[[2]] > 0 &
+];
+
+(* ---------- plots: time evolution ---------- *)
+peakCentersPlot =
+	ListPlot[
+		{peak1VsTime, peak2VsTime},
+		Joined -> True,
+		PlotStyle -> {Directive[Blue, Thick], Directive[Red, Thick]},
+		PlotMarkers -> {{Automatic, 7}, {Automatic, 7}},
+		Frame -> True,
+		Axes -> False,
+		Background -> White,
+		ImageSize -> 500,
+		FrameLabel -> {"Time (hours)", "Peak center k (s^-1)"},
+		PlotRange -> All,
+		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
+		PlotLabel -> "Peak k vs time"
+	];
+
+fwhmPlot =
+	ListPlot[
+		{fwhm1VsTime, fwhm2VsTime},
+		Joined -> True,
+		PlotStyle -> {Directive[Blue, Thick], Directive[Red, Thick]},
+		PlotMarkers -> {{Automatic, 7}, {Automatic, 7}},
+		Frame -> True,
+		Axes -> False,
+		Background -> White,
+		ImageSize -> 500,
+		FrameLabel -> {"Time (hours)", "Estimated FWHM in k (s^-1)"},
+		PlotRange -> All,
+		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
+		PlotLabel -> "Peak FWHM vs time"
+	];
+
+peakCentersPlot
+fwhmPlot
+
+
+
+exampleSelector = 1;   (* choose one trace to visualize *)
+
+exampleResult = analyzeOneTraceFastRefined[exampleSelector];
+
+If[!TrueQ@exampleResult["OK"],
+	Print["Example selector failed: ", exampleResult["Message"]],
+	
+	Module[
+		{
+			kUse, xDec, yRaw,
+			xpk1, xpk2, ypk1, ypk2, fwhm1, fwhm2,
+			sigma1, sigma2, fitFun, fitVals,
+			rawPts, fitPts, valid
+		},
+		
+		kUse = exampleResult["kGridUsed"];
+		xDec = exampleResult["xDecUsed"];
+		yRaw = exampleResult["yRaw"];
+		
+		xpk1 = exampleResult["xPeakDec1"];
+		xpk2 = exampleResult["xPeakDec2"];
+		ypk1 = exampleResult["yPeak1"];
+		ypk2 = exampleResult["yPeak2"];
+		
+		fwhm1 = exampleResult["FWHMDec1"];
+		fwhm2 = exampleResult["FWHMDec2"];
+		
+		sigma1 = If[NumericQ[fwhm1] && fwhm1 > 0,
+			fwhm1/(2 Sqrt[2 Log[2]]),
+			Missing["BadSigma1"]
+		];
+		
+		sigma2 = If[NumericQ[fwhm2] && fwhm2 > 0,
+			fwhm2/(2 Sqrt[2 Log[2]]),
+			Missing["BadSigma2"]
+		];
+		
+		valid = And[
+			VectorQ[kUse, NumericQ],
+			VectorQ[yRaw, NumericQ],
+			NumericQ[xpk1], NumericQ[xpk2],
+			NumericQ[ypk1], NumericQ[ypk2],
+			NumericQ[sigma1], NumericQ[sigma2]
+		];
+		
+		If[!valid,
+			Print["Could not build example plot because some fit quantities are nonnumeric."],
+			
+			fitFun[x_] := 
+				ypk1 Exp[-(x - xpk1)^2/(2 sigma1^2)] +
+				ypk2 Exp[-(x - xpk2)^2/(2 sigma2^2)];
+			
+			fitVals = fitFun /@ xDec;
+			
+			rawPts = Transpose[{kUse, yRaw}];
+			fitPts = Transpose[{kUse, fitVals}];
+			
+			Print[
+				ListPlot[
+					{rawPts, fitPts},
+					Joined -> {False, True},
+					PlotStyle -> {
+						Directive[Black, PointSize[0.015]],
+						Directive[Red, Thick]
+					},
+					Frame -> True,
+					Axes -> False,
+					Background -> White,
+					ImageSize -> 900,
+					ScalingFunctions -> {"Log10", None},
+					FrameLabel -> {"k (s^-1)", "g(k)"},
+					PlotRange -> All,
+					PlotLegends -> Placed[{"Raw data", "Reconstructed fit"}, Right],
+					PlotLabel -> Row[{
+						"Selected trace and reconstructed fit, selector = ",
+						exampleSelector,
+						", time = ",
+						NumberForm[exampleResult["TimeHr"], {6, 2}],
+						" hr"
+					}]
+				]
+			];
+		];
+	]
+];
 
 
 (* ============================================================ *)
@@ -996,7 +1385,7 @@ GraphicsGrid[
 		{rawZPhasePlot, fitZPhasePlot, resZPhasePlot},
 		{rawZRePlot, fitZRePlot, resZRePlot},
 		{rawZImPlot, fitZImPlot, resZImPlot}
-	}, ImageSize->1200
+	}, ImageSize->1200, Spacings->{0,0}
 ]
 
 
@@ -1553,8 +1942,8 @@ GraphicsGrid[
 (* ============================== *)
 (* User control: area window      *)
 (* ============================== *)
-fMinArea = 10/(2 Pi);
-fMaxArea = 1000/(2 Pi);
+fMinArea = 30/(2 Pi);
+fMaxArea = 500/(2 Pi);
 fMid = 150/(2 Pi);   (* Hz, user-selected split point *)
 
 kMinArea = 2 Pi fMinArea;   (* s^-1 *)
@@ -2694,3 +3083,6 @@ yVarPlot
 
 
 
+
+
+ 
