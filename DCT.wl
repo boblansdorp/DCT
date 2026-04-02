@@ -61,77 +61,114 @@ assert[cond_, msg_] := If[Not@TrueQ[cond], Throw[Failure["DCTDebug", <|"Message"
 toNumber[s_String] := Quiet@Check[ToExpression[StringTrim[s]], Missing["Bad"]];
 toNumber[x_] := x;
 
-(* Import and parse semicolon-separated EIS text file.
-   Minimal assumptions: at least 4 semicolon-separated fields per row. *)
+
+ClearAll[toNumber, splitEISLine, importEISTxt];
+
+toNumber[x_] := Module[{s, y},
+  s = StringTrim[ToString[x]];
+  If[s === "", Return[Missing["NotNumeric"]]];
+  y = Quiet @ Check[ToExpression[s], $Failed];
+  If[NumericQ[y], y, Missing["NotNumeric"]]
+];
+
+splitEISLine[s_String] := Module[{t = StringTrim[s]},
+  Which[
+    StringContainsQ[t, ";"],
+      StringTrim /@ StringSplit[t, ";"],
+    StringContainsQ[t, "\t"],
+      StringTrim /@ StringSplit[t, "\t"],
+    True,
+      DeleteCases[StringSplit[t, Whitespace], ""]
+  ]
+];
+
 importEISTxt[file_String] := Module[
- {rawLines, lines, header, hasHeader, splitHeader, colMap,
-  freqCol, zreCol, zimCol, timeCol,
-  splitRows, numRows, good,
-  freqHz, zre, zimNeg, z, timeS},
+  {
+    rawLines, lines, header, hasHeader,
+    splitHeader, colMap,
+    freqCol, zreCol, zimCol, timeCol,
+    splitRows, numRows, good,
+    freqHz, zre, zimNeg, z, timeS, ord
+  },
 
- rawLines = Import[file, "Lines"];
- rawLines = Select[rawLines, StringTrim[#] =!= "" &];
+  rawLines = Import[file, "Lines"];
+  rawLines = Select[rawLines, StringTrim[#] =!= "" &];
 
- header = First[rawLines];
- hasHeader = StringContainsQ[header, "Frequency"];
-
- lines = If[hasHeader, Rest[rawLines], rawLines];
-
- If[hasHeader,
-  
-  splitHeader = StringTrim /@ StringSplit[header, ";"];
-  colMap = AssociationThread[splitHeader -> Range[Length[splitHeader]]];
-
-  freqCol = Lookup[colMap, "Frequency (Hz)", Missing["NoCol"]];
-  zreCol  = Lookup[colMap, "Z' (\[CapitalOmega])", Missing["NoCol"]];
-  zimCol  = Lookup[colMap, "-Z'' (\[CapitalOmega])", Missing["NoCol"]];
-  timeCol = Lookup[colMap, "Time (s)", Missing["NoCol"]];
-
-  If[MemberQ[{freqCol, zreCol, zimCol}, Missing["NoCol"]],
-   Throw[
-    Failure["DCTImport",
-     <|"Message" -> "Header found but required columns not located."|>
+  If[rawLines === {},
+    Return[
+      Failure["DCTImport", <|"Message" -> "File is empty."|>]
     ]
-   ]
-  ],
+  ];
 
-  (* legacy format *)
-  freqCol = 2; 
-  zreCol = 3; 
-  zimCol = 4;
-  timeCol = Missing["NoCol"];
- ];
+  header = First[rawLines];
+  hasHeader = StringContainsQ[header, "Frequency", IgnoreCase -> True];
 
- splitRows = StringSplit[#, ";"] & /@ lines;
- numRows = (toNumber /@ #) & /@ splitRows;
+  lines = If[hasHeader, Rest[rawLines], rawLines];
 
- good = Select[
-   numRows,
-   (Length[#] >= Max[freqCol, zreCol, zimCol] &&
-      NumericQ[#[[freqCol]]] &&
-      NumericQ[#[[zreCol]]] &&
-      NumericQ[#[[zimCol]]]) &
-   ];
+  If[hasHeader,
+    splitHeader = splitEISLine[header];
+    colMap = AssociationThread[splitHeader -> Range[Length[splitHeader]]];
 
- freqHz = good[[All, freqCol]];
- zre    = good[[All, zreCol]];
- zimNeg = good[[All, zimCol]];
+    freqCol = Lookup[colMap, "Frequency (Hz)", Missing["NoCol"]];
+    zreCol  = Lookup[colMap, "Z' (\[CapitalOmega])", Missing["NoCol"]];
+    zimCol  = Lookup[colMap, "-Z'' (\[CapitalOmega])", Missing["NoCol"]];
+    timeCol = Lookup[colMap, "Time (s)", Missing["NoCol"]];
 
- z = zre + I*(-zimNeg);
+    If[MemberQ[{freqCol, zreCol, zimCol}, Missing["NoCol"]],
+      Return[
+        Failure[
+          "DCTImport",
+          <|
+            "Message" -> "Header found but required columns not located.",
+            "HeaderFields" -> splitHeader
+          |>
+        ]
+      ]
+    ],
+    
+    (* legacy no-header format *)
+    freqCol = 2;
+    zreCol  = 3;
+    zimCol  = 4;
+    timeCol = Missing["NoCol"];
+  ];
 
- timeS =
-  If[timeCol === Missing["NoCol"],
-   ConstantArray[Missing["NoTime"], Length[freqHz]],
-   good[[All, timeCol]]
-   ];
+  splitRows = splitEISLine /@ lines;
+  numRows = (toNumber /@ #) & /@ splitRows;
 
- With[{ord = Ordering[freqHz]},
+  good = Select[
+    numRows,
+    Length[#] >= Max[freqCol, zreCol, zimCol] &&
+    NumericQ[#[[freqCol]]] &&
+    NumericQ[#[[zreCol]]] &&
+    NumericQ[#[[zimCol]]] &
+  ];
+
+  If[good === {},
+    Return[
+      Failure["DCTImport", <|"Message" -> "No valid numeric data rows were parsed."|>]
+    ]
+  ];
+
+  freqHz = good[[All, freqCol]];
+  zre    = good[[All, zreCol]];
+  zimNeg = good[[All, zimCol]];
+  z      = zre + I*(-zimNeg);
+
+  timeS =
+    If[
+      IntegerQ[timeCol] && Length[First[good]] >= timeCol,
+      good[[All, timeCol]],
+      ConstantArray[Missing["NoTime"], Length[good]]
+    ];
+
+  ord = Ordering[freqHz];
+
   <|
-   "FreqHz" -> freqHz[[ord]],
-   "Z" -> z[[ord]],
-   "TimeS" -> timeS[[ord]]
-   |>
- ]
+    "FreqHz" -> freqHz[[ord]],
+    "Z" -> z[[ord]],
+    "TimeS" -> timeS[[ord]]
+  |>
 ];
 
 
