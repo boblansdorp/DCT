@@ -9,12 +9,22 @@
 
 
 (* ---------- LOAD PACKAGE ---------- *)
-ClearAll["DCT`*"]; (* first unload it *)
-dctPackagePath = "C:\\Users\\bobla\\Documents\\DCT\\DCT.wl";
-Get[dctPackagePath]
+ClearAll["DCT`*"];  (* unload package *)
 
-ClearAll["NNLS`*"]; (* first unload it *)
-NNLSPackagePath = "C:\\Users\\bobla\\Documents\\DCT\\NNLSFit.m";
+dctPaths = FileNames["DCT.wl", NotebookDirectory[], Infinity];
+
+If[dctPaths === {},
+  Print["DCT.wl not found under: ", NotebookDirectory[]];
+  Abort[],
+  Get[First[dctPaths]]
+];
+
+
+ClearAll["NNLS`*"];  (* unload *)
+
+NNLSPackagePath =
+  First @ FileNames["NNLSFit.m", NotebookDirectory[], Infinity];
+
 Get[NNLSPackagePath]
 
 
@@ -25,12 +35,31 @@ Get[NNLSPackagePath]
 
 
 
-dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data";
 
 
+
+
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+
+
+
+(* dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data";
 dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25-titration";
-
 dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25";
+dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\drift_03252026\\E1"
+*)
+baseDir = FileNameJoin[{NotebookDirectory[], "data"}] // ExpandFileName
+
+
+(* examples of switching datasets *)
+dataDir = FileNameJoin[{baseDir, "2026-02-25-titration"}];
+dataDir = FileNameJoin[{baseDir, "2026-02-25"}];
+dataDir = FileNameJoin[{baseDir, "drift_03252026", "E1"}]
 
 debugFlag = False;
 fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)

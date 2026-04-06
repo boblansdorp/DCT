@@ -22,18 +22,19 @@
       "FreqHz"-> frequency vector [Hz]
 *)
 (* Load NNLSFit package from the same folder as this DCT .wl file *)
-Module[{here, nnlsPathWL, nnlsPathM},
-  here = DirectoryName[$InputFileName];
-  nnlsPathM = "C:\\Users\\bobla\\Documents\\DCT\\NNLSFit.m";
+Module[{here, nnlsPaths},
 
-  If[FileExistsQ[nnlsPathWL],
-    Get[nnlsPathWL],
-    If[FileExistsQ[nnlsPathM],
-      Get[nnlsPathM],
-      Print["NNLSFit not found next to DCT file. Expected: ", nnlsPathWL, " or ", nnlsPathM];
-      Abort[];
-    ]
+  here = DirectoryName[$InputFileName];
+
+  (* search recursively for NNLSFit.m or NNLSFit.wl *)
+  nnlsPaths = FileNames[{"NNLSFit.m", "NNLSFit.wl"}, here, Infinity];
+
+  If[nnlsPaths === {},
+    Print["NNLSFit not found under: ", here];
+    Abort[],
+    Get[First[nnlsPaths]]
   ];
+
 ];
 
 
