@@ -68,19 +68,32 @@ maxFreqRsFit = 300 + minFreqRsFit;  (* Hz *)
 
 
 (* ============================================================ *)
-(* 1) FIND ALL TXT FILES                                         *)
+(* 1) FIND ALL TXT FILES                                        *)
 (* ============================================================ *)
-txtFilesAll = Sort @ FileNames["*.txt", dataDir];
+
+txtFilesAll =
+  SortBy[
+    FileNames["*.txt", dataDir],
+    ToExpression @ First @ StringCases[FileNameTake[#], "(" ~~ x : NumberString ~~ ")" :> x] &
+  ];
 
 Print["Found ", Length[txtFilesAll], " .txt files total."];
 If[Length[txtFilesAll] == 0, Abort[]];
 
 fileDecimation = Max[1, Round[fileDecimation]];
 
-txtFiles = txtFilesAll[[;; ;; fileDecimation]];
+txtFiles =
+  With[{idx = Range[1, Length[txtFilesAll], fileDecimation]},
+    txtFilesAll[[idx]]
+  ];
 
-Print["Using ", Length[txtFiles], " files after decimation (every ", fileDecimation, "th file)."];
+Print[
+  "Using ", Length[txtFiles],
+  " files after decimation (every ", fileDecimation, "th file)."
+];
 
+Print["Files used:"];
+Print /@ txtFiles;
 
 
 (* ============================================================ *)
