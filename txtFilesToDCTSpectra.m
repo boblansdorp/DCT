@@ -705,6 +705,17 @@ If[Length[goodPeakPicks] == 0,
 ];
 
 (* ---------- build time series ---------- *)
+peak1AmpVsTime = Table[
+	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "yPeak1"]]},
+	{i, Length[goodPeakPicks]}
+];
+
+peak2AmpVsTime = Table[
+	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "yPeak2"]]},
+	{i, Length[goodPeakPicks]}
+];
+
+
 peak1VsTime = Table[
 	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "kPeak1"]]},
 	{i, Length[goodPeakPicks]}
@@ -732,6 +743,23 @@ fwhm2VsTime = Select[
 ];
 
 (* ---------- plots: time evolution ---------- *)
+peakAmplitudesPlot =
+	ListPlot[
+		{peak1AmpVsTime, peak2AmpVsTime},
+		Joined -> True,
+		PlotStyle -> {Directive[Blue, Thick], Directive[Red, Thick]},
+		PlotMarkers -> {{Automatic, 7}, {Automatic, 7}},
+		Frame -> True,
+		Axes -> False,
+		Background -> White,
+		ImageSize -> 500,
+		FrameLabel -> {"Time (hours)", "Peak Amplitude (F)"},
+		PlotRange -> All,
+		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
+		PlotLabel -> "Peak amplitude vs time"
+	];
+
+
 peakCentersPlot =
 	ListPlot[
 		{peak1VsTime, peak2VsTime},
@@ -743,7 +771,7 @@ peakCentersPlot =
 		Background -> White,
 		ImageSize -> 500,
 		FrameLabel -> {"Time (hours)", "Peak center k (s^-1)"},
-		PlotRange -> All,
+		PlotRange -> {Automatic,{0,300}},
 		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
 		PlotLabel -> "Peak k vs time"
 	];
@@ -763,7 +791,7 @@ fwhmPlot =
 		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
 		PlotLabel -> "Peak FWHM vs time"
 	];
-
+peakAmplitudesPlot
 peakCentersPlot
 fwhmPlot
 
@@ -1162,7 +1190,7 @@ residualZResults =
 				]
 			];
 
-			magResTrace   = Transpose[{fRaw, Abs[zRaw - zFit]}];
+			magResTrace   = Transpose[{fRaw, Abs[(zRaw - zFit)/zRaw]}];
 			phaseResTrace = Transpose[{fRaw, Abs[(180./Pi) Arg[zRaw] - (180./Pi) Arg[zFit]]}];
 			reResTrace    = Transpose[{fRaw, Abs[Re[zRaw] - Re[zFit]]}];
 			imResTrace    = Transpose[{fRaw, Abs[(-Im[zRaw]) - (-Im[zFit])]}];
@@ -1288,11 +1316,11 @@ resZMagPlot =
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "|Zraw - Zfit| (\[CapitalOmega])"},
+		FrameLabel -> {"Frequency (Hz)", "|(Zraw - Zfit)/Zraw|"},
 		PlotRange -> {All, magResYRange},
 		ImageSize -> 500,
 		Background -> White,
-		PlotLabel -> "ABS residual |Zraw - Zfit|"
+		PlotLabel -> "ABS residual error |(Zraw - Zfit)/Zraw|"
 	];
 
 rawZPhasePlot =
@@ -1698,7 +1726,7 @@ residualYintResults =
 				]
 			];
 
-			magResTrace   = Transpose[{fRaw, Abs[yRaw - yFit]}];
+			magResTrace   = Transpose[{fRaw, Abs[(yRaw - yFit)/yRaw]}];
 			phaseResTrace = Transpose[{fRaw, Abs[(180./Pi) Arg[yRaw] - (180./Pi) Arg[yFit]]}];
 			reResTrace    = Transpose[{fRaw, Abs[Re[yRaw] - Re[yFit]]}];
 			imResTrace    = Transpose[{fRaw, Abs[(-Im[yRaw]) - (-Im[yFit])]}];
@@ -2419,7 +2447,7 @@ ListPlot[
   FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
   FrameLabel -> {
     Style["Time (hours)", 18, Black],
-    Style["Fraction bound", 18, Black]
+    Style["Fraction folded", 18, Black]
   },
   BaseStyle -> {FontFamily -> "Arial", 14, Black},
   LabelStyle -> Directive[18, Black],
@@ -2430,7 +2458,7 @@ ListPlot[
   },
   PlotRange -> {All, {0, 1}},
   ImageSize -> 900,
-  PlotLabel -> Style["Fraction bound vs time", 16, Black]
+  PlotLabel -> Style["Fraction folded vs time", 16, Black]
 ]
 
 
