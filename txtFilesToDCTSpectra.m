@@ -76,11 +76,11 @@ weightPower = -0.5; (* weight each point inverse to variance *)
 (* weightPowerResistance = -3.5; *)
 weightPowerResistance = weightPower + 4;
 
-fMinUse = 0.5;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
+fMinUse = 1;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
 fMaxUse = 200;     (* Hz *)
 
 minFreqRsFit = 200;  (* Hz *)
-maxFreqRsFit = 350;  (* Hz *)
+maxFreqRsFit = 500;  (* Hz *)
 
 
 
@@ -462,426 +462,6 @@ GraphicsGrid[
 		}
 	}, ImageSize -> 900
 ]
-
-
-(* ============================================================ *)
-(* FAST + MORE ACCURATE: peak picking with sub-grid refinement  *)
-(* ============================================================ *)
-
-fitKMin = 10.;
-fitKMax = 1000.;
-
-smoothRadius = 1;      (* 0,1,2 ... *)
-minSepDec = 0.20;      (* minimum separation in log10(k) *)
-minPeakFrac = 0.01;    (* peak must exceed this fraction of max signal *)
-
-(* ---------- helper: simple smoothing ---------- *)
-smooth1D[v_List, r_Integer?NonNegative] := Module[{ker},
-	If[r == 0, Return[N[v]]];
-	ker = ConstantArray[1./(2 r + 1), 2 r + 1];
-	ListCorrelate[ker, N[v], {r + 1, -(r + 1)}, 0]
-];
-
-(* ---------- helper: local maxima indices ---------- *)
-localMaxIndices[y_List] := Select[
-	Range[2, Length[y] - 1],
-	y[[#]] >= y[[# - 1]] && y[[#]] >= y[[# + 1]] &
-];
-
-(* ---------- helper: quadratic peak refinement on 3 points ---------- *)
-refinePeakQuadratic[x_List, y_List, idx_Integer] := Module[
-	{x1, x2, x3, y1, y2, y3, denom, a, b, xPeak, yPeak},
-
-	If[idx <= 1 || idx >= Length[x],
-		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
-	];
-
-	x1 = N[x[[idx - 1]]]; x2 = N[x[[idx]]]; x3 = N[x[[idx + 1]]];
-	y1 = N[y[[idx - 1]]]; y2 = N[y[[idx]]]; y3 = N[y[[idx + 1]]];
-
-	denom = (x1 - x2) (x1 - x3) (x2 - x3);
-	If[denom == 0,
-		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
-	];
-
-	a = (x3 (y2 - y1) + x2 (y1 - y3) + x1 (y3 - y2))/denom;
-	b = (x3^2 (y1 - y2) + x2^2 (y3 - y1) + x1^2 (y2 - y3))/denom;
-
-	If[!NumericQ[a] || !NumericQ[b] || a >= 0,
-		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
-	];
-
-	xPeak = -b/(2. a);
-
-	If[xPeak < Min[x1, x3] || xPeak > Max[x1, x3],
-		Return[<|"xPeak" -> x[[idx]], "yPeak" -> y[[idx]], "Refined" -> False|>]
-	];
-
-	yPeak = a xPeak^2 + b xPeak +
-		(y1 - a x1^2 - b x1);
-
-	<|"xPeak" -> xPeak, "yPeak" -> yPeak, "Refined" -> True|>
-];
-
-(* ---------- helper: interpolate x where y crosses target ---------- *)
-interpCrossingX[x1_, y1_, x2_, y2_, yTarget_] := Module[{t},
-	If[!And @@ (NumericQ /@ {x1, y1, x2, y2, yTarget}), Return[Missing["NonNumeric"]]];
-	If[y2 == y1, Return[Missing["FlatSegment"]]];
-	t = (yTarget - y1)/(y2 - y1);
-	x1 + t (x2 - x1)
-];
-
-(* ---------- helper: FWHM from interpolated half-height crossings ---------- *)
-estimateFWHMFromHalfHeightRefined[x_List, y_List, idx_Integer, yPeakOverride_: Automatic] := Module[
-	{ypeak, half, iL, iR, xL, xR},
-
-	If[idx < 1 || idx > Length[x], Return[Missing["BadIndex"]]];
-
-	ypeak = If[yPeakOverride === Automatic, y[[idx]], yPeakOverride];
-	If[!NumericQ[ypeak] || ypeak <= 0, Return[Missing["BadPeak"]]];
-
-	half = ypeak/2.0;
-
-	iL = idx;
-	While[iL > 1 && y[[iL]] > half, iL--];
-
-	iR = idx;
-	While[iR < Length[y] && y[[iR]] > half, iR++];
-
-	If[iL == 1 || iR == Length[y], Return[Missing["NoHalfHeightCrossing"]]];
-
-	xL = interpCrossingX[x[[iL]], y[[iL]], x[[iL + 1]], y[[iL + 1]], half];
-	xR = interpCrossingX[x[[iR - 1]], y[[iR - 1]], x[[iR]], y[[iR]], half];
-
-	If[!NumericQ[xL] || !NumericQ[xR], Return[Missing["BadCrossing"]]];
-
-	xR - xL
-];
-
-(* ---------- helper: choose two separated strongest peaks ---------- *)
-pickTwoPeaks[xDec_List, y_List, minSep_?NumericQ, minFrac_?NumericQ] := Module[
-	{cand, yMax, goodCand, idx1, remaining, idx2},
-	cand = localMaxIndices[y];
-	If[cand === {}, Return[{}]];
-
-	yMax = Max[y];
-	goodCand = Select[cand, y[[#]] >= minFrac yMax &];
-	If[goodCand === {}, Return[{}]];
-
-	idx1 = First @ Ordering[y[[goodCand]], -1];
-	idx1 = goodCand[[idx1]];
-
-	remaining = Select[goodCand, Abs[xDec[[#]] - xDec[[idx1]]] >= minSep &];
-	If[remaining === {}, Return[{idx1}]];
-
-	idx2 = First @ Ordering[y[[remaining]], -1];
-	idx2 = remaining[[idx2]];
-
-	SortBy[{idx1, idx2}, xDec[[#]] &]
-];
-
-(* ---------- analyze one trace ---------- *)
-analyzeOneTraceFastRefined[selector_Integer] := Module[
-	{
-		kUse0, gUse0, xDec, yRaw, ySm, peakIdx, idx1, idx2,
-		ref1, ref2, xPeakDec1, xPeakDec2, yPeak1, yPeak2,
-		kPeak1, kPeak2, fwhmDec1, fwhmDec2, fwhmK1, fwhmK2
-	},
-
-	kUse0 = Pick[kGrid, Map[fitKMin <= # <= fitKMax &, kGrid]];
-	gUse0 = Pick[gGrid[[selector, All]], Map[fitKMin <= # <= fitKMax &, kGrid]];
-
-	If[Length[kUse0] < 8,
-		Return[<|"OK" -> False, "Selector" -> selector, "Message" -> "Too few points in fit range."|>]
-	];
-
-	xDec = Log10[kUse0];
-	yRaw = N[gUse0];
-	ySm = smooth1D[yRaw, smoothRadius];
-	peakIdx = pickTwoPeaks[xDec, ySm, minSepDec, minPeakFrac];
-
-	If[Length[peakIdx] < 2,
-		Return[<|"OK" -> False, "Selector" -> selector, "Message" -> "Could not find two separated peaks."|>]
-	];
-
-	idx1 = peakIdx[[1]];
-	idx2 = peakIdx[[2]];
-
-	ref1 = refinePeakQuadratic[xDec, ySm, idx1];
-	ref2 = refinePeakQuadratic[xDec, ySm, idx2];
-
-	xPeakDec1 = ref1["xPeak"];
-	xPeakDec2 = ref2["xPeak"];
-	yPeak1 = ref1["yPeak"];
-	yPeak2 = ref2["yPeak"];
-
-	kPeak1 = 10.^xPeakDec1;
-	kPeak2 = 10.^xPeakDec2;
-
-	fwhmDec1 = estimateFWHMFromHalfHeightRefined[xDec, ySm, idx1, yPeak1];
-	fwhmDec2 = estimateFWHMFromHalfHeightRefined[xDec, ySm, idx2, yPeak2];
-
-	fwhmK1 = If[NumericQ[fwhmDec1],
-		10.^(xPeakDec1 + fwhmDec1/2) - 10.^(xPeakDec1 - fwhmDec1/2),
-		Missing["NoFWHM"]
-	];
-
-	fwhmK2 = If[NumericQ[fwhmDec2],
-		10.^(xPeakDec2 + fwhmDec2/2) - 10.^(xPeakDec2 - fwhmDec2/2),
-		Missing["NoFWHM"]
-	];
-
-	<|
-		"OK" -> True,
-		"Selector" -> selector,
-		"TimeHr" -> expTimesHr[[selector]],
-
-		"kGridUsed" -> kUse0,
-		"xDecUsed" -> xDec,
-		"yRaw" -> yRaw,
-		"ySm" -> ySm,
-
-		"idx1" -> idx1,
-		"idx2" -> idx2,
-
-		"xPeakDec1" -> xPeakDec1,
-		"xPeakDec2" -> xPeakDec2,
-		"yPeak1" -> yPeak1,
-		"yPeak2" -> yPeak2,
-
-		"kPeak1" -> kPeak1,
-		"kPeak2" -> kPeak2,
-
-		"FWHMDec1" -> fwhmDec1,
-		"FWHMDec2" -> fwhmDec2,
-		"FWHMK1" -> fwhmK1,
-		"FWHMK2" -> fwhmK2
-	|>
-];
-
-(* ---------- run across all traces with progress ---------- *)
-nTraces = Length[gGrid];
-fitCounter = 0;
-currentSelector = 0;
-
-allPeakPicks = ConstantArray[Missing["NotComputed"], nTraces];
-
-Monitor[
-	Do[
-		currentSelector = i;
-		fitCounter = i;
-		allPeakPicks[[i]] = analyzeOneTraceFastRefined[i];
-	,
-		{i, 1, nTraces}
-	],
-	Column[{
-		Style["Fast refined peak-picking progress", 14, Bold],
-		Row[{
-			ProgressIndicator[N[fitCounter/nTraces], {0, 1}],
-			"  ",
-			NumberForm[100.0 fitCounter/nTraces, {4, 1}],
-			"%   (", fitCounter, "/", nTraces, ")"
-		}],
-		Row[{"Current selector: ", currentSelector}]
-	}]
-];
-
-goodPeakPicks = Select[allPeakPicks, AssociationQ[#] && TrueQ[#["OK"]] &];
-badPeakPicks  = Select[allPeakPicks, AssociationQ[#] && !TrueQ[#["OK"]] &];
-
-Print["Succeeded on ", Length[goodPeakPicks], " / ", nTraces, " traces."];
-
-If[Length[badPeakPicks] > 0,
-	Print["Failures:"];
-	Scan[
-		(Print["  selector ", #["Selector"], ": ", #["Message"]]) &,
-		badPeakPicks
-	];
-];
-
-If[Length[goodPeakPicks] == 0,
-	Print["No successful peak picks."];
-	Abort[];
-];
-
-(* ---------- build time series ---------- *)
-peak1AmpVsTime = Table[
-	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "yPeak1"]]},
-	{i, Length[goodPeakPicks]}
-];
-
-peak2AmpVsTime = Table[
-	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "yPeak2"]]},
-	{i, Length[goodPeakPicks]}
-];
-
-
-peak1VsTime = Table[
-	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "kPeak1"]]},
-	{i, Length[goodPeakPicks]}
-];
-
-peak2VsTime = Table[
-	{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "kPeak2"]]},
-	{i, Length[goodPeakPicks]}
-];
-
-fwhm1VsTime = Select[
-	Table[
-		{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "FWHMK1"]]},
-		{i, Length[goodPeakPicks]}
-	],
-	NumericQ[#[[2]]] && #[[2]] > 0 &
-];
-
-fwhm2VsTime = Select[
-	Table[
-		{goodPeakPicks[[i, "TimeHr"]], goodPeakPicks[[i, "FWHMK2"]]},
-		{i, Length[goodPeakPicks]}
-	],
-	NumericQ[#[[2]]] && #[[2]] > 0 &
-];
-
-(* ---------- plots: time evolution ---------- *)
-peakAmplitudesPlot =
-	ListPlot[
-		{peak1AmpVsTime, peak2AmpVsTime},
-		Joined -> True,
-		PlotStyle -> {Directive[Blue, Thick], Directive[Red, Thick]},
-		PlotMarkers -> {{Automatic, 7}, {Automatic, 7}},
-		Frame -> True,
-		Axes -> False,
-		Background -> White,
-		ImageSize -> 500,
-		FrameLabel -> {"Time (hours)", "Peak Amplitude (F)"},
-		PlotRange -> All,
-		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
-		PlotLabel -> "Peak amplitude vs time"
-	];
-
-
-peakCentersPlot =
-	ListPlot[
-		{peak1VsTime, peak2VsTime},
-		Joined -> True,
-		PlotStyle -> {Directive[Blue, Thick], Directive[Red, Thick]},
-		PlotMarkers -> {{Automatic, 7}, {Automatic, 7}},
-		Frame -> True,
-		Axes -> False,
-		Background -> White,
-		ImageSize -> 500,
-		FrameLabel -> {"Time (hours)", "Peak center k (s^-1)"},
-		PlotRange -> {Automatic,{0,300}},
-		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
-		PlotLabel -> "Peak k vs time"
-	];
-
-fwhmPlot =
-	ListPlot[
-		{fwhm1VsTime, fwhm2VsTime},
-		Joined -> True,
-		PlotStyle -> {Directive[Blue, Thick], Directive[Red, Thick]},
-		PlotMarkers -> {{Automatic, 7}, {Automatic, 7}},
-		Frame -> True,
-		Axes -> False,
-		Background -> White,
-		ImageSize -> 500,
-		FrameLabel -> {"Time (hours)", "Estimated FWHM in k (s^-1)"},
-		PlotRange -> All,
-		PlotLegends -> Placed[{"Peak 1", "Peak 2"}, Right],
-		PlotLabel -> "Peak FWHM vs time"
-	];
-peakAmplitudesPlot
-peakCentersPlot
-fwhmPlot
-
-
-
-exampleSelector = 1;   (* choose one trace to visualize *)
-
-exampleResult = analyzeOneTraceFastRefined[exampleSelector];
-
-If[!TrueQ@exampleResult["OK"],
-	Print["Example selector failed: ", exampleResult["Message"]],
-	
-	Module[
-		{
-			kUse, xDec, yRaw,
-			xpk1, xpk2, ypk1, ypk2, fwhm1, fwhm2,
-			sigma1, sigma2, fitFun, fitVals,
-			rawPts, fitPts, valid
-		},
-		
-		kUse = exampleResult["kGridUsed"];
-		xDec = exampleResult["xDecUsed"];
-		yRaw = exampleResult["yRaw"];
-		
-		xpk1 = exampleResult["xPeakDec1"];
-		xpk2 = exampleResult["xPeakDec2"];
-		ypk1 = exampleResult["yPeak1"];
-		ypk2 = exampleResult["yPeak2"];
-		
-		fwhm1 = exampleResult["FWHMDec1"];
-		fwhm2 = exampleResult["FWHMDec2"];
-		
-		sigma1 = If[NumericQ[fwhm1] && fwhm1 > 0,
-			fwhm1/(2 Sqrt[2 Log[2]]),
-			Missing["BadSigma1"]
-		];
-		
-		sigma2 = If[NumericQ[fwhm2] && fwhm2 > 0,
-			fwhm2/(2 Sqrt[2 Log[2]]),
-			Missing["BadSigma2"]
-		];
-		
-		valid = And[
-			VectorQ[kUse, NumericQ],
-			VectorQ[yRaw, NumericQ],
-			NumericQ[xpk1], NumericQ[xpk2],
-			NumericQ[ypk1], NumericQ[ypk2],
-			NumericQ[sigma1], NumericQ[sigma2]
-		];
-		
-		If[!valid,
-			Print["Could not build example plot because some fit quantities are nonnumeric."],
-			
-			fitFun[x_] := 
-				ypk1 Exp[-(x - xpk1)^2/(2 sigma1^2)] +
-				ypk2 Exp[-(x - xpk2)^2/(2 sigma2^2)];
-			
-			fitVals = fitFun /@ xDec;
-			
-			rawPts = Transpose[{kUse, yRaw}];
-			fitPts = Transpose[{kUse, fitVals}];
-			
-			Print[
-				ListPlot[
-					{rawPts, fitPts},
-					Joined -> {False, True},
-					PlotStyle -> {
-						Directive[Black, PointSize[0.015]],
-						Directive[Red, Thick]
-					},
-					Frame -> True,
-					Axes -> False,
-					Background -> White,
-					ImageSize -> 900,
-					ScalingFunctions -> {"Log10", None},
-					FrameLabel -> {"k (s^-1)", "g(k)"},
-					PlotRange -> All,
-					PlotLegends -> Placed[{"Raw data", "Reconstructed fit"}, Right],
-					PlotLabel -> Row[{
-						"Selected trace and reconstructed fit, selector = ",
-						exampleSelector,
-						", time = ",
-						NumberForm[exampleResult["TimeHr"], {6, 2}],
-						" hr"
-					}]
-				]
-			];
-		];
-	]
-];
 
 
 (* ============================================================ *)
@@ -2232,9 +1812,65 @@ langmuirConcFromF[f_?NumericQ, kd_?NumericQ] := Module[{eps = 10^-12, ff},
 (* ============================================ *)
 (* 3) Build one combined table                  *)
 (* ============================================ *)
+(* ---------- helpers for moments over log10(k) ---------- *)
+
+areaOverLog10k[k_List, g_List] := Module[{x},
+  If[Length[k] < 2 || Length[g] != Length[k], Return[0.0]];
+  x = Log10[k];
+  Total[
+    Table[
+      0.5 (g[[j]] + g[[j + 1]]) (x[[j + 1]] - x[[j]]),
+      {j, 1, Length[k] - 1}
+    ]
+  ]
+];
+
+firstMomentOverLog10k[k_List, g_List] := Module[{x, area, num},
+  If[Length[k] < 2 || Length[g] != Length[k], Return[Missing["TooFewPoints"]]];
+  x = Log10[k];
+  area = areaOverLog10k[k, g];
+  If[!NumericQ[area] || area <= 0, Return[Missing["BadArea"]]];
+  num = Total[
+    Table[
+      0.5 (g[[j]] k[[j]] + g[[j + 1]] k[[j + 1]]) (x[[j + 1]] - x[[j]]),
+      {j, 1, Length[k] - 1}
+    ]
+  ];
+  num/area
+];
+
+secondCentralMomentOverLog10k[k_List, g_List] := Module[{x, area, mu1, num},
+  If[Length[k] < 2 || Length[g] != Length[k], Return[Missing["TooFewPoints"]]];
+  x = Log10[k];
+  area = areaOverLog10k[k, g];
+  If[!NumericQ[area] || area <= 0, Return[Missing["BadArea"]]];
+  mu1 = firstMomentOverLog10k[k, g];
+  If[!NumericQ[mu1], Return[Missing["BadFirstMoment"]]];
+  num = Total[
+    Table[
+      0.5 (g[[j]] (k[[j]] - mu1)^2 + g[[j + 1]] (k[[j + 1]] - mu1)^2) (x[[j + 1]] - x[[j]]),
+      {j, 1, Length[k] - 1}
+    ]
+  ];
+  num/area
+];
+
+sigmaOverLog10k[k_List, g_List] := Module[{m2},
+  m2 = secondCentralMomentOverLog10k[k, g];
+  If[NumericQ[m2] && m2 >= 0, Sqrt[m2], Missing["BadSecondMoment"]]
+];
+
+(* ---------- main table ---------- *)
 
 areaResultsFull = Table[
-  Module[{spec, file, k, g, ord, kk, gg, keep, kkUse, ggUse, idx, cSlow, cFast, cTot, frac},
+  Module[
+    {
+      spec, file, k, g, ord, kk, gg, keep, kkUse, ggUse, idx,
+      kSlow, gSlow, kFast, gFast,
+      cSlow, cFast, cTot, frac,
+      mu1Slow, mu1Fast, mu2Slow, mu2Fast, sigmaSlow, sigmaFast
+    },
+
     spec = goodSpecs[[i, "Spec"]];
     file = goodSpecs[[i, "File"]];
     k = 1/spec["Tau"];
@@ -2250,10 +1886,25 @@ areaResultsFull = Table[
 
     idx = LengthWhile[kkUse, # <= kMid &];
 
-    cSlow = If[idx >= 2, areaOverLog10k[kkUse[[;; idx]], ggUse[[;; idx]]], 0.0];
-    cFast = If[idx + 1 <= Length[kkUse] - 1, areaOverLog10k[kkUse[[idx + 1 ;;]], ggUse[[idx + 1 ;;]]], 0.0];
+    kSlow = If[idx >= 2, kkUse[[;; idx]], {}];
+    gSlow = If[idx >= 2, ggUse[[;; idx]], {}];
+
+    kFast = If[idx + 1 <= Length[kkUse] - 1, kkUse[[idx + 1 ;;]], {}];
+    gFast = If[idx + 1 <= Length[kkUse] - 1, ggUse[[idx + 1 ;;]], {}];
+
+    cSlow = If[Length[kSlow] >= 2, areaOverLog10k[kSlow, gSlow], 0.0];
+    cFast = If[Length[kFast] >= 2, areaOverLog10k[kFast, gFast], 0.0];
     cTot = cSlow + cFast;
     frac = If[cTot > 0, cFast/cTot, Indeterminate];
+
+    mu1Slow = If[Length[kSlow] >= 2, firstMomentOverLog10k[kSlow, gSlow], Missing["TooFewPoints"]];
+    mu1Fast = If[Length[kFast] >= 2, firstMomentOverLog10k[kFast, gFast], Missing["TooFewPoints"]];
+
+    mu2Slow = If[Length[kSlow] >= 2, secondCentralMomentOverLog10k[kSlow, gSlow], Missing["TooFewPoints"]];
+    mu2Fast = If[Length[kFast] >= 2, secondCentralMomentOverLog10k[kFast, gFast], Missing["TooFewPoints"]];
+
+    sigmaSlow = If[Length[kSlow] >= 2, sigmaOverLog10k[kSlow, gSlow], Missing["TooFewPoints"]];
+    sigmaFast = If[Length[kFast] >= 2, sigmaOverLog10k[kFast, gFast], Missing["TooFewPoints"]];
 
     <|
       "i" -> i,
@@ -2262,9 +1913,20 @@ areaResultsFull = Table[
       "Electrode" -> getElectrodeFromFile[file],
       "ConcActual" -> getConcFromFile[file],
       "KD" -> KD,
+
       "cSlow_F" -> cSlow,
       "cFast_F" -> cFast,
       "cTotal_F" -> cTot,
+
+      "kMeanSlow" -> mu1Slow,
+      "kMeanFast" -> mu1Fast,
+
+      "kVarSlow" -> mu2Slow,
+      "kVarFast" -> mu2Fast,
+
+      "kSigmaSlow" -> sigmaSlow,
+      "kSigmaFast" -> sigmaFast,
+
       "FractionBound" -> frac,
       "ConcEst" -> If[NumericQ[frac], langmuirConcFromF[frac, KD], Missing["NoFrac"]]
     |>
@@ -2416,7 +2078,6 @@ Show[
 
 
 (* ---------- Fraction bound vs time ---------- *)
-
 timeSeriesRows = SortBy[
   Select[
     areaResultsFull,
@@ -2435,7 +2096,7 @@ fbTimeRows = SortBy[
   #["TimeHr"] &
 ];
 
-fbTimeData = ({#["TimeHr"], #["FractionBound"]} & /@ fbTimeRows);
+fbTimeData = ({#["TimeHr"], #["FractionBound"]} & /@ fbTimeRows)
 
 ListPlot[
   fbTimeData,
@@ -2459,6 +2120,164 @@ ListPlot[
   PlotRange -> {All, {0, 1}},
   ImageSize -> 900,
   PlotLabel -> Style["Fraction folded vs time", 16, Black]
+]
+
+
+fbTimeRows = SortBy[
+  Select[
+    areaResultsFull,
+    NumericQ[#["TimeHr"]] &&
+    NumericQ[#["cSlow_F"]] &&
+    NumericQ[#["cFast_F"]] &&
+    NumericQ[#["kMeanSlow"]] &&
+    NumericQ[#["kMeanFast"]] &&
+    NumericQ[#["kVarSlow"]] &&
+    NumericQ[#["kVarFast"]] &
+  ],
+  #["TimeHr"] &
+];
+
+fbSlowTimeData = ({#["TimeHr"], #["cSlow_F"]} & /@ fbTimeRows);
+fbFastTimeData = ({#["TimeHr"], #["cFast_F"]} & /@ fbTimeRows);
+
+fbSlowMeanData = ({#["TimeHr"], #["kMeanSlow"]} & /@ fbTimeRows);
+fbFastMeanData = ({#["TimeHr"], #["kMeanFast"]} & /@ fbTimeRows);
+
+fbSlowVarData = ({#["TimeHr"], #["kVarSlow"]} & /@ fbTimeRows);
+fbFastVarData = ({#["TimeHr"], #["kVarFast"]} & /@ fbTimeRows);
+
+slowStyle = Directive[RGBColor[0.8, 0.2, 0.2], Thick];
+fastStyle = Directive[RGBColor[0.15, 0.6, 0.35], Thick];
+
+capacitancePlot =
+ ListPlot[
+  {fbSlowTimeData, fbFastTimeData},
+
+  Joined -> True,
+  PlotStyle -> {slowStyle, fastStyle},
+  PlotMarkers -> None,
+
+  PlotLegends -> Placed[
+    LineLegend[
+      {slowStyle, fastStyle},
+      {"C_slow", "C_fast"}
+    ],
+    Right
+  ],
+
+  Background -> White,
+  PlotRangePadding -> Scaled[0.02],
+
+  Frame -> True,
+  FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+
+  FrameLabel -> {
+    Style["Time (hours)", 18],
+    Style["Capacitance (F)", 18]
+  },
+  BaseStyle -> {FontFamily -> "Arial", 14},
+  LabelStyle -> Directive[18],
+  FrameTicksStyle -> Directive[14],
+  FrameTicks -> {
+    {Automatic, None},
+    {Automatic, None}
+  },
+  PlotRange -> {All, {0, 2 10^-7}},
+  ImageSize -> 600,
+  PlotLabel -> Style["Fast and slow state capacitance vs time", 16]
+ ];
+
+firstMomentPlot =
+ ListPlot[
+  {fbSlowMeanData, fbFastMeanData},
+
+  Joined -> True,
+  PlotStyle -> {slowStyle, fastStyle},
+  PlotMarkers -> None,
+
+  PlotLegends -> Placed[
+    LineLegend[
+      {slowStyle, fastStyle},
+      {"k_mean, slow", "k_mean, fast"}
+    ],
+    Right
+  ],
+
+  Background -> White,
+  PlotRangePadding -> Scaled[0.02],
+
+  Frame -> True,
+  FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+
+  FrameLabel -> {
+    Style["Time (hours)", 18],
+	Style[Row[{"First moment of k (", Superscript["s", -1], ")"}], 18]
+  },
+
+  BaseStyle -> {FontFamily -> "Arial", 14},
+  LabelStyle -> Directive[18],
+  FrameTicksStyle -> Directive[14],
+
+  FrameTicks -> {
+    {Automatic, None},
+    {Automatic, None}
+  },
+
+  PlotRange -> {Automatic,{0,250}},
+  ImageSize -> 600,
+
+  PlotLabel -> Style["Fast and slow state first moment vs time", 16]
+ ];
+
+secondMomentPlot =
+ ListPlot[
+  {fbSlowVarData, fbFastVarData},
+
+  Joined -> True,
+  PlotStyle -> {slowStyle, fastStyle},
+  PlotMarkers -> None,
+
+  PlotLegends -> Placed[
+    LineLegend[
+      {slowStyle, fastStyle},
+      {"k_var, slow", "k_var, fast"}
+    ],
+    Right
+  ],
+
+  Background -> White,
+  PlotRangePadding -> Scaled[0.02],
+
+  Frame -> True,
+  FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+
+  FrameLabel -> {
+    Style["Time (hours)", 18],
+    Style["Second central moment of k ((s^-1)^2)", 18]
+  },
+
+  BaseStyle -> {FontFamily -> "Arial", 14},
+  LabelStyle -> Directive[18],
+  FrameTicksStyle -> Directive[14],
+
+  FrameTicks -> {
+    {Automatic, None},
+    {Automatic, None}
+  },
+
+  PlotRange -> {Automatic,{0,500}},
+  ImageSize -> 600,
+
+  PlotLabel -> Style["Fast and slow state second moment vs time", 16]
+ ];
+
+Column[
+  {
+    capacitancePlot,
+    firstMomentPlot,
+    secondMomentPlot
+  },
+  Spacings -> 2
 ]
 
 
