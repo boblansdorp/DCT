@@ -181,7 +181,8 @@ estimateRs[freqHz_List, z_List, minFreqRsFit_?NumericQ, maxFreqRsFit_?NumericQ] 
 	top = Re[Pick[z, keep]];
 	top = Select[top, NumericQ];
 	If[top === {}, Return[0.]];
-	rs = Median[top];
+	(* rs = Median[top]; *)
+	rs = Min[top];
 	If[NumericQ[rs] && rs >= 0., rs, 0.]
 ];
 
@@ -226,11 +227,8 @@ Options[DCTSpectrum] = {
 	"TauMaxFactor" -> 10.0,
 	"LambdaND" -> 10^-2,
 	"TopPointsForRs" -> 7,
-	"MinFreqRsFit" -> 500.,
-	"MaxFreqRsFit" -> 800.,
 	"WeightMode" -> "AbsYHalf",
 	"WeightPower" -> 3/4,
-	"WeightPowerResistance"->10,
 	"Debug" -> False
 };
 
@@ -240,7 +238,7 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 
 		(* options *)
 		binsPerDecade, tauMinFactor, tauMaxFactor, lambdaND, nTopRs, wPow,
-		fMinUse, fMaxUse, minFreqRsFit, maxFreqRsFit,
+		fMinUse, fMaxUse,
 
 		(* imported data *)
 		dat, freqHzAll, zDataAll, timeS, finishTime,
@@ -270,11 +268,8 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 	lambdaND = OptionValue["LambdaND"];
 	nTopRs = OptionValue["TopPointsForRs"];
 	wPow = OptionValue["WeightPower"];
-	wPowR = OptionValue["WeightPowerResistance"]; 
 	fMinUse = N[OptionValue["FMinUse"]];
 	fMaxUse = N[OptionValue["FMaxUse"]];
-	minFreqRsFit = N[OptionValue["MinFreqRsFit"]];
-	maxFreqRsFit = N[OptionValue["MaxFreqRsFit"]];
 
 	(* ---------- Import full data ---------- *)
 	dat = importEISTxt[file];
@@ -309,13 +304,11 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 	(* impedance residual for Rs is evaluated ONLY on this      *)
 	(* separate frequency window                                *)
 	(* ======================================================== *)
-	keepRs = (minFreqRsFit <= # <= maxFreqRsFit) & /@ freqHzAll;
+	keepRs = (fMinUse <= # <= fMaxUse) & /@ freqHzAll;
 	freqHzRs = Pick[freqHzAll, keepRs];
 	zDataRs = Pick[zDataAll, keepRs];
 	omegaRs = Developer`ToPackedArray[2 Pi freqHzRs];
 
-	dbg[debug, "OUTER LOOP MinFreqRsFit", minFreqRsFit];
-	dbg[debug, "OUTER LOOP MaxFreqRsFit", maxFreqRsFit];
 	dbg[debug, "OUTER LOOP nPoints", Length[freqHzRs]];
 	dbg[debug, "OUTER LOOP freq range", If[Length[freqHzRs] > 0, {Min[freqHzRs], Max[freqHzRs]}, Missing["NoPoints"]]];
 
@@ -330,12 +323,12 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 	(* ======================================================== *)
 	solveLadderGivenRs[rsCand_?NumericQ] := Module[
 		{
-			zIntDCT, yIntDCT, wY, wYsqrt,wZ,
+			zIntDCT, yIntDCT, yIntDataRs, wY, wYsqrt, wYRs,
 			tauBins, nBins, dLog10,
 			kMatDCT, kUseDCT, aMat, aW, bW, aRI, bRI,
 			d2, dFull, aCols, colNormSq, sA2, lambda, dFullN, aAug, bAug, xBest,
 			c0, gFit, ciFit, yIntFitDCT, zFitDCT,
-			kMatRs, kUseRs, yIntFitRs, zFitRs,
+			kMatRs, kUseRs, yIntFitRs,
 			objZ, objY
 		},
 
@@ -454,37 +447,23 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 			Return[<|"OK" -> False, "Message" -> "YintFitRs too small", "ObjZ" -> Infinity|>]
 		];
 
-		zFitRs = rsCand + 1/yIntFitRs;
+		yIntDataRs = Developer`ToPackedArray[1/(zDataRs - rsCand)];
 
-		(* ---------- OUTER LOOP objective in impedance space, ONLY on Rs range ---------- *)
-		(* objZ = Total[Re[zDataRs - zFitRs]^2 + Im[zDataRs - zFitRs]^2]; *)
-		
-		(* ---------- OUTER LOOP weighted objective in impedance space ---------- *)
-(* 
-		wZsqrt = Developer`ToPackedArray[Abs[zDataRs]^wPowR];
-		
-		If[!VectorQ[wZsqrt, NumericQ] ||
-		   !FreeQ[wZsqrt, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity],
-		   Return[<|"OK" -> False, "Message" -> "bad Rs weights", "ObjZ" -> Infinity|>]
+		If[!VectorQ[yIntDataRs, NumericQ] ||
+		   !FreeQ[yIntDataRs, _ComplexInfinity | _DirectedInfinity | Indeterminate | Infinity],
+		   Return[<|"OK" -> False, "Message" -> "bad outer-loop admittance data", "ObjZ" -> Infinity|>]
 		];
+		
+		wYRs = Developer`ToPackedArray[Abs[yIntDataRs]^wPow];
 		
 		objZ =
-		   Total[
-		      wZsqrt^2 *
-		      ( Re[zDataRs - zFitRs]^2 +
-		        Im[zDataRs - zFitRs]^2 )
-		   ];
-	*)
-		wZ = Developer`ToPackedArray[Abs[zDataRs]^wPowR];
-	
-	objZ =
-		Total[
-			wZ *
-			(
-				Re[zDataRs - zFitRs]^2 +
-				Im[zDataRs - zFitRs]^2
-			)
-		];
+			Total[
+				wYRs *
+				(
+					Re[yIntDataRs - yIntFitRs]^2 +
+					Im[yIntDataRs - yIntFitRs]^2
+				)
+			];
 			   
 
 		(* ---------- diagnostic objective in admittance space, ONLY on DCT range ---------- *)
@@ -511,7 +490,8 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 	(* ======================================================== *)
 	(* OUTER LOOP: solve for Rs using ONLY Rs-fit frequency band *)
 	(* ======================================================== *)
-	rs0 = estimateRs[freqHzAll, zDataAll, minFreqRsFit, maxFreqRsFit];
+
+	rs0 = estimateRs[freqHzAll, zDataAll, fMinUse, fMaxUse]; 
 	If[!NumericQ[rs0], rs0 = Max[0., Min[Re[zDataRs]]]];
 	dbg[debug, "initial Rs guess", rs0];
 

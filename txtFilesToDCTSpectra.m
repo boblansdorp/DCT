@@ -79,8 +79,8 @@ weightPowerResistance = weightPower + 4;
 fMinUse = 1;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
 fMaxUse = 200;     (* Hz *)
 
-minFreqRsFit = 200;  (* Hz *)
-maxFreqRsFit = 500;  (* Hz *)
+
+
 
 
 
@@ -90,10 +90,7 @@ paddingDecades = 0.0; (* sets how many decades beyond the measured frequency ran
 
 tauMinFactor = 10^-paddingDecades;
 tauMaxFactor = 10^paddingDecades;          (* tauMaxUse = tauMax * factor *) (* add factor of 10 to the maximum as padding *)
-(* 
-minFreqRsFit = fMaxUse 10^paddingDecades;   (* Hz *)
-maxFreqRsFit = 300 + minFreqRsFit;  (* Hz *)
-*)
+
 
 
 (* ============================================================ *)
@@ -169,10 +166,7 @@ results = Monitor[
             "TauMinFactor" -> tauMinFactor,
             "TauMaxFactor" -> tauMaxFactor,
             "BinsPerDecade" -> binsPerDecade,
-            "WeightPower" -> weightPower,
-            "WeightPowerResistance" -> weightPowerResistance,
-            "MinFreqRsFit" -> minFreqRsFit,
-            "MaxFreqRsFit" -> maxFreqRsFit
+            "WeightPower" -> weightPower
           ],
           $Failed
         ],
