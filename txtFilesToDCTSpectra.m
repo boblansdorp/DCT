@@ -1,5 +1,8 @@
 (* ::Package:: *)
 
+ClearAll["Global`*"]
+
+
 (* ============================================================ *)
 (* DCT batch runner                                              *)
 (*   1) Find all .txt files in a directory                        *)
@@ -28,65 +31,74 @@ NNLSPackagePath =
 Get[NNLSPackagePath]
 
 
+
+
 (* ---------- USER SETTINGS ---------- *)
 
 
+debugFlag = False;
+fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
+constantPhaseElementFlag = False;
 
 
-
-
-
-
-
-
-
-
-(* ::InheritFromParent:: *)
-(**)
-
-
-
-
-
-(* dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data";
-dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25-titration";
-dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\2026-02-25";
-dataDir = "C:\\Users\\bobla\\Documents\\DCT\\data\\drift_03252026\\E1"
-*)
 baseDir = FileNameJoin[{NotebookDirectory[], "data"}] // ExpandFileName
 
 
 (* examples of switching datasets *)
-dataDir = FileNameJoin[{baseDir, "2026-02-25-titration"}];
-dataDir = FileNameJoin[{baseDir, "2026-02-25"}];
-dataDir = FileNameJoin[{baseDir, "drift_03252026", "E1"}]
 
-debugFlag = False;
-fileDecimation = 1;   (* keep every Nth file: 10 -> ~450/10 = 45 files *)
+dataDir = FileNameJoin[{baseDir, "2026-02-25"}];
+dataDir = FileNameJoin[{baseDir, "2026-02-25-titration"}]; (* initial titration experiment in PBS *)
+
+
+
+
+dataDir = FileNameJoin[{baseDir, "rebodeplotfcc11sh"}];(* ferrocene data in PBS *)
+
+
+
+dataDir = FileNameJoin[{baseDir, "2026-04-13"}];(* simulated data generated in Mathematica! *)
+
+
+
+
+
+
+
+
+
+
+
+
+dataDir = FileNameJoin[{baseDir, "simulated"}];(* simulated data generated in Mathematica! *)
+dataDir = FileNameJoin[{baseDir, "2026-04-13"}];(* ferrocene data in PBS take 2 *)
+
+
+
+
+
+
+
+dataDir = FileNameJoin[{baseDir, "spike"}];(* second titration in PBS *)
+
+
+
+dataDir = FileNameJoin[{baseDir, "drift_03252026", "E3"}];(* PBS *)
+dataDir = FileNameJoin[{baseDir, "04062026_drift\\drift", "E2"}] (* bovine blood *)
+
 
 lambdaND = 1 10^-3;
 
-constantPhaseElementFlag = False;
-
-binsPerDecade = 35;
-
-
+binsPerDecade = 10;
 weightPower = -0.5; (* weight each point inverse to variance *)
 
-(* weightPowerResistance = -3.5; *)
-weightPowerResistance = weightPower + 4;
-
-fMinUse = 1;      (* Hz *) (* starting to see resistive behavior at low freq (oxygen reduction? diffusion?) *)
-fMaxUse = 200;     (* Hz *)
-
-
-
+fMinUse =1;      (* Hz *)
+fMaxUse = 400;     (* Hz *)
 
 
 
 (* Optional: restrict the frequency range (must match package options) *)
-paddingDecades = 0.0; (* sets how many decades beyond the measured frequency range the tau values extend *)
-(* 0 = no padding, 1 = a decdade of apadding. *)
+paddingDecades = -0.0; (* sets how many decades beyond the measured frequency range the tau values extend *)
+(* 0 = no padding, 1 = a decade of padding. *)
 
 tauMinFactor = 10^-paddingDecades;
 tauMaxFactor = 10^paddingDecades;          (* tauMaxUse = tauMax * factor *) (* add factor of 10 to the maximum as padding *)
@@ -117,9 +129,9 @@ Print[
   "Using ", Length[txtFiles],
   " files after decimation (every ", fileDecimation, "th file)."
 ];
-
+(* 
 Print["Files used:"];
-Print /@ txtFiles;
+Print /@ txtFiles; *)
 
 
 (* ============================================================ *)
@@ -248,27 +260,297 @@ If[Length[failures] > 0,
 
 
 (* ============================================================ *)
-(* Plot in electron-transfer-rate space: k = 1/tau (s^-1)        *)
+(* Convert spectra to k-space                                   *)
+(* ============================================================ *)
+
+tracesK = (Transpose[{1/#Spec["Tau"], 10^6*#Spec["g"]}] &) /@ goodSpecs;
+
+(* ============================================================ *)
+(* Integrate g(k) over log10(k) to obtain distributed capacitance *)
+(* ============================================================ *)
+
+capFromGK[data_] := Module[
+  {sorted, k, g, x},
+  
+  sorted = SortBy[data, First];
+  k = sorted[[All, 1]];
+  g = sorted[[All, 2]];
+  
+  x = Log10[k];
+  
+  If[Length[k] < 2, Return[0.0]];
+  
+  Total[
+    Table[
+      0.5*(g[[j]] + g[[j + 1]])*(x[[j + 1]] - x[[j]]),
+      {j, 1, Length[k] - 1}
+    ]
+  ]
+];
+
+(* note: divide by 10^6 again since tracesK was scaled *)
+cDistList = capFromGK /@ (Transpose[{#[[All,1]], #[[All,2]]/10^6}]& /@ tracesK);
+
+(* ============================================================ *)
+(* Extract C0 from fits                                         *)
+(* ============================================================ *)
+
+c0List = (#Spec["C0"] &) /@ goodSpecs;
+
+cTotalList = cDistList + c0List;
+
+(* ============================================================ *)
+(* Plot styling                                                 *)
+(* ============================================================ *)
+
+n = Length[tracesK];
+
+plotColors =
+ Table[
+  ColorData["Rainbow"][u],
+  {u, 0.05, 0.95, (0.95 - 0.05)/Max[n - 1, 1]}
+ ];
+
+lineStyles = Map[Directive[#, AbsoluteThickness[2.5]] &, plotColors];
+
+legendLabels =
+ If[ValueQ[labels] && Length[labels] == n,
+  labels,
+  Table["Trace " <> ToString[i], {i, n}]
+ ];
+
+(* ============================================================ *)
+(* Publication-quality DCT plot                                 *)
+(* ============================================================ *)
+
+dctPlot =
+ ListLinePlot[
+  tracesK,
+  
+  PlotStyle -> lineStyles,
+  
+  ScalingFunctions -> {"Log10", None},
+  
+  Frame -> True,
+  Axes -> False,
+  
+  Background -> White,
+  
+  FrameStyle -> Directive[Black, Thickness[0.002]],
+  
+  FrameLabel -> {
+    Style["Electron-transfer rate k (s^-1)", 17],
+    Style["g(k) (\[Micro]F/decade)", 17]
+  },
+  
+  LabelStyle -> Directive[Black, 16],
+  
+  PlotRange -> {Automatic, {0, 80}},
+  
+  ImageSize -> 800,
+  
+  PlotLegends -> Placed[
+    LineLegend[lineStyles, legendLabels],
+    Right
+  ]
+ ];
+
+dctPlot
+
+(* ============================================================ *)
+(* Capacitance summary table                                    *)
+(* ============================================================ *)
+
+capSummary =
+ Table[
+  {
+   legendLabels[[i]],
+   10^6 * cDistList[[i]],
+   10^6 * c0List[[i]],
+   10^6 * cTotalList[[i]]
+   },
+  {i, 1, n}
+ ];
+
+
+
+(* ============================================================ *)
+(* Extract solution resistance from fits                        *)
+(* ============================================================ *)
+
+rsList = (#Spec["Rs"] &) /@ goodSpecs;
+
+(* ============================================================ *)
+(* Capacitance summary table                                    *)
+(* ============================================================ *)
+
+capSummary =
+ Table[
+  {
+   legendLabels[[i]],
+   rsList[[i]],
+   10^6 * cDistList[[i]],
+   10^6 * c0List[[i]],
+   10^6 * cTotalList[[i]]
+   },
+  {i, 1, n}
+ ];
+
+Grid[
+ Prepend[
+  capSummary,
+  {
+   "Trace",
+   "Rs (\[CapitalOmega])",
+   "\[Integral] g(k) dlog10k (\[Micro]F)",
+   "C0 (\[Micro]F)",
+   "Total C (\[Micro]F)"
+   }
+  ],
+ Frame -> All,
+ Alignment -> Left,
+ ItemStyle -> Directive[Black, 13]
+]
+
+
+(* ============================================================ *)
+(* Convert spectra to k-space                                   *)
 (* ============================================================ *)
 
 tracesK = (Transpose[{1/#Spec["Tau"], #Spec["g"]}] &) /@ goodSpecs;
 
-Show[
-  ListLinePlot[
-    tracesK,
-    PlotStyle -> colors,
-    ScalingFunctions -> {"Log10", None},
-    Frame -> True,
-    FrameLabel -> {"k (s^-1)", "g(k) (F/decade)"},
-    PlotRange -> {Automatic, {0, 4 10^-6}},
-    PlotLegends -> Placed[labels, Right],
-    ImageSize -> 700
+(* ============================================================ *)
+(* Build cumulative capacitance vs k from g(k)                  *)
+(* cumulative C(k) = Integral g(k') dlog10(k') from low k up    *)
+(* ============================================================ *)
+
+cumCapVsK[data_] := Module[
+  {sorted, k, g, x, c},
+  
+  sorted = SortBy[data, First];
+  k = sorted[[All, 1]];
+  g = sorted[[All, 2]];
+  
+  If[Length[k] < 2 || Length[g] != Length[k], Return[{}]];
+  
+  x = Log10[k];
+  
+  c = Prepend[
+    Accumulate[
+      Table[
+        0.5*(g[[j]] + g[[j + 1]])*(x[[j + 1]] - x[[j]]),
+        {j, 1, Length[k] - 1}
+      ]
+    ],
+    0
+  ];
+  
+  Transpose[{k, 10^6*c}]
+];
+
+cumTracesK = cumCapVsK /@ tracesK;
+
+(* ============================================================ *)
+(* Extract C0 from fits                                         *)
+(* ============================================================ *)
+
+c0List = (#Spec["C0"] &) /@ goodSpecs;
+
+(* ============================================================ *)
+(* Plot styling                                                 *)
+(* ============================================================ *)
+
+n = Length[cumTracesK];
+
+plotColors =
+ Table[
+  ColorData["Rainbow"][u],
+  {u, 0.05, 0.95, (0.95 - 0.05)/Max[n - 1, 1]}
+ ];
+
+lineStyles = Map[Directive[#, AbsoluteThickness[2.5]] &, plotColors];
+
+legendLabels =
+ If[ValueQ[labels] && Length[labels] == n,
+  labels,
+  Table["Trace " <> ToString[i], {i, n}]
+ ];
+
+(* ============================================================ *)
+(* Publication-quality cumulative capacitance plot              *)
+(* ============================================================ *)
+
+cumPlot =
+ ListLinePlot[
+  cumTracesK,
+  
+  PlotStyle -> lineStyles,
+  
+  ScalingFunctions -> {"Log10", None},
+  
+  Frame -> True,
+  Axes -> False,
+  
+  Background -> White,
+  
+  FrameStyle -> Directive[Black, Thickness[0.002]],
+  
+  FrameLabel -> {
+    Style["Electron-transfer rate k (s^-1)", 17],
+    Style["Cumulative capacitance (\[Micro]F)", 17]
+  },
+  
+  LabelStyle -> Directive[Black, 16],
+  
+  PlotRange -> All,
+  
+  ImageSize -> 800,
+  
+  PlotLegends -> Placed[
+    LineLegend[lineStyles, legendLabels],
+    Right
   ]
+ ];
+
+cumPlot
+
+(* ============================================================ *)
+(* Capacitance summary table                                    *)
+(* ============================================================ *)
+
+cDistList = Module[{x, y},
+    x = #[[All, 1]];
+    y = #[[All, 2]];
+    If[Length[y] > 0, Last[y]/10^6, 0.]
+  ] & /@ cumTracesK;
+
+cTotalList = cDistList + c0List;
+
+capSummary =
+ Table[
+  {
+   legendLabels[[i]],
+   10^6*cDistList[[i]],
+   10^6*c0List[[i]],
+   10^6*cTotalList[[i]]
+   },
+  {i, 1, n}
+ ];
+
+Grid[
+ Prepend[
+  capSummary,
+  {
+   "Trace",
+   "\[Integral] g(k) dlog10k (\[Micro]F)",
+   "C0 (\[Micro]F)",
+   "Total C (\[Micro]F)"
+   }
+  ],
+ Frame -> All,
+ Alignment -> Left,
+ ItemStyle -> Directive[Black, 13]
 ]
-
-
-(* ::InheritFromParent:: *)
-(**)
 
 
 (#Spec["CPEAlpha"] &) /@ goodSpecs
@@ -279,6 +561,254 @@ Min[(1/#Spec["Tau"] &) /@ goodSpecs]
 Max[(1/#Spec["Tau"] &) /@ goodSpecs]
 Min[(1/#Spec["Tau"] &) /@ goodSpecs]/(2 \[Pi])
 Max[(1/#Spec["Tau"] &) /@ goodSpecs]/(2 \[Pi])
+
+
+(* helper function *)
+getElectrodeFromFile[file_String] := Module[{name, hit},
+  name = FileNameTake[file];
+  hit = StringCases[
+    name,
+    RegularExpression["E(\\d+)"] :> ("E" <> "$1")
+  ];
+  If[hit === {}, Missing["NoElectrode"], First[hit]]
+];
+
+
+goodSpecsE1 =
+  Select[
+    goodSpecs,
+    getElectrodeFromFile[#["File"]] === "E1" &
+  ];
+
+goodSpecsE1 = goodSpecs;
+
+(* elapsed time in hours *)
+expTimesHr = (#Spec["FinishTimeS"]/3600) & /@ goodSpecsE1;
+elapsedHr = expTimesHr - Min[expTimesHr];
+
+(* choose target legend times *)
+targetTimesHr = Range[0, 24, 4];
+
+(* for each target time, pick the closest dataset *)
+closestIdx =
+  DeleteDuplicates[
+    (First @ Ordering[Abs[elapsedHr - #], 1]) & /@ targetTimesHr
+  ];
+
+goodSpecsE1 = goodSpecsE1[[closestIdx]];
+elapsedHrSelected = elapsedHr[[closestIdx]];
+
+labelsE1 = (ToString[#] <> " hrs") & /@ targetTimesHr[[;; Length[closestIdx]]];
+
+tracesK =
+  (Transpose[{1/#Spec["Tau"], #Spec["g"]}] &) /@
+    goodSpecsE1;
+
+nE1 = Length[tracesK];
+
+rainbowColors =
+  If[
+    nE1 <= 1,
+    {ColorData["Rainbow"][0.2]},
+    Table[
+      ColorData["Rainbow"][u],
+      {u, 0.1, 0.9, (0.9 - 0.1)/(nE1 - 1)}
+    ]
+  ];
+
+legend =
+  Framed[
+    LineLegend[
+      Map[Directive[#, AbsoluteThickness[2.2]] &, rainbowColors],
+      labelsE1,
+      LegendMarkerSize -> 28,
+      LabelStyle -> Directive[Black, 11, FontFamily -> "Arial"],
+      LegendLayout -> "Column",
+      Spacings -> 0.2
+    ],
+    Background -> White,
+    FrameStyle -> White,
+    FrameMargins -> 6
+  ];
+
+(* ----- powers-of-10 x ticks ----- *)
+kMin = Min[Flatten[(1/#Spec["Tau"]) & /@ goodSpecsE1]];
+kMax = Max[Flatten[(1/#Spec["Tau"]) & /@ goodSpecsE1]];
+
+xTicks =
+  Table[
+    {10.^p, Superscript[10, p]},
+    {p, Floor[Log10[kMin]], Ceiling[Log10[kMax]]}
+  ];
+
+plotE1 =
+  Legended[
+    ListLinePlot[
+      tracesK,
+      PlotStyle -> Map[Directive[#, AbsoluteThickness[2.2]] &, rainbowColors],
+      ScalingFunctions -> {"Log10", None},
+      Frame -> True,
+      Axes -> False,
+      FrameTicks -> {{Automatic, None}, {xTicks, None}},
+      Background -> White,
+      FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+      FrameTicksStyle -> Directive[Black, 18],
+      LabelStyle -> Directive[Black, 18, FontFamily -> "Arial"],
+      FrameLabel -> {
+        Style[
+          Row[{"Electron transfer rate, k (", Superscript["s", -1], ")"}],
+          18, Black, FontFamily -> "Arial"
+        ],
+        Style["g(k) (F/decade)", 18, Black, FontFamily -> "Arial"]
+      },
+      PlotRange -> {Automatic, {0, 0.6 10^-6}},
+      PlotRangePadding -> {{Scaled[0.02], Scaled[0.02]}, {Scaled[0.02], Scaled[0.04]}},
+      ImageSize -> 400,
+      AspectRatio -> 0.68,
+      BaseStyle -> {FontFamily -> "Arial", 16},
+      GridLines -> None
+    ],
+    Placed[legend, Right]
+  ];
+
+plotE1
+
+
+Export["driftingPeaks.png",plotE1]
+
+
+  
+
+
+
+goodSpecsE1 = Select[ goodSpecs, getElectrodeFromFile[#["File"]] === "E1" & ];
+rawLabelsE1 = FileNameTake /@ (goodSpecsE1[[All, "File"]]);
+
+keepMask = Map[
+  StringContainsQ[#, "_0uM"] ||
+  StringContainsQ[#, "_100uM"] ||
+  StringContainsQ[#, "_250uM"] ||
+  StringContainsQ[#, "_562uM"] &,
+  rawLabelsE1
+];
+
+goodSpecsE1 = Pick[goodSpecsE1, keepMask];
+rawLabelsE1 = Pick[rawLabelsE1, keepMask];
+
+(* extract concentration values *)
+concVals =
+  ToExpression @ StringReplace[
+    StringCases[#, DigitCharacter .. ~~ "uM"][[1]],
+    "uM" -> ""
+  ] & /@ rawLabelsE1;
+
+(* sort by concentration descending *)
+sortIdx = Reverse @ Ordering[concVals];
+
+goodSpecsE1 = goodSpecsE1[[sortIdx]];
+rawLabelsE1 = rawLabelsE1[[sortIdx]];
+concVals = concVals[[sortIdx]];
+
+labelsE1 = (ToString[#] <> " \[Micro]M") & /@ concVals;
+
+tracesK =
+  (Transpose[{1/#Spec["Tau"], #Spec["g"]}] &) /@
+    goodSpecsE1;
+
+nE1 = Length[tracesK];
+
+rainbowColors =
+  If[
+    nE1 <= 1,
+    {ColorData["DeepSeaColors"][0.2]},
+    Table[
+      ColorData["DeepSeaColors"][u],
+      {u, 0.1, 0.9, (0.9 - 0.1)/(nE1 - 1)}
+    ]
+  ];
+
+legend =
+  Framed[
+    LineLegend[
+      Map[Directive[#, AbsoluteThickness[2.2]] &, rainbowColors],
+      labelsE1,
+      LegendMarkerSize -> 28,
+      LabelStyle -> Directive[Black, 11, FontFamily -> "Arial"],
+      LegendLayout -> "Column"
+    ],
+    Background -> White,
+    FrameStyle -> White,
+    FrameMargins -> 6
+  ];
+
+(* ----- powers-of-10 x ticks ----- *)
+kMin = Min[Flatten[(1/#Spec["Tau"]) & /@ goodSpecsE1]];
+kMax = Max[Flatten[(1/#Spec["Tau"]) & /@ goodSpecsE1]];
+
+xTicks =
+  Table[
+    {10.^p, Superscript[10, p]},
+    {p, Floor[Log10[kMin]], Ceiling[Log10[kMax]]}
+  ];
+
+plotE1 =
+  Legended[
+    ListLinePlot[
+      tracesK,
+      PlotStyle -> Map[Directive[#, AbsoluteThickness[2.2]] &, rainbowColors],
+      ScalingFunctions -> {"Log10", None},
+      Frame -> True,
+      Axes -> False,
+      FrameTicks -> {{Automatic, None}, {xTicks, None}},
+      Background -> White,
+      FrameStyle -> Directive[Black, AbsoluteThickness[1.2]],
+      FrameTicksStyle -> Directive[Black, 18],
+      LabelStyle -> Directive[Black, 18, FontFamily -> "Arial"],
+      FrameLabel -> {
+        Style[
+          Row[{"Electron transfer rate, k (", Superscript["s", -1], ")"}],
+          18, Black, FontFamily -> "Arial"
+        ],
+        Style["g(k) (F/decade)", 18, Black, FontFamily -> "Arial"]
+      },
+      PlotRange -> {Automatic, {0,1.*10^-6}},
+      PlotRangePadding -> {{Scaled[0.02], Scaled[0.02]}, {Scaled[0.02], Scaled[0.04]}},
+      ImageSize -> 600,
+      AspectRatio -> 0.68,
+      BaseStyle -> {FontFamily -> "Arial", 16},
+      GridLines -> None
+    ],
+    Placed[legend, {0.85, 0.5}]
+  ];
+
+plotE1
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+Export["titrationPeaks.png",plotE1]
 
 
 (* ============================================================ *)
@@ -297,6 +827,7 @@ kMax = Max[Flatten[(1/#Spec["Tau"]) & /@ goodSpecs]];
 
 nK = 100;  (* resolution in k-direction; increase to 400 if you want smoother *)
 kGrid = 10.^Subdivide[Log10[kMin], Log10[kMax], nK - 1];
+
 
 (* ---------- Interpolate each experiment onto kGrid ---------- *)
 gGrid = Table[
@@ -321,11 +852,7 @@ gGrid = Table[
    ],
    {i, 1, nExp}
 ];
-
-
 expTimesHr = (#[["Spec", "FinishTimeS"]]/3600) & /@ goodSpecs;
-
-
 (* gGrid is nExp x nK; build points (x,y)->g for ListDensityPlot *)
 pts = Flatten[
    Table[
@@ -463,7 +990,7 @@ GraphicsGrid[
 (*   Col 1: RAW                                                 *)
 (*   Col 2: FIT                                                 *)
 (* ============================================================ *)
-
+(* 
 ImportEISRaw[file_String] := Module[
   {lines, rows, nums, good, f, zre, zimNeg, z, colF, colZre, colZim},
 
@@ -497,6 +1024,7 @@ ImportEISRaw[file_String] := Module[
     <|"FreqHz" -> f[[ord]], "Z" -> z[[ord]]|>
   ]
 ];
+*)
 
 
 
@@ -521,6 +1049,7 @@ labels = FileNameTake /@ (goodSpecs[[All, "File"]]);
 files  = goodSpecs[[All, "File"]];
 
 (* ---------- RAW impedance ---------- *)
+(* ---------- RAW impedance ---------- *)
 rawZResults =
 	Table[
 		Module[
@@ -530,47 +1059,46 @@ rawZResults =
 			},
 
 			file = files[[k]];
-			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
+			raw  = Quiet @ Check[DCT`Private`importEISTxt[file], $Failed];
 
 			If[
-				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"] || !KeyExistsQ[raw, "Z"],
-				Return[
-					<|
-						"File" -> file,
-						"Label" -> labels[[k]],
-						"OK" -> False,
-						"Message" -> "raw parse failed"
-					|>
-				]
-			];
+				raw === $Failed || FailureQ[raw] || !AssociationQ[raw] ||
+				!KeyExistsQ[raw, "FreqHz"] || !KeyExistsQ[raw, "Z"],
+				<|
+					"File" -> file,
+					"Label" -> labels[[k]],
+					"OK" -> False,
+					"Message" -> "raw parse failed"
+				|>,
+				
+				fRaw = raw["FreqHz"];
+				zRaw = raw["Z"];
 
-			fRaw = raw["FreqHz"];
-			zRaw = raw["Z"];
+				magTrace   = Transpose[{fRaw, Abs[zRaw]}];
+				phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[zRaw]}];
+				reTrace    = Transpose[{fRaw, Re[zRaw]}];
+				imTrace    = Transpose[{fRaw, -Im[zRaw]}];
 
-			magTrace   = Transpose[{fRaw, Abs[zRaw]}];
-			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[zRaw]}];
-			reTrace    = Transpose[{fRaw, Re[zRaw]}];
-			imTrace    = Transpose[{fRaw, -Im[zRaw]}];
+				ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+					 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+					 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+					 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
 
-			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+				msg = If[ok, "", "raw impedance trace non-numeric"];
 
-			msg = If[ok, "", "raw impedance trace non-numeric"];
-
-			<|
-				"File" -> file,
-				"Label" -> labels[[k]],
-				"FreqHz" -> fRaw,
-				"ZRaw" -> zRaw,
-				"OK" -> ok,
-				"MagTrace" -> magTrace,
-				"PhaseTrace" -> phaseTrace,
-				"ReTrace" -> reTrace,
-				"ImTrace" -> imTrace,
-				"Message" -> msg
-			|>
+				<|
+					"File" -> file,
+					"Label" -> labels[[k]],
+					"FreqHz" -> fRaw,
+					"ZRaw" -> zRaw,
+					"OK" -> ok,
+					"MagTrace" -> magTrace,
+					"PhaseTrace" -> phaseTrace,
+					"ReTrace" -> reTrace,
+					"ImTrace" -> imTrace,
+					"Message" -> msg
+				|>
+			]
 		],
 		{k, Length[files]}
 	];
@@ -599,7 +1127,6 @@ rawZReTraces    = goodRawZ[[All, "ReTrace"]];
 rawZImTraces    = goodRawZ[[All, "ImTrace"]];
 rawZLabels      = goodRawZ[[All, "Label"]];
 rawZColors      = ColorData["Rainbow"] /@ Rescale[Range[Length[goodRawZ]]];
-
 (* ---------- FIT impedance ---------- *)
 fullFitZResults =
 	Table[
@@ -612,98 +1139,92 @@ fullFitZResults =
 
 			spec = goodSpecs[[k, "Spec"]];
 			file = goodSpecs[[k, "File"]];
-			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
+			raw  = Quiet @ Check[DCT`Private`importEISTxt[file], $Failed];
 
 			If[
-				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"],
-				Return[
-					<|
-						"File" -> file,
-						"Label" -> labels[[k]],
-						"OK" -> False,
-						"Message" -> "raw parse failed or missing FreqHz"
-					|>
-				]
-			];
+				raw === $Failed || FailureQ[raw] || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"],
+				<|
+					"File" -> file,
+					"Label" -> labels[[k]],
+					"OK" -> False,
+					"Message" -> "raw parse failed or missing FreqHz"
+				|>,
 
-			tau = spec["Tau"];
-			g   = spec["g"];
-			c0  = Lookup[spec, "C0", Missing["NotFound"]];
-			y0  = Lookup[spec, "Y0", Missing["NotFound"]];
-			alphaCPE = Lookup[spec, "CPEAlpha", Missing["NotFound"]];
-			useCPE = TrueQ[Lookup[spec, "useConstantPhaseElementFlag", False]];
-			rs = spec["Rs"];
+				tau = spec["Tau"];
+				g   = spec["g"];
+				c0  = Lookup[spec, "C0", Missing["NotFound"]];
+				y0  = Lookup[spec, "Y0", Missing["NotFound"]];
+				alphaCPE = Lookup[spec, "CPEAlpha", Missing["NotFound"]];
+				useCPE = TrueQ[Lookup[spec, "useConstantPhaseElementFlag", False]];
+				rs = spec["Rs"];
 
-			fRaw = raw["FreqHz"];
-			\[Omega] = 2 Pi fRaw;
+				fRaw = raw["FreqHz"];
+				\[Omega] = 2 Pi fRaw;
 
-			\[CapitalDelta]log = Mean[Differences[Log10[tau]]];
+				\[CapitalDelta]log = Mean[Differences[Log10[tau]]];
 
-			Kmat = Table[
-				(I*\[Omega][[j]])/(1 + I*\[Omega][[j]]*tau[[m]]),
-				{j, Length[\[Omega]]}, {m, Length[tau]}
-			];
-
-			YintFit =
-				If[useCPE,
-					If[!NumericQ[y0] || !NumericQ[alphaCPE],
-						$Failed,
-						y0*(I*\[Omega])^alphaCPE + Kmat . (g * \[CapitalDelta]log)
-					],
-					If[!NumericQ[c0],
-						$Failed,
-						(I*\[Omega])*c0 + Kmat . (g * \[CapitalDelta]log)
-					]
+				Kmat = Table[
+					(I*\[Omega][[j]])/(1 + I*\[Omega][[j]]*tau[[m]]),
+					{j, Length[\[Omega]]}, {m, Length[tau]}
 				];
 
-			If[YintFit === $Failed,
-				Return[
+				YintFit =
+					If[useCPE,
+						If[!NumericQ[y0] || !NumericQ[alphaCPE],
+							$Failed,
+							y0*(I*\[Omega])^alphaCPE + Kmat . (g * \[CapitalDelta]log)
+						],
+						If[!NumericQ[c0],
+							$Failed,
+							(I*\[Omega])*c0 + Kmat . (g * \[CapitalDelta]log)
+						]
+					];
+
+				If[YintFit === $Failed,
 					<|
 						"File" -> file,
 						"Label" -> labels[[k]],
 						"OK" -> False,
 						"Message" -> "missing fit parameters for impedance reconstruction"
-					|>
+					|>,
+
+					If[Min[Abs[YintFit]] < 10^-30,
+						<|
+							"File" -> file,
+							"Label" -> labels[[k]],
+							"OK" -> False,
+							"Message" -> "YintFit too small"
+						|>,
+
+						Zfit = rs + 1/YintFit;
+
+						magTrace   = Transpose[{fRaw, Abs[Zfit]}];
+						phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[Zfit]}];
+						reTrace    = Transpose[{fRaw, Re[Zfit]}];
+						imTrace    = Transpose[{fRaw, -Im[Zfit]}];
+
+						ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+							 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+							 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+							 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+						msg = If[ok, "", "fit impedance trace non-numeric"];
+
+						<|
+							"File" -> file,
+							"Label" -> labels[[k]],
+							"FreqHz" -> fRaw,
+							"ZFit" -> Zfit,
+							"MagTrace" -> magTrace,
+							"PhaseTrace" -> phaseTrace,
+							"ReTrace" -> reTrace,
+							"ImTrace" -> imTrace,
+							"OK" -> ok,
+							"Message" -> msg
+						|>
+					]
 				]
-			];
-
-			If[Min[Abs[YintFit]] < 10^-30,
-				Return[
-					<|
-						"File" -> file,
-						"Label" -> labels[[k]],
-						"OK" -> False,
-						"Message" -> "YintFit too small"
-					|>
-				]
-			];
-
-			Zfit = rs + 1/YintFit;
-
-			magTrace   = Transpose[{fRaw, Abs[Zfit]}];
-			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[Zfit]}];
-			reTrace    = Transpose[{fRaw, Re[Zfit]}];
-			imTrace    = Transpose[{fRaw, -Im[Zfit]}];
-
-			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
-
-			msg = If[ok, "", "fit impedance trace non-numeric"];
-
-			<|
-				"File" -> file,
-				"Label" -> labels[[k]],
-				"FreqHz" -> fRaw,
-				"ZFit" -> Zfit,
-				"MagTrace" -> magTrace,
-				"PhaseTrace" -> phaseTrace,
-				"ReTrace" -> reTrace,
-				"ImTrace" -> imTrace,
-				"OK" -> ok,
-				"Message" -> msg
-			|>
+			]
 		],
 		{k, Length[goodSpecs]}
 	];
@@ -1034,14 +1555,14 @@ GraphicsGrid[
 
 
 (* ============================================================ *)
-(* Admittance Bode overlays after removing Rs                   *)
-(*   Col 1: RAW interface admittance                            *)
-(*   Col 2: FIT interface admittance                            *)
+(* Admittance Bode overlays for TOTAL SYSTEM                    *)
+(*   Col 1: RAW total admittance                                *)
+(*   Col 2: FIT total admittance                                *)
 (*   Col 3: ABS residual error                                  *)
-(*   Row 1: |Yint|                                              *)
-(*   Row 2: Phase(Yint)                                         *)
-(*   Row 3: Re(Yint)                                            *)
-(*   Row 4: -Im(Yint)                                           *)
+(*   Row 1: |Y|                                                 *)
+(*   Row 2: Phase(Y)                                            *)
+(*   Row 3: Re(Y)                                               *)
+(*   Row 4: -Im(Y)                                              *)
 (* accommodates useConstantPhaseElementFlag                     *)
 (* ============================================================ *)
 
@@ -1053,221 +1574,233 @@ If[Length[goodSpecs] == 0,
 labels = FileNameTake /@ (goodSpecs[[All, "File"]]);
 files  = goodSpecs[[All, "File"]];
 
-(* ---------- RAW admittance after removing Rs ---------- *)
-rawYintResults =
+(* ---------- RAW total admittance ---------- *)
+rawYResults =
 	Table[
 		Module[
 			{
-				file, raw, spec, rs, fRaw, zRaw, zIntRaw, yIntRaw,
+				file, raw, fRaw, zRaw, yRaw,
 				magTrace, phaseTrace, reTrace, imTrace, ok, msg
 			},
 
 			file = files[[k]];
-			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
-			spec = goodSpecs[[k, "Spec"]];
+			raw  = Quiet @ Check[DCT`Private`importEISTxt[file], $Failed];
 
 			If[
-				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"] || !KeyExistsQ[raw, "Z"],
-				Return[
+				raw === $Failed || FailureQ[raw] || !AssociationQ[raw] ||
+				!KeyExistsQ[raw, "FreqHz"] || !KeyExistsQ[raw, "Z"],
+				<|
+					"File" -> file,
+					"Label" -> labels[[k]],
+					"OK" -> False,
+					"Message" -> "raw parse failed"
+				|>,
+
+				fRaw = raw["FreqHz"];
+				zRaw = raw["Z"];
+
+				If[Min[Abs[zRaw]] < 10^-15,
 					<|
 						"File" -> file,
 						"Label" -> labels[[k]],
 						"OK" -> False,
-						"Message" -> "raw parse failed"
-					|>
-				]
-			];
+						"Message" -> "Zraw too small"
+					|>,
 
-			rs   = spec["Rs"];
-			fRaw = raw["FreqHz"];
-			zRaw = raw["Z"];
+					yRaw = 1/zRaw;
 
-			zIntRaw = zRaw - rs;
+					magTrace   = Transpose[{fRaw, Abs[yRaw]}];
+					phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[yRaw]}];
+					reTrace    = Transpose[{fRaw, Re[yRaw]}];
+					imTrace    = Transpose[{fRaw, -Im[yRaw]}];
 
-			If[Min[Abs[zIntRaw]] < 10^-15,
-				Return[
+					ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+						 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+						 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+						 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+					msg = If[ok, "", "raw admittance trace non-numeric"];
+
 					<|
 						"File" -> file,
 						"Label" -> labels[[k]],
-						"OK" -> False,
-						"Message" -> "Zraw - Rs too small"
+						"FreqHz" -> fRaw,
+						"YRaw" -> yRaw,
+						"OK" -> ok,
+						"MagTrace" -> magTrace,
+						"PhaseTrace" -> phaseTrace,
+						"ReTrace" -> reTrace,
+						"ImTrace" -> imTrace,
+						"Message" -> msg
 					|>
 				]
-			];
-
-			yIntRaw = 1/zIntRaw;
-
-			magTrace   = Transpose[{fRaw, Abs[yIntRaw]}];
-			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[yIntRaw]}];
-			reTrace    = Transpose[{fRaw, Re[yIntRaw]}];
-			imTrace    = Transpose[{fRaw, -Im[yIntRaw]}];
-
-			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
-
-			msg = If[ok, "", "raw admittance trace non-numeric"];
-
-			<|
-				"File" -> file,
-				"Label" -> labels[[k]],
-				"FreqHz" -> fRaw,
-				"YIntRaw" -> yIntRaw,
-				"OK" -> ok,
-				"MagTrace" -> magTrace,
-				"PhaseTrace" -> phaseTrace,
-				"ReTrace" -> reTrace,
-				"ImTrace" -> imTrace,
-				"Message" -> msg
-			|>
+			]
 		],
 		{k, Length[files]}
 	];
 
-goodRawYint = Select[rawYintResults, TrueQ[#["OK"]] &];
-badRawYint  = Select[rawYintResults, !TrueQ[#["OK"]] &];
+goodRawY = Select[rawYResults, TrueQ[#["OK"]] &];
+badRawY  = Select[rawYResults, !TrueQ[#["OK"]] &];
 
-Print["Raw admittance overlay: parsed OK = ", Length[goodRawYint], " / ", Length[rawYintResults]];
+Print["Raw total admittance overlay: parsed OK = ", Length[goodRawY], " / ", Length[rawYResults]];
 
-If[Length[badRawYint] > 0,
+If[Length[badRawY] > 0,
 	Print["Failures:"];
 	Scan[
 		(Print["\t", FileNameTake[#["File"]], " : ", #["Message"]]) &,
-		badRawYint
+		badRawY
 	];
 ];
 
-If[Length[goodRawYint] == 0,
-	Print["No raw admittance spectra could be parsed."];
+If[Length[goodRawY] == 0,
+	Print["No raw total admittance spectra could be parsed."];
 	Abort[];
 ];
 
-rawYintMagTraces   = goodRawYint[[All, "MagTrace"]];
-rawYintPhaseTraces = goodRawYint[[All, "PhaseTrace"]];
-rawYintReTraces    = goodRawYint[[All, "ReTrace"]];
-rawYintImTraces    = goodRawYint[[All, "ImTrace"]];
-rawYintLabels      = goodRawYint[[All, "Label"]];
-rawYintColors      = ColorData["Rainbow"] /@ Rescale[Range[Length[goodRawYint]]];
+rawYMagTraces   = goodRawY[[All, "MagTrace"]];
+rawYPhaseTraces = goodRawY[[All, "PhaseTrace"]];
+rawYReTraces    = goodRawY[[All, "ReTrace"]];
+rawYImTraces    = goodRawY[[All, "ImTrace"]];
+rawYLabels      = goodRawY[[All, "Label"]];
+rawYColors      = ColorData["Rainbow"] /@ Rescale[Range[Length[goodRawY]]];
 
-(* ---------- FIT admittance after removing Rs ---------- *)
-fullFitYintResults =
+(* ---------- FIT total admittance ---------- *)
+fullFitYResults =
 	Table[
 		Module[
 			{
-				spec, raw, tau, g, c0, y0, alphaCPE, useCPE,
-				fRaw, \[Omega], \[CapitalDelta]log, Kmat, YintFit,
+				spec, raw, tau, g, c0, y0, alphaCPE, useCPE, rs,
+				fRaw, \[Omega], \[CapitalDelta]log, Kmat, YintFit, Zfit, Yfit,
 				magTrace, phaseTrace, reTrace, imTrace, file, ok, msg
 			},
 
 			spec = goodSpecs[[k, "Spec"]];
 			file = goodSpecs[[k, "File"]];
-			raw  = Quiet @ Check[ImportEISRaw[file], $Failed];
+			raw  = Quiet @ Check[DCT`Private`importEISTxt[file], $Failed];
 
 			If[
-				raw === $Failed || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"],
-				Return[
-					<|
-						"File" -> file,
-						"Label" -> labels[[k]],
-						"OK" -> False,
-						"Message" -> "raw parse failed or missing FreqHz"
-					|>
-				]
-			];
+				raw === $Failed || FailureQ[raw] || !AssociationQ[raw] || !KeyExistsQ[raw, "FreqHz"],
+				<|
+					"File" -> file,
+					"Label" -> labels[[k]],
+					"OK" -> False,
+					"Message" -> "raw parse failed or missing FreqHz"
+				|>,
 
-			tau = spec["Tau"];
-			g   = spec["g"];
-			c0  = Lookup[spec, "C0", Missing["NotFound"]];
-			y0  = Lookup[spec, "Y0", Missing["NotFound"]];
-			alphaCPE = Lookup[spec, "CPEAlpha", Missing["NotFound"]];
-			useCPE = TrueQ[Lookup[spec, "useConstantPhaseElementFlag", False]];
+				tau = spec["Tau"];
+				g   = spec["g"];
+				c0  = Lookup[spec, "C0", Missing["NotFound"]];
+				y0  = Lookup[spec, "Y0", Missing["NotFound"]];
+				alphaCPE = Lookup[spec, "CPEAlpha", Missing["NotFound"]];
+				useCPE = TrueQ[Lookup[spec, "useConstantPhaseElementFlag", False]];
+				rs = spec["Rs"];
 
-			fRaw = raw["FreqHz"];
-			\[Omega] = 2 Pi fRaw;
+				fRaw = raw["FreqHz"];
+				\[Omega] = 2 Pi fRaw;
 
-			\[CapitalDelta]log = Mean[Differences[Log10[tau]]];
+				\[CapitalDelta]log = Mean[Differences[Log10[tau]]];
 
-			Kmat = Table[
-				(I*\[Omega][[j]])/(1 + I*\[Omega][[j]]*tau[[m]]),
-				{j, Length[\[Omega]]}, {m, Length[tau]}
-			];
-
-			YintFit =
-				If[useCPE,
-					If[!NumericQ[y0] || !NumericQ[alphaCPE],
-						$Failed,
-						y0*(I*\[Omega])^alphaCPE + Kmat . (g * \[CapitalDelta]log)
-					],
-					If[!NumericQ[c0],
-						$Failed,
-						(I*\[Omega])*c0 + Kmat . (g * \[CapitalDelta]log)
-					]
+				Kmat = Table[
+					(I*\[Omega][[j]])/(1 + I*\[Omega][[j]]*tau[[m]]),
+					{j, Length[\[Omega]]}, {m, Length[tau]}
 				];
 
-			If[YintFit === $Failed,
-				Return[
+				YintFit =
+					If[useCPE,
+						If[!NumericQ[y0] || !NumericQ[alphaCPE],
+							$Failed,
+							y0*(I*\[Omega])^alphaCPE + Kmat . (g * \[CapitalDelta]log)
+						],
+						If[!NumericQ[c0],
+							$Failed,
+							(I*\[Omega])*c0 + Kmat . (g * \[CapitalDelta]log)
+						]
+					];
+
+				If[YintFit === $Failed,
 					<|
 						"File" -> file,
 						"Label" -> labels[[k]],
 						"OK" -> False,
 						"Message" -> "missing fit parameters for admittance reconstruction"
-					|>
+					|>,
+
+					If[Min[Abs[YintFit]] < 10^-30,
+						<|
+							"File" -> file,
+							"Label" -> labels[[k]],
+							"OK" -> False,
+							"Message" -> "YintFit too small"
+						|>,
+
+						Zfit = rs + 1/YintFit;
+
+						If[Min[Abs[Zfit]] < 10^-15,
+							<|
+								"File" -> file,
+								"Label" -> labels[[k]],
+								"OK" -> False,
+								"Message" -> "Zfit too small"
+							|>,
+
+							Yfit = 1/Zfit;
+
+							magTrace   = Transpose[{fRaw, Abs[Yfit]}];
+							phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[Yfit]}];
+							reTrace    = Transpose[{fRaw, Re[Yfit]}];
+							imTrace    = Transpose[{fRaw, -Im[Yfit]}];
+
+							ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+								 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+								 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+								 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+							msg = If[ok, "", "fit admittance trace non-numeric"];
+
+							<|
+								"File" -> file,
+								"Label" -> labels[[k]],
+								"FreqHz" -> fRaw,
+								"YFit" -> Yfit,
+								"MagTrace" -> magTrace,
+								"PhaseTrace" -> phaseTrace,
+								"ReTrace" -> reTrace,
+								"ImTrace" -> imTrace,
+								"OK" -> ok,
+								"Message" -> msg
+							|>
+						]
+					]
 				]
-			];
-
-			magTrace   = Transpose[{fRaw, Abs[YintFit]}];
-			phaseTrace = Transpose[{fRaw, (180./Pi) * Arg[YintFit]}];
-			reTrace    = Transpose[{fRaw, Re[YintFit]}];
-			imTrace    = Transpose[{fRaw, -Im[YintFit]}];
-
-			ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
-				 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
-
-			msg = If[ok, "", "fit admittance trace non-numeric"];
-
-			<|
-				"File" -> file,
-				"Label" -> labels[[k]],
-				"FreqHz" -> fRaw,
-				"YIntFit" -> YintFit,
-				"MagTrace" -> magTrace,
-				"PhaseTrace" -> phaseTrace,
-				"ReTrace" -> reTrace,
-				"ImTrace" -> imTrace,
-				"OK" -> ok,
-				"Message" -> msg
-			|>
+			]
 		],
 		{k, Length[goodSpecs]}
 	];
 
-goodFullFitYint = Select[fullFitYintResults, TrueQ[#["OK"]] &];
-badFullFitYint  = Select[fullFitYintResults, !TrueQ[#["OK"]] &];
+goodFullFitY = Select[fullFitYResults, TrueQ[#["OK"]] &];
+badFullFitY  = Select[fullFitYResults, !TrueQ[#["OK"]] &];
 
-If[Length[badFullFitYint] > 0,
+If[Length[badFullFitY] > 0,
 	Print["Failures:"];
 	Scan[
 		(Print["\t", #["File"], " : ", #["Message"]]) &,
-		badFullFitYint
+		badFullFitY
 	];
 ];
 
-If[Length[goodFullFitYint] == 0,
-	Print["No fit admittance spectra could be computed."];
+If[Length[goodFullFitY] == 0,
+	Print["No fit total admittance spectra could be computed."];
 	Abort[];
 ];
 
-fullFitYintMagTraces   = goodFullFitYint[[All, "MagTrace"]];
-fullFitYintPhaseTraces = goodFullFitYint[[All, "PhaseTrace"]];
-fullFitYintReTraces    = goodFullFitYint[[All, "ReTrace"]];
-fullFitYintImTraces    = goodFullFitYint[[All, "ImTrace"]];
-fitYintColors          = ColorData["Rainbow"] /@ Rescale[Range[Length[goodFullFitYint]]];
+fullFitYMagTraces   = goodFullFitY[[All, "MagTrace"]];
+fullFitYPhaseTraces = goodFullFitY[[All, "PhaseTrace"]];
+fullFitYReTraces    = goodFullFitY[[All, "ReTrace"]];
+fullFitYImTraces    = goodFullFitY[[All, "ImTrace"]];
+fitYColors          = ColorData["Rainbow"] /@ Rescale[Range[Length[goodFullFitY]]];
 
 (* ---------- Residual traces ---------- *)
-residualYintResults =
+residualYResults =
 	Table[
 		Module[
 			{
@@ -1275,98 +1808,94 @@ residualYintResults =
 				magResTrace, phaseResTrace, reResTrace, imResTrace
 			},
 
-			rawAssoc = rawYintResults[[k]];
-			fitAssoc = fullFitYintResults[[k]];
+			rawAssoc = rawYResults[[k]] /. HoldPattern[Return[x_]] :> x;
+			fitAssoc = fullFitYResults[[k]] /. HoldPattern[Return[x_]] :> x;
 
-			If[!TrueQ[rawAssoc["OK"]] || !TrueQ[fitAssoc["OK"]],
-				Return[
-					<|
-						"OK" -> False,
-						"Message" -> "raw/fit pair unavailable"
-					|>
-				]
-			];
+			If[!TrueQ[Lookup[rawAssoc, "OK", False]] || !TrueQ[Lookup[fitAssoc, "OK", False]],
+				<|
+					"OK" -> False,
+					"Message" -> "raw/fit pair unavailable"
+				|>,
 
-			fRaw = rawAssoc["FreqHz"];
-			yRaw = rawAssoc["YIntRaw"];
-			yFit = fitAssoc["YIntFit"];
+				fRaw = rawAssoc["FreqHz"];
+				yRaw = rawAssoc["YRaw"];
+				yFit = fitAssoc["YFit"];
 
-			If[Length[fRaw] =!= Length[yRaw] || Length[yRaw] =!= Length[yFit],
-				Return[
+				If[Length[fRaw] =!= Length[yRaw] || Length[yRaw] =!= Length[yFit],
 					<|
 						"OK" -> False,
 						"Message" -> "raw and fit lengths mismatch"
+					|>,
+
+					magResTrace   = Transpose[{fRaw, Abs[(yRaw - yFit)/yRaw]}];
+					phaseResTrace = Transpose[{fRaw, Abs[(180./Pi) Arg[yRaw] - (180./Pi) Arg[yFit]]}];
+					reResTrace    = Transpose[{fRaw, Abs[Re[yRaw] - Re[yFit]]}];
+					imResTrace    = Transpose[{fRaw, Abs[(-Im[yRaw]) - (-Im[yFit])]}];
+
+					<|
+						"OK" -> True,
+						"MagResTrace" -> magResTrace,
+						"PhaseResTrace" -> phaseResTrace,
+						"ReResTrace" -> reResTrace,
+						"ImResTrace" -> imResTrace
 					|>
 				]
-			];
-
-			magResTrace   = Transpose[{fRaw, Abs[(yRaw - yFit)/yRaw]}];
-			phaseResTrace = Transpose[{fRaw, Abs[(180./Pi) Arg[yRaw] - (180./Pi) Arg[yFit]]}];
-			reResTrace    = Transpose[{fRaw, Abs[Re[yRaw] - Re[yFit]]}];
-			imResTrace    = Transpose[{fRaw, Abs[(-Im[yRaw]) - (-Im[yFit])]}];
-
-			<|
-				"OK" -> True,
-				"MagResTrace" -> magResTrace,
-				"PhaseResTrace" -> phaseResTrace,
-				"ReResTrace" -> reResTrace,
-				"ImResTrace" -> imResTrace
-			|>
+			]
 		],
 		{k, Length[files]}
 	];
 
-goodResidualYint = Select[residualYintResults, TrueQ[#["OK"]] &];
+goodResidualY = Select[residualYResults, TrueQ[#["OK"]] &];
 
-If[Length[goodResidualYint] == 0,
-	Print["No residual admittance traces could be computed."];
+If[Length[goodResidualY] == 0,
+	Print["No residual total admittance traces could be computed."];
 	Abort[];
 ];
 
-residualYintMagTraces   = goodResidualYint[[All, "MagResTrace"]];
-residualYintPhaseTraces = goodResidualYint[[All, "PhaseResTrace"]];
-residualYintReTraces    = goodResidualYint[[All, "ReResTrace"]];
-residualYintImTraces    = goodResidualYint[[All, "ImResTrace"]];
-resYintColors           = ColorData["Rainbow"] /@ Rescale[Range[Length[goodResidualYint]]];
+residualYMagTraces   = goodResidualY[[All, "MagResTrace"]];
+residualYPhaseTraces = goodResidualY[[All, "PhaseResTrace"]];
+residualYReTraces    = goodResidualY[[All, "ReResTrace"]];
+residualYImTraces    = goodResidualY[[All, "ImResTrace"]];
+resYColors           = ColorData["Rainbow"] /@ Rescale[Range[Length[goodResidualY]]];
 
 (* ---------- Shared y-axis ranges ---------- *)
 
 allMagY = Select[
 	Join[
-		Flatten[rawYintMagTraces[[All, All, 2]]],
-		Flatten[fullFitYintMagTraces[[All, All, 2]]]
+		Flatten[rawYMagTraces[[All, All, 2]]],
+		Flatten[fullFitYMagTraces[[All, All, 2]]]
 	],
 	NumericQ[#] && # > 0 &
 ];
 
 allPhaseY = Select[
 	Join[
-		Flatten[rawYintPhaseTraces[[All, All, 2]]],
-		Flatten[fullFitYintPhaseTraces[[All, All, 2]]]
+		Flatten[rawYPhaseTraces[[All, All, 2]]],
+		Flatten[fullFitYPhaseTraces[[All, All, 2]]]
 	],
 	NumericQ
 ];
 
 allReY = Select[
 	Join[
-		Flatten[rawYintReTraces[[All, All, 2]]],
-		Flatten[fullFitYintReTraces[[All, All, 2]]]
+		Flatten[rawYReTraces[[All, All, 2]]],
+		Flatten[fullFitYReTraces[[All, All, 2]]]
 	],
 	NumericQ
 ];
 
 allImY = Select[
 	Join[
-		Flatten[rawYintImTraces[[All, All, 2]]],
-		Flatten[fullFitYintImTraces[[All, All, 2]]]
+		Flatten[rawYImTraces[[All, All, 2]]],
+		Flatten[fullFitYImTraces[[All, All, 2]]]
 	],
 	NumericQ
 ];
 
-allMagResY = Select[Flatten[residualYintMagTraces[[All, All, 2]]], NumericQ[#] && # > 0 &];
-allPhaseResY = Select[Flatten[residualYintPhaseTraces[[All, All, 2]]], NumericQ];
-allReResY = Select[Flatten[residualYintReTraces[[All, All, 2]]], NumericQ];
-allImResY = Select[Flatten[residualYintImTraces[[All, All, 2]]], NumericQ];
+allMagResY = Select[Flatten[residualYMagTraces[[All, All, 2]]], NumericQ[#] && # > 0 &];
+allPhaseResY = Select[Flatten[residualYPhaseTraces[[All, All, 2]]], NumericQ];
+allReResY = Select[Flatten[residualYReTraces[[All, All, 2]]], NumericQ];
+allImResY = Select[Flatten[residualYImTraces[[All, All, 2]]], NumericQ];
 
 If[
 	allMagY === {} || allPhaseY === {} || allReY === {} || allImY === {} ||
@@ -1391,80 +1920,80 @@ Print["Shared -Im(Y) y-range = ", imYRange];
 
 (* ---------- Plots ---------- *)
 
-rawYintMagPlot =
+rawYMagPlot =
 	ListLogLogPlot[
-		rawYintMagTraces,
-		PlotStyle -> rawYintColors,
+		rawYMagTraces,
+		PlotStyle -> rawYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "|Yint,raw| (S)"},
+		FrameLabel -> {"Frequency (Hz)", "|Yraw| (S)"},
 		PlotRange -> {All, magYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> Row[{"RAW |Yint|   n=", Length[goodRawYint]}]
+		PlotLabel -> Row[{"RAW |Y|   n=", Length[goodRawY]}]
 	];
 
-fitYintMagPlot =
+fitYMagPlot =
 	ListLogLogPlot[
-		fullFitYintMagTraces,
-		PlotStyle -> fitYintColors,
+		fullFitYMagTraces,
+		PlotStyle -> fitYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "|Yint,fit| (S)"},
+		FrameLabel -> {"Frequency (Hz)", "|Yfit| (S)"},
 		PlotRange -> {All, magYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> Row[{"FIT |Yint|   n=", Length[goodFullFitYint]}]
+		PlotLabel -> Row[{"FIT |Y|   n=", Length[goodFullFitY]}]
 	];
 
-resYintMagPlot =
+resYMagPlot =
 	ListLogLogPlot[
-		residualYintMagTraces,
-		PlotStyle -> resYintColors,
+		residualYMagTraces,
+		PlotStyle -> resYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "|Yraw - Yfit| (S)"},
+		FrameLabel -> {"Frequency (Hz)", "|(Yraw - Yfit)/Yraw|"},
 		PlotRange -> {All, magResYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> "ABS residual |Yraw - Yfit|"
+		PlotLabel -> "ABS residual |(Yraw - Yfit)/Yraw|"
 	];
 
-rawYintPhasePlot =
+rawYPhasePlot =
 	ListLogLinearPlot[
-		rawYintPhaseTraces,
-		PlotStyle -> rawYintColors,
+		rawYPhaseTraces,
+		PlotStyle -> rawYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "Phase(Yint,raw) (deg)"},
+		FrameLabel -> {"Frequency (Hz)", "Phase(Yraw) (deg)"},
 		PlotRange -> {All, phaseYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> Row[{"RAW phase(Yint)   n=", Length[goodRawYint]}]
+		PlotLabel -> Row[{"RAW phase(Y)   n=", Length[goodRawY]}]
 	];
 
-fitYintPhasePlot =
+fitYPhasePlot =
 	ListLogLinearPlot[
-		fullFitYintPhaseTraces,
-		PlotStyle -> fitYintColors,
+		fullFitYPhaseTraces,
+		PlotStyle -> fitYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "Phase(Yint,fit) (deg)"},
+		FrameLabel -> {"Frequency (Hz)", "Phase(Yfit) (deg)"},
 		PlotRange -> {All, phaseYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> Row[{"FIT phase(Yint)   n=", Length[goodFullFitYint]}]
+		PlotLabel -> Row[{"FIT phase(Y)   n=", Length[goodFullFitY]}]
 	];
 
-resYintPhasePlot =
+resYPhasePlot =
 	ListLogLinearPlot[
-		residualYintPhaseTraces,
-		PlotStyle -> resYintColors,
+		residualYPhaseTraces,
+		PlotStyle -> resYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
@@ -1475,87 +2004,85 @@ resYintPhasePlot =
 		PlotLabel -> "ABS phase residual"
 	];
 
-rawYintRePlot =
+rawYRePlot =
 	ListLogLinearPlot[
-		rawYintReTraces,
-		PlotStyle -> rawYintColors,
+		rawYReTraces,
+		PlotStyle -> rawYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "Re(Yint,raw) (S)"},
+		FrameLabel -> {"Frequency (Hz)", "Re(Yraw) (S)"},
 		PlotRange -> {All, reYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> "RAW Re(Yint)"
+		PlotLabel -> "RAW Re(Y)"
 	];
 
-fitYintRePlot =
+fitYRePlot =
 	ListLogLinearPlot[
-		fullFitYintReTraces,
-		PlotStyle -> fitYintColors,
+		fullFitYReTraces,
+		PlotStyle -> fitYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "Re(Yint,fit) (S)"},
+		FrameLabel -> {"Frequency (Hz)", "Re(Yfit) (S)"},
 		PlotRange -> {All, reYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> "FIT Re(Yint)"
+		PlotLabel -> "FIT Re(Y)"
 	];
 
-resYintRePlot =
+resYRePlot =
 	ListLogLinearPlot[
-		residualYintReTraces,
-		PlotStyle -> resYintColors,
+		residualYReTraces,
+		PlotStyle -> resYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
 		FrameLabel -> {"Frequency (Hz)", "|Re raw - fit| (S)"},
-		(* PlotRange -> {All, reResYRange}, *)
-		PlotRange -> {All, {0,0.0001}},
+		PlotRange -> {All, reResYRange},
 		ImageSize -> 900,
 		Background -> White,
 		PlotLabel -> "ABS Re residual"
 	];
 
-rawYintImPlot =
+rawYImPlot =
 	ListLogLinearPlot[
-		rawYintImTraces,
-		PlotStyle -> rawYintColors,
+		rawYImTraces,
+		PlotStyle -> rawYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "-Im(Yint,raw) (S)"},
+		FrameLabel -> {"Frequency (Hz)", "-Im(Yraw) (S)"},
 		PlotRange -> {All, imYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> "RAW -Im(Yint)"
+		PlotLabel -> "RAW -Im(Y)"
 	];
 
-fitYintImPlot =
+fitYImPlot =
 	ListLogLinearPlot[
-		fullFitYintImTraces,
-		PlotStyle -> fitYintColors,
+		fullFitYImTraces,
+		PlotStyle -> fitYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
-		FrameLabel -> {"Frequency (Hz)", "-Im(Yint,fit) (S)"},
+		FrameLabel -> {"Frequency (Hz)", "-Im(Yfit) (S)"},
 		PlotRange -> {All, imYRange},
 		ImageSize -> 900,
 		Background -> White,
-		PlotLabel -> "FIT -Im(Yint)"
+		PlotLabel -> "FIT -Im(Y)"
 	];
 
-resYintImPlot =
+resYImPlot =
 	ListLogLinearPlot[
-		residualYintImTraces,
-		PlotStyle -> resYintColors,
+		residualYImTraces,
+		PlotStyle -> resYColors,
 		Joined -> True,
 		Frame -> True,
 		Axes -> False,
 		FrameLabel -> {"Frequency (Hz)", "|(-Im raw) - (-Im fit)| (S)"},
-		(* PlotRange -> {All, imResYRange}, *)
-		PlotRange -> {All, {0,0.0001}},
+		PlotRange -> {All, imResYRange},
 		ImageSize -> 900,
 		Background -> White,
 		PlotLabel -> "ABS -Im residual"
@@ -1563,16 +2090,411 @@ resYintImPlot =
 
 GraphicsGrid[
 	{
-		{rawYintMagPlot, fitYintMagPlot, resYintMagPlot},
-		{rawYintPhasePlot, fitYintPhasePlot, resYintPhasePlot},
-		{rawYintRePlot, fitYintRePlot, resYintRePlot},
-		{rawYintImPlot, fitYintImPlot, resYintImPlot}
-	}, ImageSize->1200
+		{rawYMagPlot, fitYMagPlot, resYMagPlot},
+		{rawYPhasePlot, fitYPhasePlot, resYPhasePlot}
+		,{rawYRePlot, fitYRePlot, resYRePlot},
+		{rawYImPlot, fitYImPlot, resYImPlot}
+	},
+	ImageSize -> 1200
+]
+
+
+(* ============================================================ *)
+(* Ratio diagnostic in TOTAL admittance space                   *)
+(*   Magnitude: |Yraw / Yfit|                                   *)
+(*   Phase:     Phase(Yraw) - Phase(Yfit)                       *)
+(* ============================================================ *)
+
+If[Length[rawYResults] == 0 || Length[fullFitYResults] == 0,
+	Print["Need rawYResults and fullFitYResults first."];
+	Abort[];
+];
+
+rawYResultsClean     = rawYResults /. HoldPattern[Return[x_]] :> x;
+fullFitYResultsClean = fullFitYResults /. HoldPattern[Return[x_]] :> x;
+
+ratioYResults =
+	Table[
+		Module[
+			{
+				rawAssoc, fitAssoc, fRaw, yRaw, yFit, yRatio,
+				magTrace, phaseDiffTrace
+			},
+
+			rawAssoc = rawYResultsClean[[k]];
+			fitAssoc = fullFitYResultsClean[[k]];
+
+			If[
+				!AssociationQ[rawAssoc] || !AssociationQ[fitAssoc],
+				<|
+					"OK" -> False,
+					"Message" -> "raw/fit entry is not an Association"
+				|>,
+
+				If[
+					!TrueQ[Lookup[rawAssoc, "OK", False]] || !TrueQ[Lookup[fitAssoc, "OK", False]],
+					<|
+						"OK" -> False,
+						"Message" -> "raw/fit pair unavailable"
+					|>,
+
+					fRaw = Lookup[rawAssoc, "FreqHz", Missing["NoFreq"]];
+					yRaw = Lookup[rawAssoc, "YRaw", Missing["NoYRaw"]];
+					yFit = Lookup[fitAssoc, "YFit", Missing["NoYFit"]];
+
+					If[
+						MemberQ[{fRaw, yRaw, yFit}, _Missing],
+						<|
+							"OK" -> False,
+							"Message" -> "missing FreqHz, YRaw, or YFit"
+						|>,
+
+						If[
+							Length[fRaw] =!= Length[yRaw] || Length[yRaw] =!= Length[yFit],
+							<|
+								"OK" -> False,
+								"Message" -> "raw and fit lengths mismatch"
+							|>,
+
+							If[
+								Min[Abs[yFit]] < 10^-30,
+								<|
+									"OK" -> False,
+									"Message" -> "Yfit too small for ratio"
+								|>,
+
+								yRatio = yRaw/yFit;
+
+								magTrace       = Transpose[{fRaw, Abs[yRatio]}];
+								phaseDiffTrace = Transpose[{fRaw, (180./Pi) * (Arg[yRaw] - Arg[yFit])}];
+
+								<|
+									"OK" -> True,
+									"MagTrace" -> magTrace,
+									"PhaseDiffTrace" -> phaseDiffTrace
+								|>
+							]
+						]
+					]
+				]
+			]
+		],
+		{k, Length[rawYResultsClean]}
+	];
+
+goodRatioY = Select[ratioYResults, TrueQ[Lookup[#, "OK", False]] &];
+badRatioY  = Select[ratioYResults, !TrueQ[Lookup[#, "OK", False]] &];
+
+If[Length[badRatioY] > 0,
+	Print["Failures in total-Y ratio traces:"];
+	MapIndexed[
+		Function[{assoc, idx},
+			Print["\ttrace ", First[idx], " : ", Lookup[assoc, "Message", "no message"]]
+		],
+		badRatioY
+	];
+];
+
+If[Length[goodRatioY] == 0,
+	Print["No total-Y ratio traces could be computed."];
+	Abort[];
+];
+
+ratioYMagTraces    = goodRatioY[[All, "MagTrace"]];
+phaseDiffYTraces   = goodRatioY[[All, "PhaseDiffTrace"]];
+ratioYColors       = ColorData["Rainbow"] /@ Rescale[Range[Length[goodRatioY]]];
+
+allRatioMagY = Select[
+	Flatten[ratioYMagTraces[[All, All, 2]]],
+	NumericQ[#] && # > 0 &
+];
+
+allPhaseDiffY = Select[
+	Flatten[phaseDiffYTraces[[All, All, 2]]],
+	NumericQ
+];
+
+If[allRatioMagY === {} || allPhaseDiffY === {},
+	Print["Could not determine total-Y ratio plot ranges."];
+	Abort[];
+];
+
+ratioMagYRange  = {Min[allRatioMagY], Max[allRatioMagY]};
+phaseDiffYRange = {Min[allPhaseDiffY], Max[allPhaseDiffY]};
+
+magRef = LogLinearPlot[
+	1,
+	{x,
+	 Min[Flatten[ratioYMagTraces[[All, All, 1]]]],
+	 Max[Flatten[ratioYMagTraces[[All, All, 1]]]]
+	},
+	PlotStyle -> Directive[Black, Dashed]
+];
+
+phaseRef = LogLinearPlot[
+	0,
+	{x,
+	 Min[Flatten[phaseDiffYTraces[[All, All, 1]]]],
+	 Max[Flatten[phaseDiffYTraces[[All, All, 1]]]]
+	},
+	PlotStyle -> Directive[Black, Dashed]
+];
+
+ratioYMagPlot =
+	Show[
+		ListLogLinearPlot[
+			ratioYMagTraces,
+			PlotStyle -> ratioYColors,
+			Joined -> True,
+			Frame -> True,
+			Axes -> False,
+			FrameLabel -> {"Frequency (Hz)", "|Yraw / Yfit|"},
+			(* PlotRange -> {All, ratioMagYRange}, *)
+			PlotRange -> {All, {0.97,1.03}},
+			ImageSize -> 800,
+			Background -> White,
+			PlotLabel -> "Magnitude ratio for total-system admittance"
+		],
+		magRef
+	];
+
+phaseDiffYPlot =
+	Show[
+		ListLogLinearPlot[
+			phaseDiffYTraces,
+			PlotStyle -> ratioYColors,
+			Joined -> True,
+			Frame -> True,
+			Axes -> False,
+			FrameLabel -> {"Frequency (Hz)", "Phase(Yraw) - Phase(Yfit) (deg)"},
+			(* PlotRange -> {All, phaseDiffYRange}, *)
+			PlotRange -> {All, {-2,2.}},
+			ImageSize -> 800,
+			Background -> White,
+			PlotLabel -> "Phase difference for total-system admittance"
+		],
+		phaseRef
+	];
+
+GraphicsRow[
+	{ratioYMagPlot, phaseDiffYPlot},
+	ImageSize -> 1200
 ]
 
 
 (* ::InheritFromParent:: *)
 (**)
+
+
+(* ::InheritFromParent:: *)
+(**)
+
+
+(* ============================================================ *)
+(* RAW complex capacitance overlays                             *)
+(* Ccomplex = 1/(I w Z)                                          *)
+(*   Row 1: |Ccomplex|                                           *)
+(*   Row 2: Phase(Ccomplex)                                      *)
+(*   Row 3: Re(Ccomplex)                                         *)
+(*   Row 4: Im(Ccomplex)                                         *)
+(* ============================================================ *)
+
+If[Length[goodSpecs] == 0,
+	Print["No goodSpecs to plot."];
+	Abort[];
+];
+
+labels = FileNameTake /@ (goodSpecs[[All, "File"]]);
+files  = goodSpecs[[All, "File"]];
+rawCResults =
+	Table[
+		Module[
+			{
+				file, raw, fRaw, zRaw, omega, cRaw,
+				magTrace, phaseTrace, reTrace, imTrace, ok, msg
+			},
+
+			file = files[[k]];
+			raw  = Quiet @ Check[DCT`Private`importEISTxt[file], $Failed];
+
+			If[
+				raw === $Failed || FailureQ[raw] || !AssociationQ[raw] ||
+				!KeyExistsQ[raw, "FreqHz"] || !KeyExistsQ[raw, "Z"],
+				<|
+					"File" -> file,
+					"Label" -> labels[[k]],
+					"OK" -> False,
+					"Message" -> "raw parse failed"
+				|>,
+
+				fRaw = raw["FreqHz"];
+				zRaw = raw["Z"];
+				omega = 2 Pi fRaw;
+
+				If[
+					Length[fRaw] =!= Length[zRaw] ||
+					Min[Abs[omega]] <= 0 ||
+					Min[Abs[zRaw]] <= 10^-30,
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"OK" -> False,
+						"Message" -> "invalid raw data for capacitance conversion"
+					|>,
+
+					cRaw = 1/(I*omega*zRaw);
+
+					magTrace   = Transpose[{fRaw, 10^6*Abs[cRaw]}];
+					phaseTrace = Transpose[{fRaw, (180./Pi)*Arg[cRaw]}];
+					reTrace    = Transpose[{fRaw, 10^6*Re[cRaw]}];
+					imTrace    = Transpose[{fRaw, -10^6*Im[cRaw]}];
+
+					ok = VectorQ[magTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+						 VectorQ[phaseTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+						 VectorQ[reTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &] &&
+						 VectorQ[imTrace, MatchQ[#, {_?NumericQ, _?NumericQ}] &];
+
+					msg = If[ok, "", "raw complex capacitance trace non-numeric"];
+
+					<|
+						"File" -> file,
+						"Label" -> labels[[k]],
+						"FreqHz" -> fRaw,
+						"CRaw" -> cRaw,
+						"OK" -> ok,
+						"MagTrace" -> magTrace,
+						"PhaseTrace" -> phaseTrace,
+						"ReTrace" -> reTrace,
+						"ImTrace" -> imTrace,
+						"Message" -> msg
+					|>
+				]
+			]
+		],
+		{k, Length[files]}
+	];
+
+goodRawC = Select[rawCResults, TrueQ[#["OK"]] &];
+badRawC  = Select[rawCResults, !TrueQ[#["OK"]] &];
+
+Print["Raw complex capacitance overlay: parsed OK = ", Length[goodRawC], " / ", Length[rawCResults]];
+
+If[Length[badRawC] > 0,
+	Print["Failures:"];
+	Scan[
+		(Print["\t", FileNameTake[#["File"]], " : ", #["Message"]]) &,
+		badRawC
+	];
+];
+
+If[Length[goodRawC] == 0,
+	Print["No raw complex capacitance spectra could be parsed."];
+	Abort[];
+];
+
+rawCMagTraces   = goodRawC[[All, "MagTrace"]];
+rawCPhaseTraces = goodRawC[[All, "PhaseTrace"]];
+rawCReTraces    = goodRawC[[All, "ReTrace"]];
+rawCImTraces    = goodRawC[[All, "ImTrace"]];
+rawCLabels      = goodRawC[[All, "Label"]];
+rawCColors      = ColorData["Rainbow"] /@ Rescale[Range[Length[goodRawC]]];
+
+(* ---------- Plots ---------- *)
+
+rawCMagPlot =
+	ListLogLogPlot[
+		rawCMagTraces,
+		PlotStyle -> rawCColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "|Ccomplex| (\[Micro]F)"},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> Row[{"RAW |Ccomplex|   n=", Length[goodRawC]}]
+	];
+
+rawCPhasePlot =
+	ListLogLinearPlot[
+		rawCPhaseTraces,
+		PlotStyle -> rawCColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Phase(Ccomplex) (deg)"},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> Row[{"RAW Phase(Ccomplex)   n=", Length[goodRawC]}]
+	];
+
+rawCRePlot =
+	ListLogLinearPlot[
+		rawCReTraces,
+		PlotStyle -> rawCColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Re(Ccomplex) (\[Micro]F)"},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "RAW Re(Ccomplex)"
+	];
+
+rawCImPlot =
+	ListLogLinearPlot[
+		rawCImTraces,
+		PlotStyle -> rawCColors,
+		Joined -> True,
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Frequency (Hz)", "Im(Ccomplex) (\[Micro]F)"},
+		ImageSize -> 500,
+		Background -> White,
+		PlotLabel -> "RAW Im(Ccomplex)"
+	];
+
+GraphicsGrid[
+	{
+		{rawCMagPlot},
+		{rawCPhasePlot},
+		{rawCRePlot},
+		{rawCImPlot}
+	},
+	ImageSize -> 600,
+	Spacings -> {0, 0}
+]
+
+
+rawCImPlot
+
+
+fitYintNyquistTraces =
+  Table[
+    Transpose[
+      {
+        fullFitYintReTraces[[i, All, 2]],
+        -fullFitYintImTraces[[i, All, 2]]
+      }
+    ],
+    {i, Length[fullFitYintReTraces]}
+  ];
+
+fitYintNyquistPlot =
+ ListPlot[
+  fitYintNyquistTraces,
+  Joined -> True,
+  PlotStyle -> fitYintColors,
+  Frame -> True,
+  Axes -> False,
+  Background -> White,
+  FrameLabel -> {
+    "Re(Yint) (S)",
+    "-Im(Yint) (S)"
+  },
+  ImageSize -> 700,
+  PlotLabel -> Row[{"Nyquist plot (FIT admittance)   n=", Length[fitYintNyquistTraces]}],
+  PlotRange->{{0,10^-3},{0,10^-3}}
+ ]
 
 
 (* ::InheritFromParent:: *)
@@ -1586,9 +2508,9 @@ GraphicsGrid[
 (* ============================== *)
 (* User control: area window      *)
 (* ============================== *)
-fMinArea = 30/(2 Pi);
+fMinArea = 10/(2 Pi);
 fMaxArea = 500/(2 Pi);
-fMid = 150/(2 Pi);   (* Hz, user-selected split point *)
+fMid = 100/(2 Pi);   (* Hz, user-selected split point *)
 
 kMinArea = 2 Pi fMinArea;   (* s^-1 *)
 kMaxArea = 2 Pi fMaxArea;   (* s^-1 *)
@@ -1769,8 +2691,6 @@ areaResultsWithConc =
 
 Dataset[areaResultsWithConc];
 
-
-
 concTable = areaResultsWithConc[[All, {"File", "Conc_Actual", "Conc_Est"}]];
 Dataset[concTable];
 (* ============================================ *)
@@ -1786,14 +2706,6 @@ getConcFromFile[file_String] := Module[{name, hit},
   If[hit === {}, Missing["NoConc"], ToExpression[First[hit]]]
 ];
 
-getElectrodeFromFile[file_String] := Module[{name, hit},
-  name = FileNameTake[file];
-  hit = StringCases[
-    name,
-    RegularExpression["E(\\d+)"] :> ("E" <> "$1")
-  ];
-  If[hit === {}, Missing["NoElectrode"], First[hit]]
-];
 
 (* ============================================ *)
 (* 2) Langmuir inversion                        *)
@@ -2041,17 +2953,17 @@ Show[
       PlotStyle -> (colors /@ Keys[tracesFB]),
       PlotMarkers -> {Automatic, 9},
       Joined -> False,
-      PlotRange -> {{0, 5 cMax}, {0, 1}}
+      PlotRange -> {{0, cMax}, {0, 1}}
     ],
     Plot[
       langmuirFB[c, KD],
-      {c, 0, 5 cMax},
+      {c, 0,  cMax},
       PlotStyle -> {GrayLevel[0.35], Thick}
     ],
     Plot[
-      langmuirFB[c, KD] + 0.08,
-      {c, 0, 5 cMax},
-      PlotStyle -> {GrayLevel[0.35], Thick}
+      0.58 langmuirFB[c, 70] + 0.08,
+      {c, 0,  cMax},
+      PlotStyle -> {GrayLevel[0.35], Dashed}
     ]
   },
   Frame -> True,
@@ -2217,7 +3129,7 @@ firstMomentPlot =
     {Automatic, None}
   },
 
-  PlotRange -> {Automatic,{0,250}},
+  PlotRange -> {Automatic,{0,350}},
   ImageSize -> 600,
 
   PlotLabel -> Style["Fast and slow state first moment vs time", 16]
@@ -2781,8 +3693,6 @@ yVarPlot =
 meanTableGrid;
 zVarPlot;
 yVarPlot;
-
-
 (* ------------------------------------------------------------ *)
 (* Build labeled subset of Z variance data                      *)
 (* ------------------------------------------------------------ *)
@@ -2865,13 +3775,9 @@ zVarPlot =
 		PlotLabel -> "Impedance variance vs mean (labeled)"
 	];
 
-
-
 (* ------------------------------------------------------------ *)
 (* Build labeled subset of Y variance data                      *)
 (* ------------------------------------------------------------ *)
-
-
 (* extract mean-Y vs variance pairs with their frequencies *)
 yVarFull = Table[
 	{
@@ -2956,3 +3862,8 @@ yVarPlot
 
 
  
+
+
+(* get concnetration by inverting Langmuir isotherm*)
+
+
