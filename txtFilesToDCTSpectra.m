@@ -56,17 +56,7 @@ dataDir = FileNameJoin[{baseDir, "rebodeplotfcc11sh"}];(* ferrocene data in PBS 
 
 
 
-dataDir = FileNameJoin[{baseDir, "2026-04-13"}];(* simulated data generated in Mathematica! *)
-
-
-
-
-
-
-
-
-
-
+dataDir = FileNameJoin[{baseDir, "2026-04-13"}]; (* simulated data generated in Mathematica! *)
 
 
 dataDir = FileNameJoin[{baseDir, "simulated"}];(* simulated data generated in Mathematica! *)
@@ -74,30 +64,36 @@ dataDir = FileNameJoin[{baseDir, "2026-04-13"}];(* ferrocene data in PBS take 2 
 
 
 
-
-
-
-
 dataDir = FileNameJoin[{baseDir, "spike"}];(* second titration in PBS *)
 
 
 
+
 dataDir = FileNameJoin[{baseDir, "drift_03252026", "E3"}];(* PBS *)
+
+
 dataDir = FileNameJoin[{baseDir, "04062026_drift\\drift", "E2"}] (* bovine blood *)
 
+dataDir = FileNameJoin[{baseDir, "260507_temp dependence"}] (* ferrocene temperature *)
 
-lambdaND = 1 10^-3;
+dataDir = FileNameJoin[{baseDir, "20260514_Fc_drift\\drift", "E1"}] (* ferrocene drift *)
+
+
+
+lambdaND = 1 10^-2;
 
 binsPerDecade = 10;
-weightPower = -0.5; (* weight each point inverse to variance *)
+weightPower =-1.0; (* weight each point equally *)
 
-fMinUse =1;      (* Hz *)
-fMaxUse = 400;     (* Hz *)
+weightPower = -1.25; (* weight each point inverse to variance *)
+
+fMinUse =0.01;      (* Hz *)
+fMaxUse = 1000;     (* Hz *)
 
 
 
 (* Optional: restrict the frequency range (must match package options) *)
-paddingDecades = -0.0; (* sets how many decades beyond the measured frequency range the tau values extend *)
+paddingDecades = 0.0; (* sets how many decades beyond the measured frequency range the tau values extend *)
 (* 0 = no padding, 1 = a decade of padding. *)
 
 tauMinFactor = 10^-paddingDecades;
@@ -135,128 +131,165 @@ Print /@ txtFiles; *)
 
 
 (* ============================================================ *)
-(* 2) FIT EACH FILE TO A DCT SPECTRUM                            *)
-(*    - sort by numeric index in parentheses: ... (n).txt        *)
+(* 2) FIT EACH FILE TO A DCT SPECTRUM                           *)
+(*    - sort by numeric index in parentheses: ... (n).txt       *)
 (* ============================================================ *)
 
-(* ---------- helper: "natural" sort by trailing (...) integer ---------- *)
-(* Example: "E1_EIS_15(1).txt" < "E1_EIS_15(26).txt" *)
 fileOrderKey[path_String] := Module[{base, n},
   base = FileBaseName[path];
   n = Quiet @ Check[
-    ToExpression @ StringReplace[base, RegularExpression[".*\\((\\d+)\\)$"] -> "$1"],
-    Missing["NoIndex"]
-  ];
-  If[IntegerQ[n], {StringReplace[base, RegularExpression["\\(\\d+\\)$"] -> ""], n}, {base, Infinity}]
+     ToExpression @ 
+      StringReplace[base, RegularExpression[".*\\((\\d+)\\)$"] -> "$1"],
+     Missing["NoIndex"]
+   ];
+  If[
+   IntegerQ[n],
+   {StringReplace[base, RegularExpression["\\(\\d+\\)$"] -> ""], n},
+   {base, Infinity}
+  ]
 ];
 
-(* Sort the decimated list by the numeric index if present *)
 txtFiles = SortBy[txtFiles, fileOrderKey];
-(* ============================================================ *)
-(* 2) FIT EACH FILE TO A DCT SPECTRUM  (with progress indicator) *)
-(* ============================================================ *)
 
 nFiles = Length[txtFiles];
 i = 0;
 currentFile = "";
 
 results = Monitor[
-  Table[
+   Table[
     Module[{file = f, spec, msg = "", ok = True},
 
-      i++;
-      currentFile = FileNameTake[file];
+     i++;
+     currentFile = FileNameTake[file];
 
-      spec = Quiet[
-        Check[
-          DCT`DCTSpectrum[
-            file,
-            "Debug" -> debugFlag,
-            "LambdaND" -> lambdaND,
-            "FMinUse" -> fMinUse,
-            "FMaxUse" -> fMaxUse,
-            "TauMinFactor" -> tauMinFactor,
-            "TauMaxFactor" -> tauMaxFactor,
-            "BinsPerDecade" -> binsPerDecade,
-            "WeightPower" -> weightPower
-          ],
-          $Failed
+     spec = Quiet[
+       Check[
+        DCT`DCTSpectrum[
+         file,
+         "Debug" -> debugFlag,
+         "LambdaND" -> lambdaND,
+         "FMinUse" -> fMinUse,
+         "FMaxUse" -> fMaxUse,
+         "TauMinFactor" -> tauMinFactor,
+         "TauMaxFactor" -> tauMaxFactor,
+         "BinsPerDecade" -> binsPerDecade,
+         "WeightPower" -> weightPower
         ],
-        {NMinimize::dinfeas}
+        $Failed
+       ],
+       {NMinimize::dinfeas}
       ];
 
-      ok = AssociationQ[spec] &&
-           KeyExistsQ[spec, "Tau"] && KeyExistsQ[spec, "g"] &&
-           VectorQ[spec["Tau"], NumericQ] && VectorQ[spec["g"], NumericQ] &&
-           Length[spec["Tau"]] == Length[spec["g"]];
+     ok =
+      AssociationQ[spec] &&
+       And @@ (KeyExistsQ[spec, #] & /@ {
+           "Tau", "g", "C0", "Rs", "FreqHz", "ZData", "ZFit"
+          }) &&
+       Length[spec["Tau"]] == Length[spec["g"]] &&
+       Length[spec["Tau"]] > 0 &&
+       Length[spec["FreqHz"]] == Length[spec["ZData"]] &&
+       Length[spec["FreqHz"]] == Length[spec["ZFit"]] &&
+       VectorQ[N[spec["Tau"]], NumericQ] &&
+       VectorQ[N[spec["g"]], NumericQ] &&
+       NumericQ[N[spec["C0"]]] &&
+       NumericQ[N[spec["Rs"]]];
 
-      If[!ok,
-        msg = If[spec === $Failed,
-          "DCTSpectrum returned $Failed",
-          "DCTSpectrum did not return a valid Association"
-        ];
-      ];
+     If[! ok,
+      msg =
+       If[
+        spec === $Failed,
+        "DCTSpectrum returned $Failed",
+        If[
+         AssociationQ[spec],
+         "DCTSpectrum returned Association but failed validation. Keys = " <>
+          ToString[Keys[spec]],
+         "DCTSpectrum did not return an Association. Head = " <>
+          ToString[Head[spec]]
+        ]
+       ];
+      Print["Fit rejected for ", FileNameTake[file], ": ", msg];
+     ];
 
-      <|"File" -> file, "Spec" -> spec, "OK" -> ok, "Message" -> msg|>
+     <|"File" -> file, "Spec" -> spec, "OK" -> ok, "Message" -> msg|>
     ],
     {f, txtFiles}
-  ],
-  Column[{
-    Style["DCT batch progress", 14, Bold],
-    Row[{
-      ProgressIndicator[i/nFiles, {0, 1}],
-      "  ",
-      NumberForm[100. i/nFiles, {3, 1}], "%   (", i, "/", nFiles, ")"
-    }],
-    Row[{"Current file:  ", Style[currentFile, 12]}]
-  }]
-];
+   ],
+   Column[{
+     Style["DCT batch progress", 14, Bold],
+     Row[{
+       ProgressIndicator[i/Max[nFiles, 1], {0, 1}],
+       "  ",
+       NumberForm[100. i/Max[nFiles, 1], {3, 1}],
+       "%   (", i, "/", nFiles, ")"
+      }],
+     Row[{"Current file:  ", Style[currentFile, 12]}]
+    }]
+  ];
 
 nOK = Count[results[[All, "OK"]], True];
 Print["Succeeded on ", nOK, " / ", Length[txtFiles], " files."];
 
 (* ============================================================ *)
-(* 3) PLOT RESULTS (rainbow by file order)                       *)
+(* 3) PLOT DCT RESULTS                                          *)
 (* ============================================================ *)
 
 goodSpecs = Select[results, #OK === True &];
 
 If[Length[goodSpecs] == 0,
   Print["No successful fits to plot."];
+  failures = Select[results, #OK =!= True &];
+  If[Length[failures] > 0,
+   Print["\nFailures:"];
+   Do[
+    Print["  ", FileNameTake[fail["File"]], " : ", fail["Message"]],
+    {fail, failures}
+   ];
+  ];
   Abort[];
 ];
 
 traces = (Transpose[{#Spec["Tau"], #Spec["g"]}] &) /@ goodSpecs;
 labels = FileNameTake /@ (goodSpecs[[All, "File"]]);
 
-(* rainbow colors in the same order as traces *)
-colors = ColorData["Rainbow"] /@ Rescale[Range[Length[traces]]];
+colors =
+  If[
+   Length[traces] <= 1,
+   {ColorData["Rainbow"][0.2]},
+   Table[
+    ColorData["Rainbow"][u],
+    {u, 0.05, 0.95, (0.95 - 0.05)/(Length[traces] - 1)}
+   ]
+  ];
 
-Show[
-  ListLinePlot[
-    traces,
-    PlotStyle -> colors,
-    ScalingFunctions -> {"Log10", None},
-    Frame -> True,
-    FrameLabel -> {"\[Tau] (s)", "g(\[Tau]) (F/decade)"},
-    PlotRange -> {Automatic, All},
-    PlotLegends -> Placed[labels, Right],
-    ImageSize -> 700
-  ]
-];
+ListLinePlot[
+ traces,
+ Joined -> True,
+ PlotStyle -> (Directive[#, AbsoluteThickness[2.2]] & /@ colors),
+ ScalingFunctions -> {"Log10", None},
+ Frame -> True,
+ Axes -> False,
+ FrameLabel -> {"\[Tau] (s)", "g(\[Tau]) (F/decade)"},
+ PlotRange -> {Automatic, All},
+ PlotLegends -> Placed[LineLegend[colors, labels], Right],
+ ImageSize -> 700
+]
 
 (* ============================================================ *)
-(* OPTIONAL: PRINT FAILURES                                      *)
+(* OPTIONAL: PRINT FAILURES                                     *)
 (* ============================================================ *)
 
 failures = Select[results, #OK =!= True &];
+
 If[Length[failures] > 0,
-  Print["\nFailures:"];
-  Do[
-    Print["  ", FileNameTake[fail["File"]], " : ", fail["Message"]],
-    {fail, failures}
-  ];
+ Print["\nFailures:"];
+ Do[
+  Print["  ", FileNameTake[fail["File"]], " : ", fail["Message"]],
+  {fail, failures}
+ ];
 ];
+
+
+
 
 
 (* ============================================================ *)
@@ -345,7 +378,7 @@ dctPlot =
   
   LabelStyle -> Directive[Black, 16],
   
-  PlotRange -> {Automatic, {0, 80}},
+  PlotRange -> {Automatic, {0, 300}},
   
   ImageSize -> 800,
   
@@ -372,6 +405,146 @@ capSummary =
   {i, 1, n}
  ];
 
+
+
+(* ============================================================ *)
+(* Filtered DCT plot: E0 only, colored by temperature            *)
+(* ============================================================ *)
+
+tracesKAll =
+  (Transpose[{1/#Spec["Tau"], 10^6*#Spec["g"]}] &) /@ goodSpecs;
+
+labelsAll =
+  FileNameTake /@ (goodSpecs[[All, "File"]]);
+
+e0Mask =
+  StringContainsQ[#, "E0_"] & /@ labelsAll;
+
+tracesKE0 = Pick[tracesKAll, e0Mask];
+labelsE0 = Pick[labelsAll, e0Mask]
+
+If[Length[tracesKE0] == 0,
+  Print["No E0 traces found."];
+  Abort[];
+];
+
+tempColor[label_] :=
+  Which[
+    StringContainsQ[label, "20C"], Yellow,
+    StringContainsQ[label, "30C"], Orange,
+    StringContainsQ[label, "40C"], Red,
+    True, Gray
+  ];
+lineStylesE0 =
+  Table[
+    Which[
+      StringContainsQ[labelsE0[[i]], "_1_"],
+        Directive[tempColor[labelsE0[[i]]], AbsoluteThickness[2.5]],
+
+      StringContainsQ[labelsE0[[i]], "_2_"],
+        Directive[tempColor[labelsE0[[i]]], AbsoluteThickness[2.5], Dashed],
+
+      StringContainsQ[labelsE0[[i]], "_3_"],
+        Directive[tempColor[labelsE0[[i]]], AbsoluteThickness[2.5], DotDashed],
+
+      True,
+        Directive[tempColor[labelsE0[[i]]], AbsoluteThickness[2.5]]
+    ],
+    {i, Length[labelsE0]}
+  ];
+  
+dctPlotE0 =
+  ListLinePlot[
+    tracesKE0,
+    PlotStyle -> lineStylesE0,
+    ScalingFunctions -> {"Log10", None},
+    Frame -> True,
+    Axes -> False,
+    Background -> White,
+    FrameStyle -> Directive[Black, Thickness[0.002]],
+    FrameLabel -> {
+      Style["Electron-transfer rate k (s^-1)", 17],
+      Style["g(k) (\[Micro]F/decade)", 17]
+    },
+    LabelStyle -> Directive[Black, 16],
+    PlotRange -> {Automatic, {0, 10}},
+    ImageSize -> 800,
+    PlotLegends -> Placed[
+      LineLegend[lineStylesE0, labelsE0],
+      Right
+    ]
+  ];
+
+dctPlotE0
+
+
+(* ============================================================ *)
+(* E0 DCT plots: one panel per electrode, colored by temperature *)
+(* ============================================================ *)
+
+tracesKAll =
+  (Transpose[{1/#Spec["Tau"], 10^6*#Spec["g"]}] &) /@ goodSpecs;
+
+labelsAll = FileNameTake /@ (goodSpecs[[All, "File"]]);
+
+e0Mask = StringContainsQ[#, "E0_"] & /@ labelsAll;
+
+tracesKE0 = Pick[tracesKAll, e0Mask];
+labelsE0 = Pick[labelsAll, e0Mask];
+
+If[Length[tracesKE0] == 0,
+  Print["No E0 traces found."];
+  Abort[];
+];
+
+tempColor[label_] :=
+  Which[
+    StringContainsQ[label, "20C"], Yellow,
+    StringContainsQ[label, "30C"], Orange,
+    StringContainsQ[label, "40C"], Red,
+    True, Gray
+  ];
+
+makeElectrodePlot[eTag_] := Module[
+  {mask, traces, labels, styles},
+  
+  mask = StringContainsQ[#, eTag] & /@ labelsE0;
+  traces = Pick[tracesKE0, mask];
+  labels = Pick[labelsE0, mask];
+  styles = Directive[tempColor[#], AbsoluteThickness[3]] & /@ labels;
+  
+  ListLinePlot[
+    traces,
+    PlotStyle -> styles,
+    ScalingFunctions -> {"Log10", None},
+    Frame -> True,
+    Axes -> False,
+    Background -> White,
+    FrameStyle -> Directive[Black, Thickness[0.002]],
+    FrameLabel -> {
+      Style["k (s^-1)", 15],
+      Style["g(k) (\[Mu]F/decade)", 15]
+    },
+    LabelStyle -> Directive[Black, 14],
+    PlotRange -> {Automatic, {0, 10}},
+    ImageSize -> 420,
+    PlotLabel -> Style["Electrode " <> StringReplace[eTag, {"_" -> ""}], 16],
+    PlotLegends -> Placed[
+      LineLegend[styles, labels],
+      Below
+    ]
+  ]
+];
+
+GraphicsGrid[
+  {{
+    makeElectrodePlot["_1_"],
+    makeElectrodePlot["_2_"],
+    makeElectrodePlot["_3_"]
+  }},
+  ImageSize -> 1300,
+  Spacings -> {0.5, 0.5}
+]
 
 
 (* ============================================================ *)
@@ -661,7 +834,7 @@ plotE1 =
         ],
         Style["g(k) (F/decade)", 18, Black, FontFamily -> "Arial"]
       },
-      PlotRange -> {Automatic, {0, 0.6 10^-6}},
+      PlotRange -> {Automatic, {0, 300 10^-6}},
       PlotRangePadding -> {{Scaled[0.02], Scaled[0.02]}, {Scaled[0.02], Scaled[0.04]}},
       ImageSize -> 400,
       AspectRatio -> 0.68,
@@ -1909,7 +2082,7 @@ phaseYRange    = {Min[allPhaseY], Max[allPhaseY]};
 reYRange       = {Min[allReY], Max[allReY]};
 imYRange       = {Min[allImY], Max[allImY]};
 magResYRange   = {Min[allMagResY], Max[allMagResY]};
-phaseResYRange = {Min[allPhaseResY], Max[allPhaseResY]};
+phaseResYRange = {Min[allPhaseResY], Min[10,Max[allPhaseResY]]};
 reResYRange    = {Min[allReResY], Max[allReResY]};
 imResYRange    = {Min[allImResY], Max[allImResY]};
 
@@ -2468,33 +2641,144 @@ GraphicsGrid[
 rawCImPlot
 
 
-fitYintNyquistTraces =
-  Table[
-    Transpose[
-      {
-        fullFitYintReTraces[[i, All, 2]],
-        -fullFitYintImTraces[[i, All, 2]]
-      }
-    ],
-    {i, Length[fullFitYintReTraces]}
-  ];
+(* ============================================================ *)
+(* Nyquist plots for RAW and FIT impedance                      *)
+(* ============================================================ *)
 
-fitYintNyquistPlot =
- ListPlot[
-  fitYintNyquistTraces,
-  Joined -> True,
-  PlotStyle -> fitYintColors,
-  Frame -> True,
-  Axes -> False,
-  Background -> White,
-  FrameLabel -> {
-    "Re(Yint) (S)",
-    "-Im(Yint) (S)"
-  },
-  ImageSize -> 700,
-  PlotLabel -> Row[{"Nyquist plot (FIT admittance)   n=", Length[fitYintNyquistTraces]}],
-  PlotRange->{{0,10^-3},{0,10^-3}}
- ]
+(* ---------- RAW Z traces DIRECTLY from imported Z ---------- *)
+
+rawZResults =
+	Table[
+		Module[
+			{
+				file, raw, zRaw, trace, ok
+			},
+
+			file = files[[k]];
+			raw = Quiet @ Check[DCT`Private`importEISTxt[file], $Failed];
+
+			If[
+				raw === $Failed || FailureQ[raw] || !AssociationQ[raw] ||
+				!KeyExistsQ[raw, "Z"],
+
+				<|
+					"OK" -> False,
+					"File" -> file
+				|>,
+
+				zRaw = raw["Z"];
+
+				trace =
+					Transpose[
+						{
+							Re[zRaw],
+							-Im[zRaw]
+						}
+					];
+
+				ok =
+					VectorQ[
+						trace,
+						MatchQ[#, {_?NumericQ, _?NumericQ}] &
+					];
+
+				<|
+					"OK" -> ok,
+					"File" -> file,
+					"Trace" -> trace
+				|>
+			]
+		],
+		{k, Length[files]}
+	];
+
+goodRawZ = Select[rawZResults, TrueQ[#["OK"]] &];
+
+rawZTraces = goodRawZ[[All, "Trace"]];
+
+(* ---------- FIT Z traces ---------- *)
+
+fitZTraces =
+	Table[
+		Transpose[
+			{
+				Re[1/goodFullFitY[[k, "YFit"]]],
+				-Im[1/goodFullFitY[[k, "YFit"]]]
+			}
+		],
+		{k, Length[goodFullFitY]}
+	];
+
+(* ---------- Shared axis range ---------- *)
+
+allNyquistVals =
+	Select[
+		Join[
+			Flatten[rawZTraces[[All, All, 1]]],
+			Flatten[rawZTraces[[All, All, 2]]],
+			Flatten[fitZTraces[[All, All, 1]]],
+			Flatten[fitZTraces[[All, All, 2]]]
+		],
+		NumericQ
+	];
+
+nyquistMax = Max[allNyquistVals];
+
+Print["Nyquist max = ", nyquistMax];
+
+scaleFactor = 1;
+
+(* ---------- RAW Nyquist ---------- *)
+
+rawNyquistPlot =
+	ListLinePlot[
+		rawZTraces,
+		PlotStyle -> rawYColors,
+		Frame -> True,
+		Axes -> False,
+		AspectRatio -> 1,
+		FrameLabel -> {
+			"Re(Z) (\[CapitalOmega])",
+			"-Im(Z) (\[CapitalOmega])"
+		},
+		PlotRange -> {
+			{0, nyquistMax/scaleFactor},
+			{0, nyquistMax/scaleFactor}
+		},
+		ImageSize -> 700,
+		Background -> White,
+		PlotLabel -> Row[{"RAW Nyquist   n=", Length[goodRawZ]}]
+	];
+
+(* ---------- FIT Nyquist ---------- *)
+
+fitNyquistPlot =
+	ListLinePlot[
+		fitZTraces,
+		PlotStyle -> fitYColors,
+		Frame -> True,
+		Axes -> False,
+		AspectRatio -> 1,
+		FrameLabel -> {
+			"Re(Z) (\[CapitalOmega])",
+			"-Im(Z) (\[CapitalOmega])"
+		},
+		PlotRange -> {
+			{0, nyquistMax/scaleFactor},
+			{0, nyquistMax/scaleFactor}
+		},
+		ImageSize -> 700,
+		Background -> White,
+		PlotLabel -> Row[{"FIT Nyquist   n=", Length[goodFullFitY]}]
+	];
+
+GraphicsRow[
+	{
+		rawNyquistPlot,
+		fitNyquistPlot
+	},
+	ImageSize -> 1400
+]
 
 
 (* ::InheritFromParent:: *)
@@ -3189,27 +3473,24 @@ Column[
 
 (* ============================================================ *)
 (* TIME-SERIES / PSD ANALYSIS OF EIS FOURIER COMPONENTS         *)
-(* Uses already-built goodRawZ and goodSpecs                    *)
-(* Last 10 hours only                                           *)
-(* Outputs:                                                     *)
-(*   1) Overlay PSD plot for all EIS frequencies               *)
-(*   2) Table of mean Z quantities vs frequency                *)
-(*   3) Variance vs mean for impedance                         *)
-(*   4) Variance vs mean for admittance after subtracting Rs   *)
+(* Re-imports raw Z directly from files in goodSpecs             *)
+(* Last 20 hours only                                           *)
 (* ============================================================ *)
 
-If[Length[goodRawZ] == 0 || Length[goodSpecs] == 0,
-	Print["goodRawZ or goodSpecs is empty."];
+If[Length[goodSpecs] == 0,
+	Print["goodSpecs is empty."];
 	Abort[];
 ];
 
 (* ---------- helper to pull finish times ---------- *)
+
 finishTimesS = Lookup[goodSpecs[[All, "Spec"]], "FinishTimeS", Missing["NoTime"]];
 
-validTimeIdx = Select[
-	Range[Length[goodRawZ]],
-	NumericQ[finishTimesS[[#]]] &
-];
+validTimeIdx =
+	Select[
+		Range[Length[goodSpecs]],
+		NumericQ[finishTimesS[[#]]] &
+	];
 
 If[Length[validTimeIdx] < 20,
 	Print["Too few spectra with valid FinishTimeS."];
@@ -3217,41 +3498,54 @@ If[Length[validTimeIdx] < 20,
 ];
 
 timesSAll = finishTimesS[[validTimeIdx]];
-rawSubsetAll = goodRawZ[[validTimeIdx]];
 specSubsetAll = goodSpecs[[validTimeIdx]];
 
 tMax = Max[timesSAll];
 tMinKeep = tMax - 20.*3600.;
 
-keepLast10h = Map[# >= tMinKeep &, timesSAll];
+keepLast20h = Map[# >= tMinKeep &, timesSAll];
 
-timesS = Pick[timesSAll, keepLast10h];
-rawSubset = Pick[rawSubsetAll, keepLast10h];
-specSubset = Pick[specSubsetAll, keepLast10h];
+timesS = Pick[timesSAll, keepLast20h];
+specSubset = Pick[specSubsetAll, keepLast20h];
 
-If[Length[rawSubset] < 20,
+If[Length[specSubset] < 20,
 	Print["Too few spectra in last 20 hours."];
 	Abort[];
 ];
 
 (* ---------- sort by time ---------- *)
+
 ord = Ordering[timesS];
 timesS = timesS[[ord]];
-rawSubset = rawSubset[[ord]];
 specSubset = specSubset[[ord]];
 
 timesHr = (timesS - Min[timesS])/3600.0;
-nSpec = Length[rawSubset];
+nSpec = Length[specSubset];
 
-Print["Using ", nSpec, " spectra from last 10 hours."];
+Print["Using ", nSpec, " spectra from last 20 hours."];
+
+(* ---------- re-import raw files directly ---------- *)
+
+rawImportedSubset =
+	Table[
+		DCT`Private`importEISTxt[specSubset[[k, "File"]]],
+		{k, 1, nSpec}
+	];
+
+If[!VectorQ[rawImportedSubset, AssociationQ],
+	Print["At least one raw file failed to import."];
+	Abort[];
+];
 
 (* ---------- common frequency grid check ---------- *)
-freqTemplate = rawSubset[[1, "FreqHz"]];
 
-sameFreqGridQ = And @@ Table[
-	rawSubset[[k, "FreqHz"]] === freqTemplate,
-	{k, 2, nSpec}
-];
+freqTemplate = rawImportedSubset[[1, "FreqHz"]];
+
+sameFreqGridQ =
+	And @@ Table[
+		rawImportedSubset[[k, "FreqHz"]] === freqTemplate,
+		{k, 2, nSpec}
+	];
 
 If[!sameFreqGridQ,
 	Print["Frequency grids are not identical across spectra."];
@@ -3262,27 +3556,42 @@ freqList = N[freqTemplate];
 nFreq = Length[freqList];
 
 (* ---------- build matrices ---------- *)
-zMat = Table[
-	rawSubset[[k, "ZRaw"]],
-	{k, 1, nSpec}
+
+zMat =
+	Table[
+		rawImportedSubset[[k, "Z"]],
+		{k, 1, nSpec}
+	];
+
+If[!MatrixQ[zMat, NumericQ],
+	Print["zMat is not numeric. Check imported Z values."];
+	Abort[];
 ];
 
-rsVec = Table[
-	specSubset[[k, "Spec", "Rs"]],
-	{k, 1, nSpec}
-];
+rsVec =
+	Table[
+		specSubset[[k, "Spec", "Rs"]],
+		{k, 1, nSpec}
+	];
 
 If[!VectorQ[rsVec, NumericQ],
 	Print["Could not extract numeric Rs values from goodSpecs."];
 	Abort[];
 ];
 
-yMat = Table[
-	1/(zMat[[k]] - rsVec[[k]]),
-	{k, 1, nSpec}
+yMat =
+	Table[
+		1/(zMat[[k]] - rsVec[[k]]),
+		{k, 1, nSpec}
+	];
+
+If[!MatrixQ[yMat, NumericQ],
+	Print["yMat is not numeric. Check zMat and Rs values."];
+	Abort[];
 ];
 
 (* ---------- sampling interval estimate ---------- *)
+
 dtList = Differences[timesS];
 dtMed = Median[dtList];
 
@@ -3292,19 +3601,28 @@ If[!NumericQ[dtMed] || dtMed <= 0,
 ];
 
 fsTime = 1./dtMed;
+
 Print["Median sampling interval = ", NumberForm[dtMed, {8, 2}], " s"];
 Print["Effective time-series sample rate = ", NumberForm[fsTime, {8, 5}], " Hz"];
 
 (* ---------- simple periodogram PSD helper ---------- *)
+
 clearPSD[x_List, dt_?NumericQ] := Module[
-	{
-		x0, n, fs, fft, kmax, psd, ff
-	},
+	{x0, n, fs, fft, kmax, psd, ff},
+
 	n = Length[x];
-	If[n < 4, Return[<|"PSDfreq" -> {}, "PSD" -> {}|>]];
+
+	If[n < 4,
+		Return[<|"PSDfreq" -> {}, "PSD" -> {}|>]
+	];
+
+	If[!VectorQ[x, NumericQ],
+		Return[<|"PSDfreq" -> {}, "PSD" -> {}|>]
+	];
 
 	fs = 1./dt;
 	x0 = N[x - Mean[x]];
+
 	fft = Fourier[x0, FourierParameters -> {1, -1}];
 
 	kmax = Floor[n/2];
@@ -3312,7 +3630,7 @@ clearPSD[x_List, dt_?NumericQ] := Module[
 	ff = Range[0, kmax] * fs/n;
 	psd = (1./(fs*n)) * Abs[fft[[1 ;; kmax + 1]]]^2;
 
-	If[kmax >= 1,
+	If[kmax >= 2,
 		psd[[2 ;; -2]] = 2.0 * psd[[2 ;; -2]];
 	];
 
@@ -3320,87 +3638,106 @@ clearPSD[x_List, dt_?NumericQ] := Module[
 ];
 
 (* ---------- compute PSD and statistics at each EIS frequency ---------- *)
-psdResults = Table[
-	Module[
-		{
-			f = freqList[[j]],
-			zSeries, ySeries,
-			zMagSeries, zReSeries, zImSeries,
-			yMagSeries, yReSeries, yImSeries,
-			psdZMag, meanZMag, varZMagRaw, varZMagPSD,
-			psdYMag, meanYMag, varYMagRaw, varYMagPSD,
-			meanZRe, meanNegZIm, varZReRaw, varNegZImRaw,
-			meanYRe, meanNegYIm, varYReRaw, varNegYImRaw
-		},
 
-		zSeries = zMat[[All, j]];
-		ySeries = yMat[[All, j]];
+psdResults =
+	Table[
+		Module[
+			{
+				f = freqList[[j]],
+				zSeries, ySeries,
+				zMagSeries, zReSeries, zImSeries,
+				yMagSeries, yReSeries, yImSeries,
+				psdZMag, meanZMag, varZMagRaw, varZMagPSD,
+				psdYMag, meanYMag, varYMagRaw, varYMagPSD,
+				meanZRe, meanNegZIm, varZReRaw, varNegZImRaw,
+				meanYRe, meanNegYIm, varYReRaw, varNegYImRaw
+			},
 
-		zMagSeries = Abs[zSeries];
-		zReSeries = Re[zSeries];
-		zImSeries = -Im[zSeries];
+			zSeries = zMat[[All, j]];
+			ySeries = yMat[[All, j]];
 
-		yMagSeries = Abs[ySeries];
-		yReSeries = Re[ySeries];
-		yImSeries = -Im[ySeries];
+			If[!VectorQ[zSeries, NumericQ] || !VectorQ[ySeries, NumericQ],
+				Return[<|"OK" -> False, "Freq" -> f|>]
+			];
 
-		psdZMag = clearPSD[zMagSeries, dtMed];
-		psdYMag = clearPSD[yMagSeries, dtMed];
+			zMagSeries = Abs[zSeries];
+			zReSeries = Re[zSeries];
+			zImSeries = -Im[zSeries];
 
-		meanZMag = Mean[zMagSeries];
-		varZMagRaw = Variance[zMagSeries];
-		varZMagPSD = Total[Most[psdZMag["PSD"]] * Differences[psdZMag["PSDfreq"]]];
+			yMagSeries = Abs[ySeries];
+			yReSeries = Re[ySeries];
+			yImSeries = -Im[ySeries];
 
-		meanYMag = Mean[yMagSeries];
-		varYMagRaw = Variance[yMagSeries];
-		varYMagPSD = Total[Most[psdYMag["PSD"]] * Differences[psdYMag["PSDfreq"]]];
+			psdZMag = clearPSD[zMagSeries, dtMed];
+			psdYMag = clearPSD[yMagSeries, dtMed];
 
-		meanZRe = Mean[zReSeries];
-		meanNegZIm = Mean[zImSeries];
-		varZReRaw = Variance[zReSeries];
-		varNegZImRaw = Variance[zImSeries];
+			meanZMag = Mean[zMagSeries];
+			varZMagRaw = Variance[zMagSeries];
+			varZMagPSD =
+				If[
+					Length[psdZMag["PSDfreq"]] > 2,
+					Total[Most[psdZMag["PSD"]] * Differences[psdZMag["PSDfreq"]]],
+					Missing["NoPSD"]
+				];
 
-		meanYRe = Mean[yReSeries];
-		meanNegYIm = Mean[yImSeries];
-		varYReRaw = Variance[yReSeries];
-		varNegYImRaw = Variance[yImSeries];
+			meanYMag = Mean[yMagSeries];
+			varYMagRaw = Variance[yMagSeries];
+			varYMagPSD =
+				If[
+					Length[psdYMag["PSDfreq"]] > 2,
+					Total[Most[psdYMag["PSD"]] * Differences[psdYMag["PSDfreq"]]],
+					Missing["NoPSD"]
+				];
 
-		<|
-			"Freq" -> f,
+			meanZRe = Mean[zReSeries];
+			meanNegZIm = Mean[zImSeries];
+			varZReRaw = Variance[zReSeries];
+			varNegZImRaw = Variance[zImSeries];
 
-			"PSDfreq" -> psdZMag["PSDfreq"],
-			"PSD" -> psdZMag["PSD"],
+			meanYRe = Mean[yReSeries];
+			meanNegYIm = Mean[yImSeries];
+			varYReRaw = Variance[yReSeries];
+			varNegYImRaw = Variance[yImSeries];
 
-			"MeanZMag" -> meanZMag,
-			"VarZMagRaw" -> varZMagRaw,
-			"VarZMagPSD" -> varZMagPSD,
-			"MeanZRe" -> meanZRe,
-			"MeanNegZIm" -> meanNegZIm,
-			"VarZReRaw" -> varZReRaw,
-			"VarNegZImRaw" -> varNegZImRaw,
+			<|
+				"OK" -> True,
+				"Freq" -> f,
 
-			"MeanYMag" -> meanYMag,
-			"VarYMagRaw" -> varYMagRaw,
-			"VarYMagPSD" -> varYMagPSD,
-			"MeanYRe" -> meanYRe,
-			"MeanNegYIm" -> meanNegYIm,
-			"VarYReRaw" -> varYReRaw,
-			"VarNegYImRaw" -> varNegYImRaw
-		|>
-	],
-	{j, 1, nFreq}
-];
+				"PSDfreq" -> psdZMag["PSDfreq"],
+				"PSD" -> psdZMag["PSD"],
 
-goodPSDResults = Select[
-	psdResults,
-	AssociationQ[#] &&
-	KeyExistsQ[#, "PSDfreq"] &&
-	KeyExistsQ[#, "PSD"] &&
-	VectorQ[#["PSDfreq"], NumericQ] &&
-	VectorQ[#["PSD"], NumericQ] &&
-	Length[#["PSDfreq"]] == Length[#["PSD"]] &&
-	Length[#["PSDfreq"]] > 2 &
-];
+				"MeanZMag" -> meanZMag,
+				"VarZMagRaw" -> varZMagRaw,
+				"VarZMagPSD" -> varZMagPSD,
+				"MeanZRe" -> meanZRe,
+				"MeanNegZIm" -> meanNegZIm,
+				"VarZReRaw" -> varZReRaw,
+				"VarNegZImRaw" -> varNegZImRaw,
+
+				"MeanYMag" -> meanYMag,
+				"VarYMagRaw" -> varYMagRaw,
+				"VarYMagPSD" -> varYMagPSD,
+				"MeanYRe" -> meanYRe,
+				"MeanNegYIm" -> meanNegYIm,
+				"VarYReRaw" -> varYReRaw,
+				"VarNegYImRaw" -> varNegYImRaw
+			|>
+		],
+		{j, 1, nFreq}
+	];
+
+goodPSDResults =
+	Select[
+		psdResults,
+		AssociationQ[#] &&
+			TrueQ[Lookup[#, "OK", False]] &&
+			KeyExistsQ[#, "PSDfreq"] &&
+			KeyExistsQ[#, "PSD"] &&
+			VectorQ[#["PSDfreq"], NumericQ] &&
+			VectorQ[#["PSD"], NumericQ] &&
+			Length[#["PSDfreq"]] == Length[#["PSD"]] &&
+			Length[#["PSDfreq"]] > 2 &
+	];
 
 If[Length[goodPSDResults] == 0,
 	Print["No valid PSD results found."];
@@ -3408,12 +3745,15 @@ If[Length[goodPSDResults] == 0,
 ];
 
 (* ---------- overlay PSD plot ---------- *)
-psdCurves = Transpose[{#["PSDfreq"]*3600, #["PSD"]}] & /@ goodPSDResults;
 
-psdLabels = Table[
-	ToString@NumberForm[goodPSDResults[[k, "Freq"]], {7, 2}] <> " Hz",
-	{k, Length[goodPSDResults]}
-];
+psdCurves =
+	Transpose[{#["PSDfreq"]*3600, #["PSD"]}] & /@ goodPSDResults;
+
+psdLabels =
+	Table[
+		ToString@NumberForm[goodPSDResults[[k, "Freq"]], {7, 2}] <> " Hz",
+		{k, Length[goodPSDResults]}
+	];
 
 psdColors = ColorData["Rainbow"] /@ Rescale[Range[Length[psdCurves]]];
 
@@ -3422,25 +3762,26 @@ psdOverlayPlot =
 		psdCurves,
 		PlotStyle -> psdColors,
 		Frame -> True,
-		Joined->True,
+		Joined -> True,
 		Axes -> False,
-		FrameLabel -> {"Temporal frequency (Hz)", "PSD of |Z|"},
+		FrameLabel -> {"Temporal frequency (cycles/hour)", "PSD of |Z|"},
 		PlotRange -> All,
 		ImageSize -> 900,
 		Background -> White,
-		PlotLegends -> Placed[
-			LineLegend[
-				psdColors,
-				psdLabels,
-				LegendLayout -> "Column",
-				LabelStyle -> Directive[11]
+		PlotLegends ->
+			Placed[
+				LineLegend[
+					psdColors,
+					psdLabels,
+					LegendLayout -> "Column",
+					LabelStyle -> Directive[11]
+				],
+				Right
 			],
-			Right
-		],
-		PlotLabel -> "Overlay PSD of |Z| for each EIS Fourier component"
+		PlotLabel -> "Overlay PSD of |Z| for each EIS frequency"
 	];
-psdOverlayPlot
 
+psdOverlayPlot
 
 
 
@@ -3528,7 +3869,7 @@ makeReferenceLine[data_List, slope_?NumericQ] := Module[
 zShotLine = makeReferenceLine[zVarMeanRaw, 3];
 
 yShotLine = makeReferenceLine[yVarMeanRaw, 1];
-
+yShotLine = makeReferenceLine[yVarMeanRaw, 1.5];
 (* ---------- label helper ---------- *)
 targetFreqs = {1., 10., 100., 1000., 10000.};
 
@@ -3861,7 +4202,81 @@ yVarPlot
 
 
 
- 
+ (* ------------------------------------------------------------ *)
+(* Final admittance variance plot with labels and slope guides  *)
+(* ------------------------------------------------------------ *)
+
+ySlopeList = {0.5, 1.0, 1.5, 2.0};
+
+ySlopeLines =
+	makeReferenceLine[yBasePoints, #] & /@ ySlopeList;
+
+ySlopeLabels =
+	("Slope " <> ToString[NumberForm[#, {3, 1}]] <>
+	 "   Var[Y] \[Proportional] |Y|^" <> ToString[NumberForm[#, {3, 1}]]) & /@
+		ySlopeList;
+
+yVarPlot =
+	ListLogLogPlot[
+		Join[
+			{
+				yBasePoints
+			},
+			ySlopeLines,
+			{
+				yLabelPoints
+			}
+		],
+		Joined -> Join[
+			{False},
+			ConstantArray[True, Length[ySlopeLines]],
+			{False}
+		],
+		PlotMarkers -> Join[
+			{
+				{Automatic, Medium}
+			},
+			ConstantArray[None, Length[ySlopeLines]],
+			{
+				None
+			}
+		],
+		PlotStyle -> Join[
+			{
+				Directive[Black]
+			},
+			{
+				Directive[Blue, Dashed, Thick],
+				Directive[Darker[Green], Dashed, Thick],
+				Directive[Purple, Dashed, Thick],
+				Directive[Orange, Dashed, Thick]
+			},
+			{
+				Directive[Black]
+			}
+		],
+		Frame -> True,
+		Axes -> False,
+		FrameLabel -> {"Mean |Y|", "Variance of |Y|"},
+		PlotRange -> {{0.001,Automatic},{10^-9, Automatic}},
+		ImageSize -> 800,
+		Background -> White,
+		PlotLegends -> Placed[
+			Join[
+				{
+					"Raw variance"
+				},
+				ySlopeLabels,
+				{
+					"Labeled representative frequencies"
+				}
+			],
+			Right
+		],
+		PlotLabel -> "Admittance variance vs mean (labeled)"
+	];
+
+yVarPlot
 
 
 (* get concnetration by inverting Langmuir isotherm*)

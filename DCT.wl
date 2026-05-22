@@ -65,12 +65,21 @@ toNumber[x_] := x;
 
 ClearAll[toNumber, splitEISLine, importEISTxt];
 
-toNumber[x_] := Module[{s, y},
-  s = StringTrim[ToString[x]];
-  If[s === "", Return[Missing["NotNumeric"]]];
-  y = Quiet @ Check[ToExpression[s], $Failed];
-  If[NumericQ[y], y, Missing["NotNumeric"]]
+toNumber[s_String] := Module[{ss},
+  ss = StringTrim[s];
+  ss = StringReplace[
+    ss,
+    {
+      "," -> ".",
+      RegularExpression["([0-9.]+)[Ee]([+-]?[0-9]+)"] -> "$1*^$2"
+    }
+  ];
+  Quiet @ Check[
+    ToExpression[ss],
+    Missing["NotNumeric"]
+  ]
 ];
+
 
 splitEISLine[s_String] := Module[{t = StringTrim[s]},
   Which[
@@ -83,37 +92,119 @@ splitEISLine[s_String] := Module[{t = StringTrim[s]},
   ]
 ];
 
-importEISTxt[file_String] := Module[
+importEISTxt[file_String, debug_: False] := Module[
   {
     rawLines, lines, header, hasHeader,
-    splitHeader, colMap,
+    splitHeader, headerNorm, colMap,
     freqCol, zreCol, zimCol, timeCol,
     splitRows, numRows, good,
-    freqHz, zre, zimNeg, z, timeS, ord
+    freqHz, zre, zimNeg, z, timeS, ord,
+    nPreview, previewRows
   },
+
+  nPreview = 8;
+
+  dbg[debug, "========== IMPORT DEBUG ==========", ""];
+  dbg[debug, "file", file];
 
   rawLines = Import[file, "Lines"];
   rawLines = Select[rawLines, StringTrim[#] =!= "" &];
 
+  dbg[debug, "non-empty raw lines", Length[rawLines]];
+  dbg[debug, "first raw lines", Take[rawLines, UpTo[nPreview]]];
+
   If[rawLines === {},
-    Return[
-      Failure["DCTImport", <|"Message" -> "File is empty."|>]
-    ]
+    Return[Failure["DCTImport", <|"Message" -> "File is empty."|>]]
   ];
 
   header = First[rawLines];
-  hasHeader = StringContainsQ[header, "Frequency", IgnoreCase -> True];
+  hasHeader = ! StringMatchQ[StringTrim[header], NumberString ~~ ___];
+
+  dbg[debug, "hasHeader", hasHeader];
+  dbg[debug, "header/first line", header];
 
   lines = If[hasHeader, Rest[rawLines], rawLines];
 
   If[hasHeader,
-    splitHeader = splitEISLine[header];
-    colMap = AssociationThread[splitHeader -> Range[Length[splitHeader]]];
 
-    freqCol = Lookup[colMap, "Frequency (Hz)", Missing["NoCol"]];
-    zreCol  = Lookup[colMap, "Z' (\[CapitalOmega])", Missing["NoCol"]];
-    zimCol  = Lookup[colMap, "-Z'' (\[CapitalOmega])", Missing["NoCol"]];
-    timeCol = Lookup[colMap, "Time (s)", Missing["NoCol"]];
+    splitHeader = splitEISLine[header];
+
+    headerNorm =
+      ToLowerCase[
+        StringReplace[
+          StringTrim /@ splitHeader,
+          {
+            "\[CapitalOmega]" -> "ohm",
+            "\[CapitalOmega]" -> "ohm",
+            "''" -> "doubleprime",
+            "'" -> "prime",
+            "\"" -> "",
+            " " -> "",
+            "(" -> "",
+            ")" -> ""
+          }
+        ]
+      ];
+
+    colMap = AssociationThread[headerNorm -> Range[Length[headerNorm]]];
+
+    dbg[debug, "splitHeader", splitHeader];
+    dbg[debug, "headerNorm", headerNorm];
+    dbg[debug, "colMap", colMap];
+
+    freqCol =
+      FirstCase[
+        {
+          Lookup[colMap, "frequencyhz", Missing["NoCol"]],
+          Lookup[colMap, "freq/hz", Missing["NoCol"]],
+          Lookup[colMap, "freqhz", Missing["NoCol"]],
+          Lookup[colMap, "fhz", Missing["NoCol"]]
+        },
+        _Integer,
+        Missing["NoCol"]
+      ];
+
+    zreCol =
+      FirstCase[
+        {
+          Lookup[colMap, "zprimeohm", Missing["NoCol"]],
+          Lookup[colMap, "rez/ohm", Missing["NoCol"]],
+          Lookup[colMap, "rezohm", Missing["NoCol"]],
+          Lookup[colMap, "realzohm", Missing["NoCol"]],
+          Lookup[colMap, "zreohm", Missing["NoCol"]]
+        },
+        _Integer,
+        Missing["NoCol"]
+      ];
+
+    zimCol =
+      FirstCase[
+        {
+          Lookup[colMap, "-zdoubleprimeohm", Missing["NoCol"]],
+          Lookup[colMap, "-imz/ohm", Missing["NoCol"]],
+          Lookup[colMap, "-imzohm", Missing["NoCol"]],
+          Lookup[colMap, "minusimzohm", Missing["NoCol"]],
+          Lookup[colMap, "-imagzohm", Missing["NoCol"]]
+        },
+        _Integer,
+        Missing["NoCol"]
+      ];
+
+    timeCol =
+      FirstCase[
+        {
+          Lookup[colMap, "times", Missing["NoCol"]],
+          Lookup[colMap, "time/s", Missing["NoCol"]]
+        },
+        _Integer,
+        Missing["NoCol"]
+      ];
+
+    dbg[
+      debug,
+      "detected columns {freqCol,zreCol,zimCol,timeCol}",
+      {freqCol, zreCol, zimCol, timeCol}
+    ];
 
     If[MemberQ[{freqCol, zreCol, zimCol}, Missing["NoCol"]],
       Return[
@@ -121,40 +212,81 @@ importEISTxt[file_String] := Module[
           "DCTImport",
           <|
             "Message" -> "Header found but required columns not located.",
-            "HeaderFields" -> splitHeader
+            "HeaderFields" -> splitHeader,
+            "NormalizedHeaderFields" -> headerNorm
           |>
         ]
       ]
     ],
-    
-    (* legacy no-header format *)
-    freqCol = 2;
-    zreCol  = 3;
-    zimCol  = 4;
+
+    dbg[debug, "no header, fallback columns {freq,zre,-imz}", {1, 2, 3}];
+
+    freqCol = 1;
+    zreCol = 2;
+    zimCol = 3;
     timeCol = Missing["NoCol"];
   ];
 
   splitRows = splitEISLine /@ lines;
   numRows = (toNumber /@ #) & /@ splitRows;
 
-  good = Select[
-    numRows,
-    Length[#] >= Max[freqCol, zreCol, zimCol] &&
-    NumericQ[#[[freqCol]]] &&
-    NumericQ[#[[zreCol]]] &&
-    NumericQ[#[[zimCol]]] &
-  ];
+  dbg[debug, "first split data rows", Take[splitRows, UpTo[nPreview]]];
+  dbg[debug, "first numeric data rows", Take[numRows, UpTo[nPreview]]];
+
+  good =
+    Select[
+      numRows,
+      Length[#] >= Max[freqCol, zreCol, zimCol] &&
+        NumericQ[#[[freqCol]]] &&
+        NumericQ[#[[zreCol]]] &&
+        NumericQ[#[[zimCol]]] &
+    ];
+
+  dbg[debug, "parsed numeric rows", Length[numRows]];
+  dbg[debug, "good rows", Length[good]];
 
   If[good === {},
     Return[
-      Failure["DCTImport", <|"Message" -> "No valid numeric data rows were parsed."|>]
+      Failure[
+        "DCTImport",
+        <|"Message" -> "No valid numeric data rows were parsed."|>
+      ]
     ]
   ];
 
   freqHz = good[[All, freqCol]];
-  zre    = good[[All, zreCol]];
+  zre = good[[All, zreCol]];
   zimNeg = good[[All, zimCol]];
-  z      = zre + I*(-zimNeg);
+
+  z = zre - I*zimNeg;
+
+  previewRows =
+    Table[
+      <|
+        "row" -> i,
+        "freqHz" -> freqHz[[i]],
+        "ReZ_imported" -> zre[[i]],
+        "minusImZ_imported" -> zimNeg[[i]],
+        "complexZ" -> z[[i]],
+        "Re[Z]" -> Re[z[[i]]],
+        "Im[Z]" -> Im[z[[i]]],
+        "-Im[Z]" -> -Im[z[[i]]],
+        "Abs[Z]" -> Abs[z[[i]]],
+        "Arg[Z]_deg" -> (180./Pi) Arg[z[[i]]],
+        "-Arg[Z]_deg" -> -(180./Pi) Arg[z[[i]]]
+      |>,
+      {i, 1, Min[nPreview, Length[z]]}
+    ];
+
+  dbg[debug, "COLUMN CHECK preview", Dataset[previewRows]];
+
+  dbg[debug, "freqHz min/max", MinMax[freqHz]];
+  dbg[debug, "ReZ min/max", MinMax[zre]];
+  dbg[debug, "imported -ImZ min/max", MinMax[zimNeg]];
+  dbg[debug, "constructed Im[Z] min/max", MinMax[Im[z]]];
+  dbg[debug, "constructed -Im[Z] min/max", MinMax[-Im[z]]];
+  dbg[debug, "Arg[Z] deg min/max", MinMax[(180./Pi) Arg /@ z]];
+  dbg[debug, "-Arg[Z] deg min/max", MinMax[-(180./Pi) Arg /@ z]];
 
   timeS =
     If[
@@ -164,6 +296,13 @@ importEISTxt[file_String] := Module[
     ];
 
   ord = Ordering[freqHz];
+
+  dbg[debug, "first 10 frequencies after ordering", Take[freqHz[[ord]], UpTo[10]]];
+  dbg[debug, "last 10 frequencies after ordering", Take[freqHz[[ord]], -Min[10, Length[freqHz]]]];
+  dbg[debug, "first 5 Z after ordering", Take[z[[ord]], UpTo[5]]];
+  dbg[debug, "last 5 Z after ordering", Take[z[[ord]], -Min[5, Length[z]]]];
+
+  dbg[debug, "========== END IMPORT DEBUG ==========", ""];
 
   <|
     "FreqHz" -> freqHz[[ord]],
@@ -229,7 +368,8 @@ Options[DCTSpectrum] = {
 	"TopPointsForRs" -> 7,
 	"WeightMode" -> "AbsYHalf",
 	"WeightPower" -> 3/4,
-	"Debug" -> False
+	"Debug" -> False,
+	"useConstantPhaseElementFlag", False
 };
 
 DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
@@ -272,7 +412,7 @@ DCTSpectrum[file_String, OptionsPattern[]] := Catch@Module[
 	fMaxUse = N[OptionValue["FMaxUse"]];
 
 	(* ---------- Import full data ---------- *)
-	dat = importEISTxt[file];
+	dat = importEISTxt[file, debug];
 	freqHzAll = dat["FreqHz"];
 	zDataAll = Developer`ToPackedArray[dat["Z"]];
 
