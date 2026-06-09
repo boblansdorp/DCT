@@ -59,7 +59,7 @@ Export[tmpFile,
   StringJoin @ Riffle[
     Prepend[
       StringJoin[Riffle[ToString /@ #, "\t"]] & /@ rows,
-      "Freq/Hz\tZ'/Ohm\t-Z''/Ohm"
+      "Freq/Hz\tRe(Z)/Ohm\t-Im(Z)/Ohm"
     ],
     "\n"
   ],
