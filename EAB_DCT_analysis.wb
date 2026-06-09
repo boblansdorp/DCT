@@ -1,14 +1,28 @@
 {
  "cells": [
   {
+   "kind": 1,
+   "value": "## 0. Setup",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 0.1 Load packages",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
-   "value": "Quiet[Remove[\"DCTDataImport`*\", \"NNLSFit`*\", \"DCTKernel`*\", \"DCT`*\",\r\n             \"DCTPlots`*\", \"DCTPeakAnalysis`*\", \"DCTSensitivity`*\", \"DCTDashboard`*\",\r\n             \"DCTAdmittanceStats`*\", \"DCTKKCheck`*\"]];\r\n$ContextPath = Select[$ContextPath, !StringMatchQ[#, \"DCT*\" | \"NNLSFit*\"] &];\r\nGet[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\DCT.wl\"]",
+   "value": "Quiet[Remove[\"DCTDataImport`*\", \"NNLSFit`*\", \"DCTKernel`*\", \"DCT`*\",\r\n             \"DCTPlots`*\", \"DCTPeakAnalysis`*\", \"DCTSensitivity`*\",\r\n             \"DCTBiophysics`*\", \"DCTAdmittanceStats`*\", \"DCTKKCheck`*\"]];\r\n$ContextPath = Select[$ContextPath, !StringMatchQ[#, \"DCT*\" | \"NNLSFit*\"] &];\r\nGet[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\DCT.wl\"]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699yvu-uu3e5xd\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c77as-fg5gd3a\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -16,14 +30,21 @@
        "mime": "text/plain"
       }
      ],
-     "id": "5578ead4-1c86-4119-882d-5129d3528ac3"
+     "id": "0097e104-d1b6-428d-8694-99f01682819f"
     }
    ],
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 0.2 Parameters",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
-   "value": "(* ── PARAMETERS ── edit these, then re-run this cell ── *)\r\n\r\n(* Data directories *)\r\ndataDir          = \"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\drift_03252026\";  (* drift data — E1/E2/E3 subdirs *)\r\nconcentrationDir = \"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\spike\";           (* spike titration in PBS *)\r\n\r\n(* Representative file index (1-based) — used for KK check and sweep plots *)\r\nrepFileIdx = 1;\r\n\r\n(* Fit parameters — tuned on drift data in Sections 1–3, locked here for all fits *)\r\nlambdaND      = 1*^-3;  (* Tikhonov regularisation — from L-curve analysis *)\r\nfMinHz        = 0.5;    (* lower frequency cutoff [Hz] *)\r\nfMaxHz        = 1000.;  (* upper frequency cutoff [Hz] *)\r\nweightPower   = -0.75;  (* admittance weight exponent *)\r\nbinsPerDecade = 15;     (* tau grid density *)\r\ntauMinFactor  = 0.1;    (* tau grid lower extension factor *)\r\ntauMaxFactor  = 10.;    (* tau grid upper extension factor *)\r\n\r\n(* Drift batch decimation: 1 = all files, N = every Nth (faster while tuning) *)\r\nfileDecimation = 1;\r\n\r\n(* Natural sort: group by electrode subdir, then by numeric file number.\r\n   Plain Sort gives lexicographic order (118 before 15) which breaks time ordering. *)\r\nsortFiles[files_List] := SortBy[files,\r\n  {FileNameTake[#, {-2}],\r\n   Last[ToExpression /@ StringCases[FileNameTake[#], NumberString], 0]} &\r\n]",
+   "value": "(* ── PARAMETERS ── edit these, then re-run this cell ── *)\r\n\r\n(* Data directories *)\r\ndataDir          = \"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\drift_03252026\";  (* drift data — E1/E2/E3 subdirs *)\r\nconcentrationDir = \"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\spike\";           (* spike titration in PBS *)\r\n\r\n(* Fit parameters — tuned on drift data in Sections 1–3, locked here for all fits *)\r\nlambdaND      = 1*^-3;  (* Tikhonov regularisation — from L-curve analysis *)\r\nfMinHz        = 0.5;    (* lower frequency cutoff [Hz] *)\r\nfMaxHz        = 1000.;  (* upper frequency cutoff [Hz] *)\r\nweightPower   = -0.75;  (* admittance weight exponent *)\r\nbinsPerDecade = 15;     (* tau grid density *)\r\ntauMinFactor  = 0.1;    (* tau grid lower extension factor *)\r\ntauMaxFactor  = 10.;    (* tau grid upper extension factor *)\r\n\r\n(* Drift batch decimation: 1 = all files, N = every Nth (faster while tuning) *)\r\nfileDecimation = 1;\r\n\r\n(* Natural sort: group by electrode subdir, then by numeric file number.\r\n   Plain Sort gives lexicographic order (118 before 15) which breaks time ordering. *)\r\nsortFiles[files_List] := SortBy[files,\r\n  {FileNameTake[#, {-2}],\r\n   Last[ToExpression /@ StringCases[FileNameTake[#], NumberString], 0]} &\r\n]",
    "languageId": "wolfram",
    "outputs": [],
    "metadata": {}
@@ -36,14 +57,21 @@
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 1.1 File list",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
-   "value": "(* Load all drift files from all electrode subdirs — numeric sort so E1/E2/E3 stay grouped\n   and files within each electrode run in time order (not lexicographic) *)\ndriftFiles = sortFiles[FileNames[\"*.txt\", dataDir, Infinity]];\nPrint[\"Found \", Length[driftFiles], \" drift files in \", FileNameTake[dataDir]];\n\n(* KK check on representative file *)\nrepFile   = driftFiles[[repFileIdx]];\nkkRepData = DCTDataImport`ImportEIS[repFile];\nkkRep     = DCTKKCheck`KKCheck[kkRepData];\nPrint[Style[\n  \"KK check: \" <> FileNameTake[repFile] <>\n  \"  RMS Re = \" <> ToString[NumberForm[100. kkRep[\"RMSRe\"], {4,2}]] <> \"%, \" <>\n  \"Im = \"  <> ToString[NumberForm[100. kkRep[\"RMSIm\"], {4,2}]] <> \"%  \" <>\n  If[kkRep[\"OK\"], \"\\[Checkmark] OK\", \"\\[Times] FAIL\"],\n  Bold, If[kkRep[\"OK\"], Darker[Green], Red], 13\n]]",
+   "value": "(* Representative file index (1-based) — used for KK check and sweep plots *)\nrepFileIdx = 1;\n\n\n(* Load all drift files from all electrode subdirs — numeric sort so E1/E2/E3 stay grouped\n   and files within each electrode run in time order (not lexicographic) *)\ndriftFiles = sortFiles[FileNames[\"*.txt\", dataDir, Infinity]];\nPrint[\"Found \", Length[driftFiles], \" drift files in \", FileNameTake[dataDir]];\n\n(* KK check on representative file *)\nrepFile   = driftFiles[[repFileIdx]];\nkkRepData = DCTDataImport`ImportEIS[repFile];\nkkRep     = DCTKKCheck`KKCheck[kkRepData];\nPrint[Style[\n  \"KK check: \" <> FileNameTake[repFile] <>\n  \"  RMS Re = \" <> ToString[NumberForm[100. kkRep[\"RMSRe\"], {4,2}]] <> \"%, \" <>\n  \"Im = \"  <> ToString[NumberForm[100. kkRep[\"RMSIm\"], {4,2}]] <> \"%  \" <>\n  If[kkRep[\"OK\"], \"\\[Checkmark] OK\", \"\\[Times] FAIL\"],\n  Bold, If[kkRep[\"OK\"], Darker[Green], Red], 13\n]]\n\nDCTPlots`PlotKKResiduals[kkRep]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699yx5-3ffaudi\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> drift files in </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq73hfkw-ek52lsy\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> drift files in </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -51,12 +79,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "9da2bc29-1230-4858-9c2d-485faaae4cae"
+     "id": "010f30da-f7f3-4879-9aed-54312e5ed05e"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699yy2-4i6bhb5\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0tLIGNoZWNrOiBFMVxfRUlTXF8oMCkudHh0ICBSTVMgUmUgPSAxLjI2XCUsIEltID0gMC44MlwlICDinJMgT0t9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">KK check: E1_EIS_(0).txt RMS Re = 1.26%, Im = 0.82% ✓ OK</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq73hfmp-zyedsnh\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0tLIGNoZWNrOiBFMVxfRUlTXF8oMCkudHh0ICBSTVMgUmUgPSAxLjI2XCUsIEltID0gMC44MlwlICDinJMgT0t9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">KK check: E1_EIS_(0).txt RMS Re = 1.26%, Im = 0.82% ✓ OK</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -64,30 +92,29 @@
        "mime": "text/plain"
       }
      ],
-     "id": "4e8ade0a-410f-46bd-8345-aaca73dcccf3"
+     "id": "ce5167b5-68f8-443e-8a8c-1ea1a7542112"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"52\" data-out-n=\"187\" data-sub-idx=\"10\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"3\" data-sub-start=\"21\" data-sub-end=\"21\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[187]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_ytym89xe7tfm.svg\" src=\"img/EAB_DCT_analysis/wl_ytym89xe7tfm.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Representative file index (1-based) — used for KK check and sweep plots *)\nrepFileIdx = 1;\n\n\n(* Load all drift files from all electrode subdirs — numeric sort so E1/E2/E3 stay grouped\n   and files within each electrode run in time order (not lexicographic) *)\ndriftFiles = sortFiles[FileNames[\"*.txt\", dataDir, Infinity]];\nPrint[\"Found \", Length[driftFiles], \" drift files in \", FileNameTake[dataDir]];\n\n(* KK check on representative file *)\nrepFile   = driftFiles[[repFileIdx]];\nkkRepData = DCTDataImport`ImportEIS[repFile];\nkkRep     = DCTKKCheck`KKCheck[kkRepData];\nPrint[Style[\n  \"KK check: \" <> FileNameTake[repFile] <>\n  \"  RMS Re = \" <> ToString[NumberForm[100. kkRep[\"RMSRe\"], {4,2}]] <> \"%, \" <>\n  \"Im = \"  <> ToString[NumberForm[100. kkRep[\"RMSIm\"], {4,2}]] <> \"%  \" <>\n  If[kkRep[\"OK\"], \"\\[Checkmark] OK\", \"\\[Times] FAIL\"],\n  Bold, If[kkRep[\"OK\"], Darker[Green], Red], 13\n]]\n\nDCTPlots`PlotKKResiduals[kkRep]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "8179b107-c405-4dde-ae80-4636beb7ecac"
     }
    ],
    "metadata": {}
   },
   {
-   "kind": 2,
-   "value": "DCTPlots`PlotKKResiduals[kkRep]",
-   "languageId": "wolfram",
-   "outputs": [
-    {
-     "items": [
-      {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"265\" data-out-n=\"1365\" data-sub-idx=\"0\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"4\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1365]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_4zez984x47uq.svg\" src=\"img/EAB_DCT_analysis/wl_4zez984x47uq.svg\"/></div></div>",
-       "mime": "x-application/wolfram-language-html"
-      },
-      {
-       "data": "(* output: graphics *)\nDCTPlots`PlotKKResiduals[kkRep]",
-       "mime": "text/plain"
-      }
-     ],
-     "id": "f3aea749-759a-4557-89b9-7502a2d1f1b7"
-    }
-   ],
+   "kind": 1,
+   "value": "### 1.2 KK residuals",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -98,7 +125,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zhq-ublaqxc\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHtLSy12YWxpZCByYW5nZTogMC43OSAtLS0gMTAwMDAgSHp9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">KK-valid range: 0.79 — 10000 Hz</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7ab9-dfylp2k\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHtLSy12YWxpZCByYW5nZTogMC43OSAtLS0gMTAwMDAgSHp9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">KK-valid range: 0.79 — 10000 Hz</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -106,9 +133,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "dca104b1-d56a-4186-9d23-3655290e2843"
+     "id": "6a96cb6a-4bd8-4844-b6ba-0625a0a43ef6"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 1.3 Set fMinHz",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -119,7 +153,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMinHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zjj-aquukq7\" data-page-width-em=\"52\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMinHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7abf-opsaau3\" data-page-width-em=\"52\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -127,7 +161,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e6c0cad9-9469-4569-8280-14156b8e8228"
+     "id": "79114e8c-fb8c-40e6-bbe7-af2085eb746a"
     }
    ],
    "metadata": {}
@@ -140,6 +174,13 @@
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 2.1 Compute statistics",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
    "value": "(* Group files by electrode subdirectory, compute within-electrode variance stats,\n   then pool across electrodes for the power-law fit. Each electrode may have a\n   different absolute admittance level — pooling the (YMean, YVar) points across\n   all electrodes gives a better estimate of the noise scaling exponent alpha. *)\nelectrodeGroups = GroupBy[\n  sortFiles[FileNames[\"*.txt\", dataDir, Infinity]],\n  FileNameTake[#, {-2}] &   (* second-to-last path component = electrode name *)\n];\nPrint[\"Electrodes: \", Row[Keys[electrodeGroups], \", \"],\n  \"   files: \", Row[Length /@ Values[electrodeGroups], \" / \"]];\n\nelectrodeStats = Association @ KeyValueMap[\n  #1 -> DCTAdmittanceStats`ComputeAdmittanceStats[#2] &,\n  electrodeGroups\n];\n\ndriftStats = DCTAdmittanceStats`MergeAdmittanceStats[Values[electrodeStats]];\nIf[FailureQ[driftStats],\n  Print[Style[\"Failed: \" <> driftStats[\"Message\"], Red, Bold]],\n  Print[Style[\n    \"Done: \" <> ToString[driftStats[\"FilesOK\"]] <> \" / \" <>\n    ToString[driftStats[\"FilesTotal\"]] <> \" files across \" <>\n    ToString[Length[electrodeGroups]] <> \" electrodes, \" <>\n    ToString[Length[driftStats[\"FreqHz\"]]] <> \" pooled (freq, electrode) points.\",\n    Bold, Darker[Green]\n  ]]\n]",
    "languageId": "wolfram",
@@ -147,7 +188,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Electrodes: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zkl-6ap5xfk\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7RTF9XHRleHR7LCB9XHRleHR7RTJ9XHRleHR7LCB9XHRleHR7RTN9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">E1</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E2</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E3</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   files: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zkm-udzh45v\" data-page-width-em=\"52\" data-latex-b64=\"MTU0XHRleHR7IC8gfTE1Mlx0ZXh0eyAvIH0xNTI=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">154</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Electrodes: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7aco-wkjrh8u\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7RTF9XHRleHR7LCB9XHRleHR7RTJ9XHRleHR7LCB9XHRleHR7RTN9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">E1</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E2</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E3</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   files: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7acq-khw9om1\" data-page-width-em=\"52\" data-latex-b64=\"MTU0XHRleHR7IC8gfTE1Mlx0ZXh0eyAvIH0xNTI=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">154</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -155,12 +196,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "f56e18b0-59fd-4986-8b7a-4f793fdf93d8"
+     "id": "74bcda1c-a7b6-4a5c-9a9c-2bbd6d8d9a0a"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a8gn-kyvv0lp\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0RvbmU6IDQ1OCAvIDQ1OCBmaWxlcyBhY3Jvc3MgMyBlbGVjdHJvZGVzLCAxNTMgcG9vbGVkIChmcmVxLCBlbGVjdHJvZGUpIHBvaW50cy59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Done: 458 / 458 files across 3 electrodes, 153 pooled (freq, electrode) points.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7i7d-12ov4ma\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0RvbmU6IDQ1OCAvIDQ1OCBmaWxlcyBhY3Jvc3MgMyBlbGVjdHJvZGVzLCAxNTMgcG9vbGVkIChmcmVxLCBlbGVjdHJvZGUpIHBvaW50cy59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Done: 458 / 458 files across 3 electrodes, 153 pooled (freq, electrode) points.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -168,9 +209,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "cd0970d9-3f31-48ba-a63c-1fb015d7afd8"
+     "id": "63371852-baea-467d-a116-bb514d67580f"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 2.2 Variance vs mean",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -181,7 +229,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"266\" data-out-n=\"1375\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"9\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1375]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_5bpp9w4dgcr5.svg\" src=\"img/EAB_DCT_analysis/wl_5bpp9w4dgcr5.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"14\" data-out-n=\"51\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"9\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[51]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_hwvo7gkxl3jy.svg\" src=\"img/EAB_DCT_analysis/wl_hwvo7gkxl3jy.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -189,9 +237,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "08b52b4b-57fc-416c-8796-48018141c2d1"
+     "id": "876e1f57-0b9b-47ed-8134-8d0f4429314b"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 2.3 Set fMaxHz",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -202,7 +257,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMaxHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a8y0-hli0ute\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMaxHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7j71-dgca9mn\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -210,9 +265,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "90759f64-51ad-4757-8fc8-a6025ab88e94"
+     "id": "94e1af4d-9390-4860-8e6a-76f3394673bf"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 2.4 Variance overview",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -223,7 +285,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"267\" data-out-n=\"1378\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"11\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1378]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1r0isg7isvunc.svg\" src=\"img/EAB_DCT_analysis/wl_1r0isg7isvunc.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"15\" data-out-n=\"54\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"11\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[54]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_2y4odsnv9o8n.svg\" src=\"img/EAB_DCT_analysis/wl_2y4odsnv9o8n.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -231,9 +293,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "9ef5074b-06a7-478f-8ae7-751a55baf462"
+     "id": "708efb1d-0fd8-4dd1-ab7d-ba0abbf43380"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 2.5 Parameter readout",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -244,30 +313,37 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"268\" data-out-n=\"1379\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"12\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1379]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9hu-dwz0dmv\" data-page-width-em=\"51\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"16\" data-out-n=\"55\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"12\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[55]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7jpd-hh0tqdb\" data-page-width-em=\"51\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "Out[1379]= 0.79433",
+       "data": "Out[55]= 0.79433",
        "mime": "text/plain"
       }
      ],
-     "id": "f009730d-5339-4afa-bcf2-fc588b7b2c99"
+     "id": "ec3bfe32-1696-4054-b899-b11814dcb599"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"269\" data-out-n=\"1380\" data-sub-idx=\"1\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"12\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1380]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9j6-lz7r72m\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"17\" data-out-n=\"56\" data-sub-idx=\"1\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"12\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[56]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7jr0-dwqkoqh\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "Out[1380]= 500.\\,",
+       "data": "Out[56]= 500.\\,",
        "mime": "text/plain"
       }
      ],
-     "id": "cb60e742-12d8-4479-a574-40bdac573b5b"
+     "id": "224725ad-cd50-40df-9bb2-dcf706cc6953"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 2.6 Derive weightPower",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -278,7 +354,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">weightPower ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9js-b9x6zhj\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7LTEuMTF9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">-1.11</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   (α = </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9jt-oszc3kl\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MS4xMX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">1.11</span></span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">weightPower ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7jrk-j8vrhgd\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7LTEuMTF9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">-1.11</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   (α = </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7jrm-ufkqo8l\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MS4xMX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">1.11</span></span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -286,7 +362,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "5753fa00-87b8-4b2f-af9b-211a986dad46"
+     "id": "3ad72524-bf78-405e-bf4d-0c6ffe8e61a4"
     }
    ],
    "metadata": {}
@@ -299,6 +375,13 @@
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 3.1 Tau grid",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
    "value": "(* Tau grid padding: the grid extends tauMinFactor/tauMaxFactor beyond the direct\n   1/(2pi*fMax) and 1/(2pi*fMin) limits. Extra range prevents Tikhonov edge artifacts\n   — peaks near the boundaries of the plot are outside the data window and suspect. *)\ntauMinFactor = 0.1;   (* decade below fMax: tau_min = tauMinFactor/(2pi*fMax) *)\ntauMaxFactor = 10.;   (* decade above fMin: tau_max = tauMaxFactor/(2pi*fMin) *)\n\nPrint[\"Tau grid: \",\n  NumberForm[tauMinFactor/(2 Pi fMaxHz), {3,2}], \" \\[LongDash] \",\n  NumberForm[tauMaxFactor/(2 Pi fMinHz), {3,2}], \" s  (data window: \",\n  NumberForm[1./(2 Pi fMaxHz), {3,4}], \" — \",\n  NumberForm[1./(2 Pi fMinHz), {3,2}], \" s)\"]",
    "languageId": "wolfram",
@@ -306,7 +389,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Tau grid: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9kl-oj53fds\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9km-unkqk1d\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7Mi4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">2.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s  (data window: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9kn-63fxrki\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMDAzfQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.0003</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9ko-ebwjbsf\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4yMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.20</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s)</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Tau grid: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7jrx-kl8c50k\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7jrz-igz9hg1\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7Mi4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">2.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s  (data window: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7js0-6qngu50\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMDAzfQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.0003</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7js1-jjecpci\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4yMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.20</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s)</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -314,9 +397,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "4cb0189c-9ef2-401d-847e-e5333e8ba6e7"
+     "id": "30ac2f18-39b3-4de0-84e1-f8ebcaeb6242"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 3.2 Lambda sweep",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -327,7 +417,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aa5o-6a9ob2o\" data-page-width-em=\"52\" data-latex-b64=\"MTA=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">10</span></span></span></span></span></div></div><span class=\"wl-ps\"> λ values computed.</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7kcj-u7cwq6x\" data-page-width-em=\"52\" data-latex-b64=\"MTA=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">10</span></span></span></span></span></div></div><span class=\"wl-ps\"> λ values computed.</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -335,14 +425,21 @@
        "mime": "text/plain"
       }
      ],
-     "id": "082da2bb-c681-4038-acd5-cd713cffd092"
+     "id": "803928cd-2b5e-49dc-a464-c6333696642a"
     }
    ],
    "metadata": {}
   },
   {
    "kind": 1,
-   "value": "### L-curve: choosing λ\nPlot of roughness ∥D²g∥ (x-axis) vs data misfit ∥Y – Ŷ∥ (y-axis) for each λ tested above. λ increases from bottom-right (spiky spectrum, low misfit) toward top-left (smooth spectrum, high misfit). The **corner** — maximum curvature — is the optimal balance point.",
+   "value": "### 3a. L-curve: choosing λ\nPlot of roughness ∥D²g∥ (x-axis) vs data misfit ∥Y – Ŷ∥ (y-axis) for each λ tested above. λ increases from bottom-right (spiky spectrum, low misfit) toward top-left (smooth spectrum, high misfit). The **corner** — maximum curvature — is the optimal balance point.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 3a.1 Plot L-curve",
    "languageId": "markdown",
    "outputs": [],
    "metadata": {}
@@ -355,7 +452,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"270\" data-out-n=\"1390\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"18\" data-sub-start=\"11\" data-sub-end=\"36\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1390]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_13r5o9yodxcg.svg\" src=\"img/EAB_DCT_analysis/wl_13r5o9yodxcg.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"18\" data-out-n=\"66\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"18\" data-sub-start=\"11\" data-sub-end=\"36\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[66]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_12xcc8jyfruuf.svg\" src=\"img/EAB_DCT_analysis/wl_12xcc8jyfruuf.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -363,9 +460,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "0aa1528e-ec22-4d05-8b95-b0a8426e8290"
+     "id": "a623c291-a20f-44ec-9f12-324990635458"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 3a.2 Set λ",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -376,7 +480,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aar7-q9avjgr\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyNmZmZmZmZ9e1x0ZXh0e2xhbWJkYU5EICRcZ2V0cyQgfX19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\" style=\"color:#ffffff;\"><span class=\"mord\" style=\"color:#ffffff;\">lambdaND </span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mrel\" style=\"color:#ffffff;\">←</span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mord\" style=\"color:#ffffff;\"> </span></span></span></span></span></span></div></div><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aar8-bmioij6\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1xmcmFjezF9ezEwMDB9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.0074em;vertical-align:-0.686em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1000</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"color:#00ff00;border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7kwx-i1480is\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyNmZmZmZmZ9e1x0ZXh0e2xhbWJkYU5EICRcZ2V0cyQgfX19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\" style=\"color:#ffffff;\"><span class=\"mord\" style=\"color:#ffffff;\">lambdaND </span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mrel\" style=\"color:#ffffff;\">←</span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mord\" style=\"color:#ffffff;\"> </span></span></span></span></span></span></div></div><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7kwy-57zxi7j\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1xmcmFjezF9ezEwMDB9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.0074em;vertical-align:-0.686em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1000</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"color:#00ff00;border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -384,9 +488,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "baf00bf0-387c-4b27-8744-b9ef3dae028e"
+     "id": "f123c004-b82d-437a-898d-baf535ba70da"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 3a.3 Verify λ",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -397,7 +508,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"271\" data-out-n=\"1393\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"20\" data-sub-start=\"1\" data-sub-end=\"53\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1393]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_tmf6n8t0edw5.svg\" src=\"img/EAB_DCT_analysis/wl_tmf6n8t0edw5.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"19\" data-out-n=\"69\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"20\" data-sub-start=\"1\" data-sub-end=\"53\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[69]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_fqxtzjvepe89.svg\" src=\"img/EAB_DCT_analysis/wl_fqxtzjvepe89.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -405,7 +516,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "ab5d9d51-4f42-4561-a113-cf95f6c9881e"
+     "id": "66ee8b43-3900-4602-902f-d816a9d45d78"
     }
    ],
    "metadata": {}
@@ -418,6 +529,13 @@
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 4.1 Batch drift fit",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
    "value": "driftFiles = sortFiles[\n  Take[\n    sortFiles[FileNames[\"*.txt\", dataDir, Infinity]],\n    ;; ;; fileDecimation\n  ]\n];\nPrint[\"Found \", Length[driftFiles], \" files (decimated) from \", FileNameTake[dataDir]];\n\nresults = Table[\n  Module[{spec},\n    If[Mod[i, Max[1, Round[Length[driftFiles]/10]]] == 1,\n      Print[i, \" / \", Length[driftFiles], \"  \", FileNameTake[driftFiles[[i]]]]\n    ];\n    spec = Quiet @ Check[\n      DCT`DCTSpectrum[driftFiles[[i]],\n        \"LambdaND\"      -> lambdaND,\n        \"FMinUse\"       -> fMinHz,\n        \"FMaxUse\"       -> fMaxHz,\n        \"WeightPower\"   -> weightPower,\n        \"BinsPerDecade\" -> binsPerDecade,\n        \"TauMinFactor\"  -> tauMinFactor,\n        \"TauMaxFactor\"  -> tauMaxFactor\n      ], $Failed\n    ];\n    <|\"File\" -> driftFiles[[i]], \"Spec\" -> spec, \"OK\" -> AssociationQ[spec]|>\n  ],\n  {i, Length[driftFiles]}\n];\n\ngoodSpecs = Select[results, #OK === True &];\nPrint[Style[ToString[Length[goodSpecs]] <> \" / \" <> ToString[Length[driftFiles]] <> \" fits succeeded.\", Bold, Darker[Green]]]",
    "languageId": "wolfram",
@@ -425,7 +543,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69abc7-o1wqc5c\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files (decimated) from </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7lk7-pwvl52i\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files (decimated) from </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -433,12 +551,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "80191b91-97ff-44c6-8699-f12cdc0d32fc"
+     "id": "27eb71f6-2200-46b2-9d53-e356e351d363"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69abcc-mcu8et6\" data-page-width-em=\"52\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69abcd-qk5shpq\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(0).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69adi8-dqxg3si\" data-page-width-em=\"52\" data-latex-b64=\"NDc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">47</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69adi9-v456av7\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(46).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69afol-gb1s3mx\" data-page-width-em=\"52\" data-latex-b64=\"OTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">93</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69afom-a9fe8l8\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(92).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ahv4-m1mu18c\" data-page-width-em=\"51\" data-latex-b64=\"MTM5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">139</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ahv4-5ahwy5b\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(138).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ak1o-225fivs\" data-page-width-em=\"52\" data-latex-b64=\"MTg1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">185</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ak1p-s98asfl\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(30).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69am7j-z15mx1h\" data-page-width-em=\"52\" data-latex-b64=\"MjMx\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">231</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69am7k-kp9evmf\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(76).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aoeo-0efum0j\" data-page-width-em=\"52\" data-latex-b64=\"Mjc3\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">277</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aoep-r310vx9\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(122).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aqlx-s8qpafv\" data-page-width-em=\"52\" data-latex-b64=\"MzIz\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">323</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aqlx-1c0gs7l\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(16).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69asqz-ociaqu9\" data-page-width-em=\"52\" data-latex-b64=\"MzY5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">369</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69asqz-tk9f0ue\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(62).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69auwg-lqrc2o2\" data-page-width-em=\"52\" data-latex-b64=\"NDE1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">415</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69auwh-21yj2du\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(108).txt</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7lka-ikkqos6\" data-page-width-em=\"52\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7lkb-0ws6czr\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(0).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7nqb-j6dhceo\" data-page-width-em=\"52\" data-latex-b64=\"NDc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">47</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7nqc-k45rc8s\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(46).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7pv9-6vt8vjt\" data-page-width-em=\"52\" data-latex-b64=\"OTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">93</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7pva-17bft7p\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(92).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7rvj-h7u69ng\" data-page-width-em=\"52\" data-latex-b64=\"MTM5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">139</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7rvk-98oc4a4\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(138).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7tud-p1qipci\" data-page-width-em=\"51\" data-latex-b64=\"MTg1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">185</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7tue-8qb7zzo\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(30).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7vt3-qxec98w\" data-page-width-em=\"52\" data-latex-b64=\"MjMx\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">231</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7vt4-lsx7f9l\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(76).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7xrf-ihmx3jw\" data-page-width-em=\"51\" data-latex-b64=\"Mjc3\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">277</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7xrg-rb0g44g\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(122).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7zq8-3nqolke\" data-page-width-em=\"51\" data-latex-b64=\"MzIz\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">323</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c7zq9-mjegi67\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(16).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c81l7-6vs83xo\" data-page-width-em=\"52\" data-latex-b64=\"MzY5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">369</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c81l8-kaaohup\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(62).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c83hg-n0krauk\" data-page-width-em=\"52\" data-latex-b64=\"NDE1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">415</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c83hh-kj1os3w\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(108).txt</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -446,12 +564,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "74ba314f-89a2-43d3-9b40-115777df27db"
+     "id": "df8dd02c-2403-48f8-aa44-fc1583a02add"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69awzk-au72l8y\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezQ1OCAvIDQ1OCBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">458 / 458 fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c85da-bm0esgw\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezQ1OCAvIDQ1OCBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">458 / 458 fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -459,14 +577,21 @@
        "mime": "text/plain"
       }
      ],
-     "id": "846a4f98-0df1-4f76-974b-55f9b0618f2f"
+     "id": "dc0b20e5-7e51-47fa-a633-74998b4fa4f0"
     }
    ],
    "metadata": {}
   },
   {
    "kind": 1,
-   "value": "## Drift plots\nRun each cell independently. `goodSpecs` must exist (run the fit cell above first).",
+   "value": "### 4a. Drift Plots\nRun each cell independently. `goodSpecs` must exist (run the fit cell above first).",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 4a.1 g(k) by electrode",
    "languageId": "markdown",
    "outputs": [],
    "metadata": {}
@@ -479,7 +604,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"272\" data-out-n=\"1400\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"24\" data-sub-start=\"5\" data-sub-end=\"5\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1400]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_avuz8g31dgee.svg\" src=\"img/EAB_DCT_analysis/wl_avuz8g31dgee.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"20\" data-out-n=\"76\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"24\" data-sub-start=\"5\" data-sub-end=\"5\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[76]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1syrr3li33mgz.svg\" src=\"img/EAB_DCT_analysis/wl_1syrr3li33mgz.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -487,9 +612,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e5e46f4a-bc82-4edc-b51e-49fd194b45a8"
+     "id": "b8558f3a-ee62-499a-b9e3-44f23283a876"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 4a.2 Cumulative capacitance",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -500,7 +632,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"273\" data-out-n=\"1401\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"25\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1401]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_15ukdritg0chw.svg\" src=\"img/EAB_DCT_analysis/wl_15ukdritg0chw.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"21\" data-out-n=\"77\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"25\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[77]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1gt0z80u9iffy.svg\" src=\"img/EAB_DCT_analysis/wl_1gt0z80u9iffy.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -508,9 +640,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "a6562942-13b9-45fe-ac37-7a19de8caaca"
+     "id": "8e2eb1dc-bae0-4f81-829f-16d2dd8ae0bf"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 4a.3 Nyquist + Bode",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -521,7 +660,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"274\" data-out-n=\"1403\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"26\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1403]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_dly34k6kr0ri.svg\" src=\"img/EAB_DCT_analysis/wl_dly34k6kr0ri.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"22\" data-out-n=\"79\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"26\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[79]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_120jh4owafkcv.svg\" src=\"img/EAB_DCT_analysis/wl_120jh4owafkcv.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -529,9 +668,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e9210bd0-6538-4305-be54-0531e1e4f698"
+     "id": "a3b45300-0a37-4715-bcb2-a7309875253b"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 4a.4 Residuals",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -542,7 +688,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"275\" data-out-n=\"1405\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"27\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1405]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_17wzyn2z49uwz.svg\" src=\"img/EAB_DCT_analysis/wl_17wzyn2z49uwz.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"23\" data-out-n=\"81\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"27\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[81]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_89j3096vm6jb.svg\" src=\"img/EAB_DCT_analysis/wl_89j3096vm6jb.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -550,9 +696,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "bb4ef15b-04bd-4513-9370-017e7fa8dbb0"
+     "id": "67f6fe8f-b427-4d05-8d1e-a72c57a1ce2d"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 4a.5 Rs and C0 vs time",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -563,7 +716,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"276\" data-out-n=\"1406\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"28\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1406]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_17xa2uuoze779.svg\" src=\"img/EAB_DCT_analysis/wl_17xa2uuoze779.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"24\" data-out-n=\"82\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"28\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[82]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1k2xckzll3bco.svg\" src=\"img/EAB_DCT_analysis/wl_1k2xckzll3bco.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -571,15 +724,29 @@
        "mime": "text/plain"
       }
      ],
-     "id": "48d5b870-60b8-411d-85e1-65cff556b5c3"
+     "id": "b88d3042-cdfe-4b1e-85d2-06a5d0114fda"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 4a.6 k-range definitions",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
    "kind": 2,
    "value": "(* k ranges for peak tracking — each window captures a distinct electron-transfer population *)\nkPeakRanges = {{20., 100.}, {100., 500.}};",
    "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 4a.7 k-peak vs time",
+   "languageId": "markdown",
    "outputs": [],
    "metadata": {}
   },
@@ -591,7 +758,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"277\" data-out-n=\"1408\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"30\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1408]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1iu88foes3wlh.svg\" src=\"img/EAB_DCT_analysis/wl_1iu88foes3wlh.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"25\" data-out-n=\"84\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"30\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[84]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_e4li1v8hpxzm.svg\" src=\"img/EAB_DCT_analysis/wl_e4li1v8hpxzm.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -599,7 +766,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "881d3228-4924-4153-b336-029c93f3f96a"
+     "id": "1f7c2861-b8ad-4cb2-a136-859b67a42f34"
     }
    ],
    "metadata": {}
@@ -612,45 +779,38 @@
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 5.1 Batch concentration fit",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
-   "value": "(* Batch fit concentration files with locked parameters *)\nIf[concentrationDir === \"\",\n  Print[Style[\"concentrationDir is empty \\[LongDash] set it in the params cell.\", Red, Bold]],\n\n  (* helpers: extract electrode tag and numeric concentration from filename *)\n  concElec[f_]  := First[StringCases[FileNameTake[f], \"E\" ~~ d:DigitCharacter :> d], \"0\"];\n  concUM[f_]    := ToExpression @ First[\n    StringCases[FileNameTake[f], n:NumberString ~~ \"uM\" :> n], \"0\"];\n  concLabel[f_] := Module[{elec, conc},\n    elec = First[StringCases[FileNameTake[f], \"E\" ~~ d:DigitCharacter :> \"E\" <> d], \"?\"];\n    conc = First[StringCases[FileNameTake[f], n:NumberString ~~ \"uM\" :> n], \"?\"];\n    elec <> \" \" <> conc <> \" \\[Mu]M\"\n  ];\n\n  (* sort: electrode first, then by numeric concentration *)\n  concFiles = SortBy[\n    FileNames[\"*.txt\", concentrationDir],\n    {concElec[#], concUM[#]} &\n  ];\n  Print[\"Found \", Length[concFiles], \" concentration files.\"];\n\n  concResults = Table[\n    Module[{spec},\n      If[Mod[i, Max[1, Round[Length[concFiles]/6]]] == 1,\n        Print[i, \" / \", Length[concFiles], \"  \", concLabel[concFiles[[i]]]]\n      ];\n      spec = Quiet @ Check[\n        DCT`DCTSpectrum[concFiles[[i]],\n          \"LambdaND\"      -> lambdaND,\n          \"FMinUse\"       -> fMinHz,\n          \"FMaxUse\"       -> fMaxHz,\n          \"WeightPower\"   -> weightPower,\n          \"BinsPerDecade\" -> binsPerDecade,\n          \"TauMinFactor\"  -> tauMinFactor,\n          \"TauMaxFactor\"  -> tauMaxFactor\n        ], $Failed\n      ];\n      <|\"File\" -> concLabel[concFiles[[i]]], \"Spec\" -> spec, \"OK\" -> AssociationQ[spec]|>\n    ],\n    {i, Length[concFiles]}\n  ];\n\n  concGoodSpecs = Select[concResults, #OK === True &];\n  Print[Style[\n    ToString[Length[concGoodSpecs]] <> \" / \" <> ToString[Length[concFiles]] <>\n    \" concentration fits succeeded.\",\n    Bold, Darker[Green]\n  ]]\n]",
+   "value": "(* Batch fit concentration files with locked parameters *)\nIf[concentrationDir === \"\",\n  Print[Style[\"concentrationDir is empty \\[LongDash] set it in the params cell.\", Red, Bold]],\n\n  (* helpers: extract electrode tag and numeric concentration from filename *)\n  concElec[f_]  := First[StringCases[FileNameTake[f], \"E\" ~~ d:DigitCharacter :> d], \"0\"];\n  concUM[f_]    := ToExpression @ First[\n    StringCases[FileNameTake[f], n:NumberString ~~ \"uM\" :> n], \"0\"];\n  concLabel[f_] := Module[{elec, conc},\n    elec = First[StringCases[FileNameTake[f], \"E\" ~~ d:DigitCharacter :> \"E\" <> d], \"?\"];\n    conc = First[StringCases[FileNameTake[f], n:NumberString ~~ \"uM\" :> n], \"?\"];\n    elec <> \" \" <> conc <> \" \\[Mu]M\"\n  ];\n\n  (* sort: electrode first, then by numeric concentration *)\n  concFiles = SortBy[\n    FileNames[\"*.txt\", concentrationDir],\n    {concElec[#], concUM[#]} &\n  ];\n  Print[\"Found \", Length[concFiles], \" concentration files.\"];\n\n  (* frequency range summary — print before fits start *)\n  Print[\"Nominal fit range:  \", fMinHz, \" \\[Dash] \", fMaxHz, \" Hz\"];\n  Module[{dat, freqInRange},\n    dat = DCTDataImport`ImportEIS[concFiles[[1]]];\n    If[AssociationQ[dat],\n      freqInRange = Select[dat[\"FreqHz\"], fMinHz <= # <= fMaxHz &];\n      Print[\"Actual freq range:   \",\n        NumberForm[Min[freqInRange], {6,3}], \" \\[Dash] \",\n        NumberForm[Max[freqInRange], {6,3}], \" Hz  (\",\n        Length[freqInRange], \" points)\"]\n    ]\n  ];\n\n  concResults = Table[\n    Module[{spec},\n      If[Mod[i, Max[1, Round[Length[concFiles]/6]]] == 1,\n        Print[i, \" / \", Length[concFiles], \"  \", concLabel[concFiles[[i]]]]\n      ];\n      spec = Quiet @ Check[\n        DCT`DCTSpectrum[concFiles[[i]],\n          \"LambdaND\"      -> lambdaND,\n          \"FMinUse\"       -> fMinHz,\n          \"FMaxUse\"       -> fMaxHz,\n          \"WeightPower\"   -> weightPower,\n          \"BinsPerDecade\" -> binsPerDecade,\n          \"TauMinFactor\"  -> tauMinFactor,\n          \"TauMaxFactor\"  -> tauMaxFactor\n        ], $Failed\n      ];\n      <|\"File\" -> concLabel[concFiles[[i]]], \"Spec\" -> spec, \"OK\" -> AssociationQ[spec]|>\n    ],\n    {i, Length[concFiles]}\n  ];\n\n  concGoodSpecs = Select[concResults, #OK === True &];\n  Print[Style[\n    ToString[Length[concGoodSpecs]] <> \" / \" <> ToString[Length[concFiles]] <>\n    \" concentration fits succeeded.\",\n    Bold, Darker[Green]\n  ]]\n]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bea9-x8za5gz\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\"> concentration files.</span></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beaa-fcis003\" data-page-width-em=\"51\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beac-uqv1lsv\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69begl-u4hsggf\" data-page-width-em=\"51\" data-latex-b64=\"NQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">5</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69begm-fcmh5vd\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beno-njnlmnm\" data-page-width-em=\"51\" data-latex-b64=\"OQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">9</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69benp-vh3xex2\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beuh-1vrtuks\" data-page-width-em=\"51\" data-latex-b64=\"MTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">13</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beui-3c7cwh5\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf16-2e7o87b\" data-page-width-em=\"51\" data-latex-b64=\"MTc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">17</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf17-vnk2x1q\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf7i-tv2lgkg\" data-page-width-em=\"51\" data-latex-b64=\"MjE=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">21</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf7i-o7ktq8t\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bfdu-vcecmqy\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezI0IC8gMjQgY29uY2VudHJhdGlvbiBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">24 / 24 concentration fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdsm-zp868pk\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\"> concentration files.</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Nominal fit range:  </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdsw-o1exxjt\" data-page-width-em=\"52\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div><span class=\"wl-ps\"> – </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdsx-q9ds3m2\" data-page-width-em=\"52\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Actual freq range:   </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdtv-9urrud3\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7MC43OTR9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.794</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> – </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdtw-b4jg18b\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7Mzk4LjExMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">398.110</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz  (</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdty-g8r3ux2\" data-page-width-em=\"52\" data-latex-b64=\"Mjg=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">28</span></span></span></span></span></div></div><span class=\"wl-ps\"> points)</span></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdtz-xfmj0mm\" data-page-width-em=\"52\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kdu1-s4s7cu8\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72ke0b-z2f3sgc\" data-page-width-em=\"52\" data-latex-b64=\"NQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">5</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72ke0c-fheq4uc\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72ke6f-g7qfv0v\" data-page-width-em=\"52\" data-latex-b64=\"OQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">9</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72ke6g-yvngfkr\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72ked4-ubay4ik\" data-page-width-em=\"52\" data-latex-b64=\"MTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">13</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72ked5-8e4jar4\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kejt-nymxe4q\" data-page-width-em=\"52\" data-latex-b64=\"MTc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">17</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72keju-bmat7wd\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72keq6-250m3ge\" data-page-width-em=\"52\" data-latex-b64=\"MjE=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">21</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72keq7-0nvh8pk\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72kew8-1a6iale\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezI0IC8gMjQgY29uY2VudHJhdGlvbiBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">24 / 24 concentration fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "Print: Found[formula] concentration files.[formula] /[formula]E1 0 μM[formula] /[formula]E1 178 μM[formula] /[formula]E2 0 μM[formula] /[formula]E2 178 μM[formula] /[formula]E3 0 μM[formula] /[formula]E3 178 μM[formula]",
+       "data": "Print: Found[formula] concentration files.Nominal fit range:[formula] –[formula] HzActual freq range:[formula] –[formula] Hz  ([formula] points)[formula] /[formula]E1 0 μM[formula] /[formula]E1 178 μM[formula] /[formula]E2 0 μM[formula] /[formula]E2 178 μM[formula] /[formula]E3 0 μM[formula] /[formula]E3 178 μM[formula]",
        "mime": "text/plain"
       }
      ],
-     "id": "c07102c0-e7b9-4c66-979f-de8080d49c3e"
+     "id": "ec27fd30-0183-469b-8324-e09ee113c4cd"
     }
    ],
    "metadata": {}
   },
   {
-   "kind": 2,
-   "value": "fMinHz",
-   "languageId": "wolfram",
-   "outputs": [
-    {
-     "items": [
-      {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"279\" data-out-n=\"1411\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"34\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1411]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bfgu-m3o34a4\" data-page-width-em=\"51\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div></div></div>",
-       "mime": "x-application/wolfram-language-html"
-      },
-      {
-       "data": "Out[1411]= 0.79433",
-       "mime": "text/plain"
-      }
-     ],
-     "id": "b8601c81-c94e-42b2-95a4-f7e93e0825c3"
-    }
-   ],
+   "kind": 1,
+   "value": "### 5.2 g(k) spectra",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -661,7 +821,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"280\" data-out-n=\"1413\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"35\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1413]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_15l74qyrco0lq.svg\" src=\"img/EAB_DCT_analysis/wl_15l74qyrco0lq.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"44\" data-out-n=\"157\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"33\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[157]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_mfyjx2qh3i0l.svg\" src=\"img/EAB_DCT_analysis/wl_mfyjx2qh3i0l.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -669,9 +829,16 @@
        "mime": "text/plain"
       }
      ],
-     "id": "7e2210c0-b285-49b2-9608-17626207da2c"
+     "id": "8cf3fba7-792a-4b31-a4e7-74b472d618f5"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 5.3 Area-normalised g(k)",
+   "languageId": "markdown",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -682,7 +849,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"281\" data-out-n=\"1415\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"36\" data-sub-start=\"10\" data-sub-end=\"15\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1415]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1hv1v1dxy5j46.svg\" src=\"img/EAB_DCT_analysis/wl_1hv1v1dxy5j46.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"45\" data-out-n=\"159\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"34\" data-sub-start=\"10\" data-sub-end=\"15\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[159]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_12gr6bkf8ks4n.svg\" src=\"img/EAB_DCT_analysis/wl_12gr6bkf8ks4n.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -690,20 +857,27 @@
        "mime": "text/plain"
       }
      ],
-     "id": "5816e6ed-3438-4566-8429-f555e2f0f8e9"
+     "id": "96f475df-e4b7-4c12-87a1-43246ca6413c"
     }
    ],
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 5.4 Fraction folded",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
-   "value": "(* Fraction folded vs [ligand]\n   k_peak shifts from range 1 (~46 s-1, unbound) to range 2 (~184 s-1, bound).\n   ff = area(range 2) / (area(range 1) + area(range 2)) — naturally 0 to 1. *)\n\nareaWindow[spec_, kLo_, kHi_] := Module[{tau, g, k, logK, n},\n  tau = spec[\"Tau\"]; g = spec[\"g\"]; k = 1./tau; logK = Log10[k]; n = Length[g];\n  If[n < 2, Return[0.]];\n  Total @ Table[If[0.5(k[[j]]+k[[j+1]]) >= kLo && 0.5(k[[j]]+k[[j+1]]) <= kHi,\n    0.5(g[[j]]+g[[j+1]]) Abs[logK[[j+1]]-logK[[j]]], 0.], {j, n-1}]\n];\n\ngetLabelUM[lbl_] := ToExpression @ First[\n  StringCases[lbl, n:NumberString ~~ \" \\[Mu]M\" :> n], \"0\"];\n\nffPerElectrode = Table[\n  Module[{subs, concs, a1, a2, ff},\n    subs  = Select[concGoodSpecs, StringStartsQ[#File, e] &];\n    concs = N @ (getLabelUM /@ subs[[All, \"File\"]]);\n    a1    = areaWindow[#Spec, kPeakRanges[[1,1]], kPeakRanges[[1,2]]] & /@ subs;\n    a2    = areaWindow[#Spec, kPeakRanges[[2,1]], kPeakRanges[[2,2]]] & /@ subs;\n    ff    = MapThread[If[#1+#2 > 0., #2/(#1+#2), 0.] &, {a1, a2}];\n    Transpose[{concs, ff}]\n  ],\n  {e, {\"E1\", \"E2\", \"E3\"}}\n];\n\n(* exclude 0 µM from log-axis plot *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8]] & /@ {1,2,3};\n\nListLinePlot[ffPerElectrode[[All, posIdx]],\n  ScalingFunctions -> {\"Log10\", None},\n  Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n  Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n  LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n  FrameLabel -> {\n    Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n    Style[\"Fraction folded\", 14, White]},\n  PlotRange -> {{0.8, 1200}, {0, 1}},\n  PlotRangePadding -> Scaled[0.04],\n  ImageSize -> 500, AspectRatio -> 0.75,\n  PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n    LabelStyle -> Directive[White, 12], Background -> darkBg,\n    LegendFunction -> (Framed[#, Background->darkBg,\n                         FrameStyle->fgStyle]&)], Right]\n]",
+   "value": "(* Fraction folded vs [ligand].\n   k_peak shifts from the unbound population (range 1) to the bound/folded population (range 2).\n   ff = area(range 2) / (area(range 1) + area(range 2)) — naturally 0 to 1. *)\n\nareaWindow[spec_, kLo_, kHi_] := Module[{tau, g, k, logK, n},\n  tau = spec[\"Tau\"]; g = spec[\"g\"]; k = 1./tau; logK = Log10[k]; n = Length[g];\n  If[n < 2, Return[0.]];\n  Total @ Table[If[0.5(k[[j]]+k[[j+1]]) >= kLo && 0.5(k[[j]]+k[[j+1]]) <= kHi,\n    0.5(g[[j]]+g[[j+1]]) Abs[logK[[j+1]]-logK[[j]]], 0.], {j, n-1}]\n];\n\ngetLabelUM[lbl_] := ToExpression @ First[\n  StringCases[lbl, n:NumberString ~~ \" \\[Mu]M\" :> n], \"0\"];\n\nffPerElectrode = Table[\n  Module[{subs, concs, a1, a2, ff},\n    subs  = Select[concGoodSpecs, StringStartsQ[#File, e] &];\n    concs = N @ (getLabelUM /@ subs[[All, \"File\"]]);\n    a1    = areaWindow[#Spec, kPeakRanges[[1,1]], kPeakRanges[[1,2]]] & /@ subs;\n    a2    = areaWindow[#Spec, kPeakRanges[[2,1]], kPeakRanges[[2,2]]] & /@ subs;\n    ff    = MapThread[If[#1+#2 > 0., #2/(#1+#2), 0.] &, {a1, a2}];\n    Transpose[{concs, ff}]\n  ],\n  {e, {\"E1\", \"E2\", \"E3\"}}\n];\n\n(* exclude 0 \\[Mu]M from log-axis plot *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8]] & /@ {1,2,3};\n\nListLinePlot[ffPerElectrode[[All, posIdx]],\n  ScalingFunctions -> {\"Log10\", None},\n  Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n  Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n  LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n  FrameLabel -> {\n    Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n    Style[\"Fraction folded\", 14, White]},\n  PlotRange -> {{0.8, 1200}, {0, 1}},\n  PlotRangePadding -> Scaled[0.04],\n  ImageSize -> 500, AspectRatio -> 0.75,\n  PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n    LabelStyle -> Directive[White, 12], Background -> darkBg,\n    LegendFunction -> (Framed[#, Background->darkBg,\n                         FrameStyle->fgStyle]&)], Right]\n]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"282\" data-out-n=\"1424\" data-sub-idx=\"10\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"37\" data-sub-start=\"34\" data-sub-end=\"49\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1424]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_zuzf1ogzpm61.svg\" src=\"img/EAB_DCT_analysis/wl_zuzf1ogzpm61.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"34\" data-out-n=\"138\" data-sub-idx=\"10\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"36\" data-sub-start=\"34\" data-sub-end=\"49\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[138]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_ej78h2fx6ui8.svg\" src=\"img/EAB_DCT_analysis/wl_ej78h2fx6ui8.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -711,35 +885,148 @@
        "mime": "text/plain"
       }
      ],
-     "id": "597f9870-ecf0-4340-b00c-2527dbf93ea2"
+     "id": "868a4ea9-f382-4d74-ae8d-0b2d154f067d"
     }
    ],
    "metadata": {}
   },
   {
    "kind": 1,
-   "value": "### Biophysical model fits\n\n**Model A** (no non-folding fraction): assumes all aptamers can fold — ff saturates at 1.  \n**Model B** (with non-folding fraction α): fraction α never folds regardless of ligand — ff saturates at f₀ + (1−α)(1−f₀).  \nBoth share the same baseline f₀ fixed from the 0 µM data.",
+   "value": "### 5a. Biophysical Model Fits\n\nFits the mechanistic kinetic model to fraction-folded vs concentration data pooled across all electrodes.\n\n**3-state model** (U ↔ F ↔ B): all aptamers can fold. Parameters: K_S (structural switching equilibrium), K_D (ligand dissociation constant). Baseline ff at zero ligand is K_S / (1 + K_S).\n\n**4-state model** (U ↔ F ↔ B + NF non-folding): fraction NF is permanently unfolded regardless of ligand. Parameters: K_S, K_D, NF. The 4-state K_D is typically much smaller than the 3-state K_D because NF absorbs the saturation shortfall rather than inflating K_D.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 5a.1 Fit and log-linear plot",
    "languageId": "markdown",
    "outputs": [],
    "metadata": {}
   },
   {
    "kind": 2,
-   "value": "(* Biophysical model fits — overlay on fraction folded data\n   Model A (no NF): ff(c) = f0 + (1-f0) / (1 + 10^(logKD - log10 c))   [all aptamers fold]\n   Model B (with NF): ff(c) = f0 + (1-NF)(1-f0) / (1 + 10^(logKD - log10 c))  [fraction NF never folds] *)\n\n(* baseline from 0 µM measurements — index 1 in ffPerElectrode is 0 µM *)\nf0 = Mean[ffPerElectrode[[All, 1, 2]]];\n\n(* all {log10(c), ff} points across all electrodes, positive concentrations only *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\nallLogPts = Flatten[\n  Map[{Log10[#[[1]]], #[[2]]} &, ffPerElectrode[[All, posIdx]], {2}],\n  1];\n\n(* Model A: only KD free — assumes all aptamers fold, ff → 1 at saturation *)\nfitA = NonlinearModelFit[allLogPts,\n  f0 + (1. - f0) / (1. + 10.^(logKdA - lx)),\n  {{logKdA, 2.9}}, lx];\nkdA = 10.^(logKdA /. fitA[\"BestFitParameters\"]);\n\n(* Model B: KD and non-folding fraction NF both free; NF bounded to (0,1) *)\nfitB = NonlinearModelFit[allLogPts,\n  f0 + (1. - nfB) * (1. - f0) / (1. + 10.^(logKdB - lx)),\n  {{logKdB, 2.}, {nfB, 0.4, 0., 0.99}}, lx];\nlogKdBval = logKdB /. fitB[\"BestFitParameters\"];\nnfBval    = nfB    /. fitB[\"BestFitParameters\"];\nkdB = 10.^logKdBval;\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n\nShow[\n  ListLinePlot[ffPerElectrode[[All, posIdx]],\n    ScalingFunctions -> {\"Log10\", None},\n    Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0.8, 1200}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White,12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right]\n  ],\n  (* Model A: dashed gray — no non-folding fraction *)\n  Plot[f0 + (1-f0)/(1 + 10^(Log10[kdA] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Axes -> False],\n  (* Model B: solid white — with non-folding fraction *)\n  Plot[f0 + (1-nfBval)*(1-f0)/(1 + 10^(Log10[kdB] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[White, AbsoluteThickness[2.]],\n    Axes -> False],\n  Epilog -> {\n    (* \"no NF\" label — top right *)\n    Text[Style[Row[{\"no NF:  K\", Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdA, 1.], {6,1}], \" \\[Mu]M\"}],\n      GrayLevel[0.65], 12, FontFamily->\"Arial\"], Scaled[{0.8, 0.80}]],\n    (* \"NF = ...\" label — middle, just above the plateau *)\n    Text[Style[Row[{\"NF = \", NumberForm[nfBval, {3,2}], \":  K\",\n      Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdB, 1.], {6,1}], \" \\[Mu]M\"}],\n      White, 12, FontFamily->\"Arial\"], Scaled[{0.42, 0.43}]]\n  }\n]",
+   "value": "(* Biophysical model fits using the mechanistic 3-state and 4-state kinetic models.\n   Data: {conc µM, ff} across all electrodes, positive concentrations only. *)\n\n(* --- model equations --- *)\nPrint[Style[\"3-state model  (U \\[LeftRightArrow] F \\[LeftRightArrow] B)\", Bold, 13]];\nPrint[Row[{\"  \", Subscript[\"f\",\"f\"], \" = \", DCTBiophysics`$FF3State}]];\nPrint[Style[\"4-state model  (U \\[LeftRightArrow] F \\[LeftRightArrow] B,  NF non-folding)\", Bold, 13]];\nPrint[Row[{\"  \", Subscript[\"f\",\"f\"], \" = \", DCTBiophysics`$FF4State}]];\nPrint[\"\"];\n\nallPts = Flatten[ffPerElectrode[[All, posIdx]], 1];\n\nfitResult = DCTBiophysics`FitFoldedFraction[allPts];\n\n(* --- fit parameters --- *)\nModule[{p3 = fitResult[\"Model3\"], p4 = fitResult[\"Model4\"]},\n  Print[Style[\"3-state model\", Bold, 13]];\n  Print[Row[{\"  \", Subscript[\"K\",\"S\"], \" = \", NumberForm[p3[\"KS\"], {4,3}],\n             \"     \", Subscript[\"K\",\"D\"], \" = \", NumberForm[p3[\"KD\"], {6,1}], \" \\[Mu]M\"}]];\n  Print[Style[\"4-state model\", Bold, 13]];\n  Print[Row[{\"  \", Subscript[\"K\",\"S\"], \" = \", NumberForm[p4[\"KS\"], {4,3}],\n             \"     \", Subscript[\"K\",\"D\"], \" = \", NumberForm[p4[\"KD\"], {6,1}], \" \\[Mu]M\",\n             \"     NF = \", NumberForm[p4[\"NF\"], {3,2}]}]]\n];\n\n(* --- plot --- *)\nModule[{ks3, kd3, ks4, kd4, nf4, m3, m4,\n        tMin, tMax, c3pts, c4pts,\n        darkBg, fgStyle, eCols, modelStyles},\n  ks3 = fitResult[\"Model3\", \"KS\"];  kd3 = fitResult[\"Model3\", \"KD\"];\n  ks4 = fitResult[\"Model4\", \"KS\"];  kd4 = fitResult[\"Model4\", \"KD\"];\n  nf4 = fitResult[\"Model4\", \"NF\"];\n\n  (* substitute numeric params into public symbolic expressions *)\n  m3 = DCTBiophysics`$FF3State /. {DCTBiophysics`KS -> ks3, DCTBiophysics`KD -> kd3};\n  m4 = DCTBiophysics`$FF4State /. {DCTBiophysics`KS -> ks4, DCTBiophysics`KD -> kd4,\n                                    DCTBiophysics`NF -> nf4};\n\n  tMin = Log10[Min[allPts[[All,1]]] * 0.4];\n  tMax = Log10[Max[allPts[[All,1]]] * 3.];\n\n  (* sample at 200 log-spaced points as {µM, ff} — same coordinate space as data *)\n  c3pts = Table[{10^t, N[m3 /. DCTBiophysics`conc -> 10^t]}, {t, tMin, tMax, (tMax-tMin)/200}];\n  c4pts = Table[{10^t, N[m4 /. DCTBiophysics`conc -> 10^t]}, {t, tMin, tMax, (tMax-tMin)/200}];\n\n  darkBg     = GrayLevel[0.12];\n  fgStyle    = Directive[White, AbsoluteThickness[1.1]];\n  eCols      = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n  modelStyles = {\n    Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Directive[White, AbsoluteThickness[2.]]\n  };\n\n  ListLinePlot[\n    Join[ffPerElectrode[[All, posIdx]], {c3pts, c4pts}],\n    ScalingFunctions -> {\"Log10\", None},\n    Joined -> True,\n    PlotMarkers -> {{Automatic,8},{Automatic,8},{Automatic,8}, None, None},\n    PlotStyle -> Join[eCols, modelStyles],\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0.8, 1200}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White, 12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right],\n    Epilog -> {\n      {Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.91}], Scaled[{0.67, 0.91}]}]},\n      Text[Style[\"3-state model\", GrayLevel[0.65], 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.91}]],\n      {Directive[White, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.83}], Scaled[{0.67, 0.83}]}]},\n      Text[Style[\"4-state model\", White, 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.83}]]\n    }\n  ]\n]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"283\" data-out-n=\"1438\" data-sub-idx=\"18\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"39\" data-sub-start=\"32\" data-sub-end=\"69\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1438]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1el35nyc4owie.svg\" src=\"img/EAB_DCT_analysis/wl_1el35nyc4owie.svg\"/></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72najm-r57kvai\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHszLXN0YXRlIG1vZGVsICAoVSAkXGxlZnRyaWdodGFycm93JCBGICRcbGVmdHJpZ2h0YXJyb3ckIEIpfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">3-state model (U </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> F </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> B)</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "(* output: graphics *)\n(* Biophysical model fits — overlay on fraction folded data\n   Model A (no NF): ff(c) = f0 + (1-f0) / (1 + 10^(logKD - log10 c))   [all aptamers fold]\n   Model B (with NF): ff(c) = f0 + (1-NF)(1-f0) / (1 + 10^(logKD - log10 c))  [fraction NF never folds] *)\n\n(* baseline from 0 µM measurements — index 1 in ffPerElectrode is 0 µM *)\nf0 = Mean[ffPerElectrode[[All, 1, 2]]];\n\n(* all {log10(c), ff} points across all electrodes, positive concentrations only *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\nallLogPts = Flatten[\n  Map[{Log10[#[[1]]], #[[2]]} &, ffPerElectrode[[All, posIdx]], {2}],\n  1];\n\n(* Model A: only KD free — assumes all aptamers fold, ff → 1 at saturation *)\nfitA = NonlinearModelFit[allLogPts,\n  f0 + (1. - f0) / (1. + 10.^(logKdA - lx)),\n  {{logKdA, 2.9}}, lx];\nkdA = 10.^(logKdA /. fitA[\"BestFitParameters\"]);\n\n(* Model B: KD and non-folding fraction NF both free; NF bounded to (0,1) *)\nfitB = NonlinearModelFit[allLogPts,\n  f0 + (1. - nfB) * (1. - f0) / (1. + 10.^(logKdB - lx)),\n  {{logKdB, 2.}, {nfB, 0.4, 0., 0.99}}, lx];\nlogKdBval = logKdB /. fitB[\"BestFitParameters\"];\nnfBval    = nfB    /. fitB[\"BestFitParameters\"];\nkdB = 10.^logKdBval;\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n\nShow[\n  ListLinePlot[ffPerElectrode[[All, posIdx]],\n    ScalingFunctions -> {\"Log10\", None},\n    Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0.8, 1200}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White,12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right]\n  ],\n  (* Model A: dashed gray — no non-folding fraction *)\n  Plot[f0 + (1-f0)/(1 + 10^(Log10[kdA] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Axes -> False],\n  (* Model B: solid white — with non-folding fraction *)\n  Plot[f0 + (1-nfBval)*(1-f0)/(1 + 10^(Log10[kdB] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[White, AbsoluteThickness[2.]],\n    Axes -> False],\n  Epilog -> {\n    (* \"no NF\" label — top right *)\n    Text[Style[Row[{\"no NF:  K\", Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdA, 1.], {6,1}], \" \\[Mu]M\"}],\n      GrayLevel[0.65], 12, FontFamily->\"Arial\"], Scaled[{0.8, 0.80}]],\n    (* \"NF = ...\" label — middle, just above the plateau *)\n    Text[Style[Row[{\"NF = \", NumberForm[nfBval, {3,2}], \":  K\",\n      Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdB, 1.], {6,1}], \" \\[Mu]M\"}],\n      White, 12, FontFamily->\"Arial\"], Scaled[{0.42, 0.43}]]\n  }\n]",
+       "data": "Print: [formula]",
        "mime": "text/plain"
       }
      ],
-     "id": "57febfe5-56ad-4edd-accc-9ea8388f1f80"
+     "id": "60497e25-fd47-48ad-9cca-72c2fbaf305e"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72najv-o6snoct\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7Zn1fe1x0ZXh0e2Z9fVx0ZXh0eyA9IH1cZnJhY3tcbWF0aHJte0tTfVwsXGxlZnQoXG1hdGhybXtjb25jfStcbWF0aHJte0tEfVxyaWdodCl9e1xtYXRocm17S1N9XCxcbGVmdChcbWF0aHJte2NvbmN9K1xtYXRocm17S0R9XHJpZ2h0KStcbWF0aHJte0tEfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.363em;vertical-align:-0.936em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">f</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">f</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "437eab81-6293-4171-ae8e-39314af20688"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72nak6-n5xjd0d\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHs0LXN0YXRlIG1vZGVsICAoVSAkXGxlZnRyaWdodGFycm93JCBGICRcbGVmdHJpZ2h0YXJyb3ckIEIsICBORiBub24tZm9sZGluZyl9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">4-state model (U </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> F </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> B, NF non-folding)</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "14b9ba99-063d-4ff3-a08b-af174bd749be"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72nakr-mufbx51\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7Zn1fe1x0ZXh0e2Z9fVx0ZXh0eyA9IH1cZnJhY3tcbWF0aHJte0tTfVwsXGxlZnQoMS1cbWF0aHJte05GfVxyaWdodClcLFxsZWZ0KFxtYXRocm17Y29uY30rXG1hdGhybXtLRH1ccmlnaHQpfXtcbWF0aHJte0tTfVwsXGxlZnQoXG1hdGhybXtjb25jfStcbWF0aHJte0tEfVxyaWdodCkrXG1hdGhybXtLRH19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.363em;vertical-align:-0.936em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">f</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">f</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">NF</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "a2466669-d4cd-420e-9b1a-c78ed986534a"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\"></span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: ",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "bea97fd8-2e26-4afa-93bd-b06f518a94f4"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72namc-iqai4ir\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHszLXN0YXRlIG1vZGVsfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">3-state model</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72name-kxl602j\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7S31fe1x0ZXh0e1N9fVx0ZXh0eyA9IH1cdGV4dHswLjE5MX1cdGV4dHsgICAgIH1cdGV4dHtLfV97XHRleHR7RH19XHRleHR7ID0gfVx0ZXh0ezYzLjF9XHRleHR7ICRcbXUkTX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">S</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">0.191</span></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">D</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">63.1</span></span><span class=\"mord text\"><span class=\"mord\"> </span><span class=\"mord mathnormal\">μ</span><span class=\"mord\">M</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72namg-3yhu27y\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHs0LXN0YXRlIG1vZGVsfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">4-state model</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq72nami-fn1ge66\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7S31fe1x0ZXh0e1N9fVx0ZXh0eyA9IH1cdGV4dHswLjE0MH1cdGV4dHsgICAgIH1cdGV4dHtLfV97XHRleHR7RH19XHRleHR7ID0gfVx0ZXh0ezcuOX1cdGV4dHsgJFxtdSRNfVx0ZXh0eyAgICAgTkYgPSB9XHRleHR7MC4zNH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">S</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">0.140</span></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">D</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">7.9</span></span><span class=\"mord text\"><span class=\"mord\"> </span><span class=\"mord mathnormal\">μ</span><span class=\"mord\">M</span></span><span class=\"mord text\"><span class=\"mord\"> NF = </span></span><span class=\"mord text\"><span class=\"mord\">0.34</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula][formula][formula][formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "d40f368d-8e82-4fe4-a598-61a9dbf41998"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"46\" data-out-n=\"171\" data-sub-idx=\"12\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"37\" data-sub-start=\"26\" data-sub-end=\"81\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[171]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1xslvu78tgcbt.svg\" src=\"img/EAB_DCT_analysis/wl_1xslvu78tgcbt.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Biophysical model fits using the mechanistic 3-state and 4-state kinetic models.\n   Data: {conc µM, ff} across all electrodes, positive concentrations only. *)\n\n(* --- model equations --- *)\nPrint[Style[\"3-state model  (U \\[LeftRightArrow] F \\[LeftRightArrow] B)\", Bold, 13]];\nPrint[Row[{\"  \", Subscript[\"f\",\"f\"], \" = \", DCTBiophysics`$FF3State}]];\nPrint[Style[\"4-state model  (U \\[LeftRightArrow] F \\[LeftRightArrow] B,  NF non-folding)\", Bold, 13]];\nPrint[Row[{\"  \", Subscript[\"f\",\"f\"], \" = \", DCTBiophysics`$FF4State}]];\nPrint[\"\"];\n\nallPts = Flatten[ffPerElectrode[[All, posIdx]], 1];\n\nfitResult = DCTBiophysics`FitFoldedFraction[allPts];\n\n(* --- fit parameters --- *)\nModule[{p3 = fitResult[\"Model3\"], p4 = fitResult[\"Model4\"]},\n  Print[Style[\"3-state model\", Bold, 13]];\n  Print[Row[{\"  \", Subscript[\"K\",\"S\"], \" = \", NumberForm[p3[\"KS\"], {4,3}],\n             \"     \", Subscript[\"K\",\"D\"], \" = \", NumberForm[p3[\"KD\"], {6,1}], \" \\[Mu]M\"}]];\n  Print[Style[\"4-state model\", Bold, 13]];\n  Print[Row[{\"  \", Subscript[\"K\",\"S\"], \" = \", NumberForm[p4[\"KS\"], {4,3}],\n             \"     \", Subscript[\"K\",\"D\"], \" = \", NumberForm[p4[\"KD\"], {6,1}], \" \\[Mu]M\",\n             \"     NF = \", NumberForm[p4[\"NF\"], {3,2}]}]]\n];\n\n(* --- plot --- *)\nModule[{ks3, kd3, ks4, kd4, nf4, m3, m4,\n        tMin, tMax, c3pts, c4pts,\n        darkBg, fgStyle, eCols, modelStyles},\n  ks3 = fitResult[\"Model3\", \"KS\"];  kd3 = fitResult[\"Model3\", \"KD\"];\n  ks4 = fitResult[\"Model4\", \"KS\"];  kd4 = fitResult[\"Model4\", \"KD\"];\n  nf4 = fitResult[\"Model4\", \"NF\"];\n\n  (* substitute numeric params into public symbolic expressions *)\n  m3 = DCTBiophysics`$FF3State /. {DCTBiophysics`KS -> ks3, DCTBiophysics`KD -> kd3};\n  m4 = DCTBiophysics`$FF4State /. {DCTBiophysics`KS -> ks4, DCTBiophysics`KD -> kd4,\n                                    DCTBiophysics`NF -> nf4};\n\n  tMin = Log10[Min[allPts[[All,1]]] * 0.4];\n  tMax = Log10[Max[allPts[[All,1]]] * 3.];\n\n  (* sample at 200 log-spaced points as {µM, ff} — same coordinate space as data *)\n  c3pts = Table[{10^t, N[m3 /. DCTBiophysics`conc -> 10^t]}, {t, tMin, tMax, (tMax-tMin)/200}];\n  c4pts = Table[{10^t, N[m4 /. DCTBiophysics`conc -> 10^t]}, {t, tMin, tMax, (tMax-tMin)/200}];\n\n  darkBg     = GrayLevel[0.12];\n  fgStyle    = Directive[White, AbsoluteThickness[1.1]];\n  eCols      = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n  modelStyles = {\n    Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Directive[White, AbsoluteThickness[2.]]\n  };\n\n  ListLinePlot[\n    Join[ffPerElectrode[[All, posIdx]], {c3pts, c4pts}],\n    ScalingFunctions -> {\"Log10\", None},\n    Joined -> True,\n    PlotMarkers -> {{Automatic,8},{Automatic,8},{Automatic,8}, None, None},\n    PlotStyle -> Join[eCols, modelStyles],\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0.8, 1200}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White, 12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right],\n    Epilog -> {\n      {Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.91}], Scaled[{0.67, 0.91}]}]},\n      Text[Style[\"3-state model\", GrayLevel[0.65], 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.91}]],\n      {Directive[White, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.83}], Scaled[{0.67, 0.83}]}]},\n      Text[Style[\"4-state model\", White, 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.83}]]\n    }\n  ]\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "cbb9af7b-d87d-4b54-8648-b3868d4879ef"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 5a.2 Linear-linear plot",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Linear-linear plot — includes 0 µM data that the log-x plot cannot show *)\nModule[{ks3, kd3, ks4, kd4, nf4, m3, m4, cMax, cPts, c3pts, c4pts,\n        darkBg, fgStyle, eCols, modelStyles},\n  ks3 = fitResult[\"Model3\", \"KS\"];  kd3 = fitResult[\"Model3\", \"KD\"];\n  ks4 = fitResult[\"Model4\", \"KS\"];  kd4 = fitResult[\"Model4\", \"KD\"];\n  nf4 = fitResult[\"Model4\", \"NF\"];\n\n  m3 = DCTBiophysics`$FF3State /. {DCTBiophysics`KS -> ks3, DCTBiophysics`KD -> kd3};\n  m4 = DCTBiophysics`$FF4State /. {DCTBiophysics`KS -> ks4, DCTBiophysics`KD -> kd4,\n                                    DCTBiophysics`NF -> nf4};\n\n  cMax = Max[ffPerElectrode[[All, All, 1]]];\n  cPts = Range[0., cMax * 1.05, cMax / 300.];\n\n  c3pts = {#, N[m3 /. DCTBiophysics`conc -> #]} & /@ cPts;\n  c4pts = {#, N[m4 /. DCTBiophysics`conc -> #]} & /@ cPts;\n\n  darkBg     = GrayLevel[0.12];\n  fgStyle    = Directive[White, AbsoluteThickness[1.1]];\n  eCols      = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n  modelStyles = {\n    Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Directive[White, AbsoluteThickness[2.]]\n  };\n\n  ListLinePlot[\n    Join[ffPerElectrode, {c3pts, c4pts}],\n    Joined -> True,\n    PlotMarkers -> {{Automatic,8},{Automatic,8},{Automatic,8}, None, None},\n    PlotStyle -> Join[eCols, modelStyles],\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0, cMax * 1.05}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White, 12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right],\n    Epilog -> {\n      {Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.91}], Scaled[{0.67, 0.91}]}]},\n      Text[Style[\"3-state model\", GrayLevel[0.65], 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.91}]],\n      {Directive[White, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.83}], Scaled[{0.67, 0.83}]}]},\n      Text[Style[\"4-state model\", White, 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.83}]]\n    }\n  ]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"40\" data-out-n=\"150\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"39\" data-sub-start=\"1\" data-sub-end=\"52\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[150]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_3bkgknowsrc2.svg\" src=\"img/EAB_DCT_analysis/wl_3bkgknowsrc2.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Linear-linear plot — includes 0 µM data that the log-x plot cannot show *)\nModule[{ks3, kd3, ks4, kd4, nf4, m3, m4, cMax, cPts, c3pts, c4pts,\n        darkBg, fgStyle, eCols, modelStyles},\n  ks3 = fitResult[\"Model3\", \"KS\"];  kd3 = fitResult[\"Model3\", \"KD\"];\n  ks4 = fitResult[\"Model4\", \"KS\"];  kd4 = fitResult[\"Model4\", \"KD\"];\n  nf4 = fitResult[\"Model4\", \"NF\"];\n\n  m3 = DCTBiophysics`$FF3State /. {DCTBiophysics`KS -> ks3, DCTBiophysics`KD -> kd3};\n  m4 = DCTBiophysics`$FF4State /. {DCTBiophysics`KS -> ks4, DCTBiophysics`KD -> kd4,\n                                    DCTBiophysics`NF -> nf4};\n\n  cMax = Max[ffPerElectrode[[All, All, 1]]];\n  cPts = Range[0., cMax * 1.05, cMax / 300.];\n\n  c3pts = {#, N[m3 /. DCTBiophysics`conc -> #]} & /@ cPts;\n  c4pts = {#, N[m4 /. DCTBiophysics`conc -> #]} & /@ cPts;\n\n  darkBg     = GrayLevel[0.12];\n  fgStyle    = Directive[White, AbsoluteThickness[1.1]];\n  eCols      = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n  modelStyles = {\n    Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Directive[White, AbsoluteThickness[2.]]\n  };\n\n  ListLinePlot[\n    Join[ffPerElectrode, {c3pts, c4pts}],\n    Joined -> True,\n    PlotMarkers -> {{Automatic,8},{Automatic,8},{Automatic,8}, None, None},\n    PlotStyle -> Join[eCols, modelStyles],\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0, cMax * 1.05}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White, 12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right],\n    Epilog -> {\n      {Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.91}], Scaled[{0.67, 0.91}]}]},\n      Text[Style[\"3-state model\", GrayLevel[0.65], 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.91}]],\n      {Directive[White, AbsoluteThickness[2.]],\n       Line[{Scaled[{0.58, 0.83}], Scaled[{0.67, 0.83}]}]},\n      Text[Style[\"4-state model\", White, 11, FontFamily -> \"Arial\"],\n           Scaled[{0.79, 0.83}]]\n    }\n  ]\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "e9fc4c35-6368-492a-8af5-75686f43ef07"
     }
    ],
    "metadata": {}
@@ -752,22 +1039,29 @@
    "metadata": {}
   },
   {
+   "kind": 1,
+   "value": "### 6.1 Export figures",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
    "kind": 2,
-   "value": "exportFigure = False; (* set to True to export all figures as PDFs *)\n\nIf[exportFigure,\n  figDir = FileNameJoin[{DirectoryName[dataDir], \"figures\"}];\n  If[!DirectoryQ[figDir], CreateDirectory[figDir]];\n  Print[\"Saving to: \", figDir];\n\n  exportFig[fig_, name_] := (\n    Export[FileNameJoin[{figDir, name <> \".pdf\"}], fig];\n    Print[\"✓ \", name]\n  );\n\n  (* Drift *)\n  exportFig[DCTPlots`PlotGK[goodSpecs],            \"drift_gK\"];\n  exportFig[DCTPlots`PlotTimeSeries[goodSpecs],    \"drift_timeSeries\"];\n  exportFig[DCTPlots`PlotDCTHeatmap[goodSpecs],    \"drift_heatmap\"];\n  exportFig[DCTPlots`PlotKKResiduals[kkRep],       \"drift_kkResiduals\"];\n\n  (* Concentration (skip if not fitted) *)\n  If[ValueQ[concGoodSpecs] && Length[concGoodSpecs] > 0,\n    exportFig[DCTPlots`PlotGK[concGoodSpecs], \"conc_gK\"]\n  ];\n\n  Print[Style[\"Export done.\", Bold, Darker[Green]]],\n\n  Print[Style[\"exportFigure = False — set to True to export.\", Italic, GrayLevel[0.6]]]\n]",
+   "value": "exportFigure = True; (* set to True to export all figures as PDFs *)\n\nIf[exportFigure,\n  figDir = FileNameJoin[{DirectoryName[dataDir], \"figures\"}];\n  If[!DirectoryQ[figDir], CreateDirectory[figDir]];\n  Print[\"Saving to: \", figDir];\n\n  exportFig[fig_, name_] := (\n    Export[FileNameJoin[{figDir, name <> \".pdf\"}], fig];\n    Print[\"✓ \", name]\n  );\n\n  (* Drift *)\n  exportFig[DCTPlots`PlotGK[goodSpecs],            \"drift_gK\"];\n  exportFig[DCTPlots`PlotTimeSeries[goodSpecs],    \"drift_timeSeries\"];\n  exportFig[DCTPlots`PlotDCTHeatmap[goodSpecs],    \"drift_heatmap\"];\n  exportFig[DCTPlots`PlotKKResiduals[kkRep],       \"drift_kkResiduals\"];\n\n  (* Concentration (skip if not fitted) *)\n  If[ValueQ[concGoodSpecs] && Length[concGoodSpecs] > 0,\n    exportFig[DCTPlots`PlotGK[concGoodSpecs], \"conc_gK\"]\n  ];\n\n  Print[Style[\"Export done.\", Bold, Darker[Green]]],\n\n  Print[Style[\"exportFigure = False — set to True to export.\", Italic, GrayLevel[0.6]]]\n]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bhex-jojbxi5\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhpdHtcdGV4dGNvbG9yeyM5OTk5OTl9e1x0ZXh0e2V4cG9ydEZpZ3VyZSA9IEZhbHNlIC0tLSBzZXQgdG8gVHJ1ZSB0byBleHBvcnQufX19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#999999;\"><span class=\"mord\" style=\"color:#999999;\">exportFigure = False — set to True to export.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Saving to: </span><span class=\"wl-ps\">c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\figures</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_gK</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_timeSeries</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_heatmap</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_kkResiduals</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">conc_gK</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6c9ur0-exnztc5\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0V4cG9ydCBkb25lLn19fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Export done.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "Print: [formula]",
+       "data": "Print: Saving to:c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\figures✓drift_gK✓drift_timeSeries✓drift_heatmap✓drift_kkResiduals✓conc_gK[formula]",
        "mime": "text/plain"
       }
      ],
-     "id": "01e273ce-0872-4d33-bf28-6a555e2ad482"
+     "id": "542bcce5-d558-4079-b55d-d6667b05a7c5"
     }
    ],
    "metadata": {}

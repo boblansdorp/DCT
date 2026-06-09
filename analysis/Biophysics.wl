@@ -133,8 +133,8 @@ FitFoldedFraction[pts_List] := Module[
   p3 = fit3["BestFitParameters"];
   p4 = fit4["BestFitParameters"];
 
-  fn3 = Function[cx, Evaluate[model3 /. p3]];
-  fn4 = Function[cx, Evaluate[model4 /. p4]];
+  fn3 = With[{e = model3 /. p3}, (e /. cx -> #) &];
+  fn4 = With[{e = model4 /. p4}, (e /. cx -> #) &];
 
   <|
     "Model3" -> <|
