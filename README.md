@@ -13,6 +13,7 @@ Initial application: EAB aptamer biosensors (concentration-dependent folding fro
 | Wolfram Mathematica | tested on 13.1 | |
 | VS Code | Any recent | Windows only for Wolfbook |
 | [Wolfbook VS Code extension](https://marketplace.visualstudio.com/items?itemName=wolfbook.wolfbook) | 2.7.14+ | Provides the `.wb` notebook UI and Wolfram kernel integration |
+| [Node.js](https://nodejs.org/) | 18+ | Required for the Wolfbook MCP bridge (not installed by default on Windows) |
 
 > **Note:** `.wb` notebooks require VS Code + Wolfbook. They cannot be opened in Mathematica directly. The `.wl` package files are standard Wolfram Language and work anywhere.
 
@@ -66,11 +67,19 @@ Add Wolfbook to **both** the global `mcpServers` block and the project-scoped bl
 }
 ```
 
-### Step 3 — Reload
+### Step 3 — Activate the MCP server in Wolfbook
 
-Close and reopen VS Code, then restart the Claude Code panel. In Claude code, you can type `/mcp` and you should see something like this:
+With a `.wb` file open, press `Ctrl+Shift+P` and run **Wolfbook Claude MCP**. This starts the bridge process that Claude connects to.
+
+### Step 4 — Reload Claude
+
+Close and reopen VS Code, or restart the Claude Code panel. It may take **2–3 restart cycles** before the MCP server is recognised — this is a known Wolfbook quirk. In Claude Code, type `/mcp` to confirm the `wolfbook` server appears as connected.
 
 ![alt text](image.png)
+
+### Known limitations
+
+**Working directory differs from Mathematica.** `NotebookDirectory[]` is not available in Wolfbook — it returns `$Failed`. Use explicit absolute paths (as in cell 0.2) or `$InputFileName` only if the notebook was opened via `Get`. For path-relative operations, set `dataDir` explicitly.
 
 ---
 
