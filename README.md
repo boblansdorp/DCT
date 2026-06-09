@@ -10,9 +10,11 @@ Initial application: EAB aptamer biosensors (concentration-dependent folding fro
 
 | Requirement | Version tested | Notes |
 |---|---|---|
-| Wolfram Mathematica | tested on 13.1 |
+| Wolfram Mathematica | tested on 13.1 | |
 | VS Code | Any recent | Windows only for Wolfbook |
 | [Wolfbook VS Code extension](https://marketplace.visualstudio.com/items?itemName=wolfbook.wolfbook) | 2.7.14+ | Provides the `.wb` notebook UI and Wolfram kernel integration |
+
+> **Note:** `.wb` notebooks require VS Code + Wolfbook. They cannot be opened in Mathematica directly. The `.wl` package files are standard Wolfram Language and work anywhere.
 
 ---
 
@@ -25,7 +27,7 @@ Initial application: EAB aptamer biosensors (concentration-dependent folding fro
 
 ## Setting up Claude Code / MCP (optional, for AI-assisted working)
 
-If you want Claude Code to read and edit cells live, Wolfbook exposes an MCP server that Claude Code can connect to. This requires manual configuration.
+If you want Claude Code to read and edit cells live, Wolfbook exposes an MCP server that Claude Code can connect to.
 
 ### Step 1 — Find the bridge script path
 
@@ -70,14 +72,14 @@ Close and reopen VS Code, then restart the Claude Code panel. In Claude code, yo
 
 ![alt text](image.png)
 
-
 ---
 
 ## Repository layout
 
 ```
 DCT/
-├── EAB_DCT_analysis.wb     ← main notebook — start here
+├── EAB_DCT_analysis.wb     ← main analysis notebook — start here
+├── runTests.wb             ← test suite notebook
 ├── DCT.wl                  ← top-level package loader
 ├── core/
 │   ├── DataImport.wl       — reads .txt EIS files (freq, Re[Z], Im[Z])
@@ -87,12 +89,18 @@ DCT/
 │   └── NNLSFit.wl          — non-negative least squares
 ├── analysis/
 │   ├── AdmittanceStats.wl  — per-frequency variance, CV, power-law fit
+│   ├── Biophysics.wl       — 3-state/4-state aptamer folding model (symbolic + fitting)
 │   ├── PeakAnalysis.wl     — peak-finding, spectrum integration
 │   └── Sensitivity.wl      — lambda / freq-range / weight-power sweeps
 ├── plots/                  — all plot functions (dark background, white-on-dark)
+├── tests/
+│   ├── TestDataImport.wl
+│   ├── TestNNLS.wl
+│   ├── TestDCTKernel.wl
+│   └── TestDCTInversion.wl
 ├── data/
 │   ├── drift_03252026/     — long-term drift data (E1/, E2/, E3/ subdirs)
-│   └── concentration/      — ligand titration data (E1_178uM.txt style names)
+│   └── spike/              — ligand titration data (E1_178uM.txt style names)
 └── legacy/                 — original .m scripts kept for reference
 ```
 
@@ -100,92 +108,90 @@ DCT/
 
 ## Entry point: `EAB_DCT_analysis.wb`
 
-Open this file in VS Code with Wolfbook installed. Run cells top-to-bottom. The notebook has five sections:
+Open in VS Code with Wolfbook installed. Run cells top-to-bottom within each section. The notebook has seven numbered sections:
 
-### Section 1 — Setup
-- **Cell 1**: Clears all package contexts and reloads from disk. Run this first whenever you edit a `.wl` file.
-- **Cell 2 (params)**: The single source of truth for all fit parameters. Edit here, re-run, then re-run downstream cells. **Do not set these variables in later cells** — they will silently overwrite Cell 2's values and cause hard-to-diagnose mismatches.
+### Section 0 — Setup
+- **0.1 Load packages**: Clears all package contexts and reloads from disk. Run this first whenever you edit a `.wl` file.
+- **0.2 Parameters**: Global fit parameters — the single source of truth for values used across sections 4 and 5. Edit here and re-run before running the batch fits.
 
-Set these upfront (the only things you need to change for a new dataset):
+Global parameters in 0.2:
 ```wolfram
-dataDir          = "...\\drift_03252026";  (* path to drift data — E1/E2/E3 subdirs *)
-concentrationDir = "...\\spike";           (* path to concentration data *)
-repFileIdx       = 1;                      (* index of representative file for KK/sweep plots *)
-fileDecimation   = 1;                     (* 1 = all drift files, N = every Nth — use a large number while tuning to more quickly iterate *)
-binsPerDecade    = 15;                     (* tau grid density (bins per decade of frequency)*)
-tauMinFactor     = 0.1;                    (* grid padding factor below 1/(2π fMax) *)
-tauMaxFactor     = 10.;                    (* grid padding factor above 1/(2π fMin) *)
+dataDir          = "...\drift_03252026";  (* path to drift data *)
+concentrationDir = "...\spike";           (* path to concentration data *)
+lambdaND         = 1e-3;   (* Tikhonov regularisation — from L-curve, Section 3 *)
+fMaxHz           = 1000.;  (* upper frequency cutoff — from admittance stats, Section 2 *)
+weightPower      = -0.75;  (* admittance weight exponent — from power-law fit, Section 2 *)
+binsPerDecade    = 15;     (* tau grid density *)
+tauMinFactor     = 0.1;
+tauMaxFactor     = 10.;
 ```
 
-These are filled in as you work through Sections 2–3 (the notebook prints the suggested values):
+`fMinHz` is **not** set here — it is determined automatically in Section 1 from the Lin-KK population analysis and written by cell 1.3.
+
+### Section 1 — KK Data Validation
+Runs Lin-KK on **all** drift files to determine `fMinHz` from the population distribution. Section-specific parameters at the top of cell 1.1:
 ```wolfram
-fMinHz      = 0.5;      (* ← from KK check, Section 2 *)
-fMaxHz      = 1000.;    (* ← from CV(f) / power-law inflection, Section 3 *)
-weightPower = -0.75;    (* ← from power-law fit, Section 3 *)
-lambdaND    = 1*^-3;    (* ← from L-curve corner, Section 3 *)
+kkResidualThreshold = 0.02;  (* point-by-point |residual|/|Y| cutoff; try 0.05 if fMinHz is too high *)
+kkFMinPercentile    = 50;    (* percentile of fMin distribution to use; 50 = median *)
 ```
+Cell 1.2 shows a histogram of all files' KK lower bounds — inspect for outliers before accepting the result. Cell 1.3 writes `fMinHz`.
 
-Set after inspecting the g(k) spectra:
-```wolfram
-kPeakRanges = {{30, 100}, {100, 500}};  (* unbound / bound k windows — concentration section *)
-```
+### Section 2 — Admittance Statistics
+Computes per-frequency mean and variance of |Y(f)| across all drift files. Used to derive `fMaxHz` (from CV inflection) and `weightPower` (from variance power-law fit). Update 0.2 with the printed values.
 
-### Section 2 — Data Validation (Lin-KK)
-Runs a Kramers–Kronig check to identify the reliable frequency window. The output `{kkFMin, kkFMax}` gives a lower bound for `fMinHz`. Copy the printed values into Cell 2.
+### Section 3 — Parameter Tuning
+L-curve and sweep plots on the representative drift file. Used to choose `lambdaND`. Workflow:
+1. Run **3.1 Tau grid** and **3.2 Lambda sweep** to compute spectra across λ values.
+2. Run **3a.1 Plot L-curve** to find the corner.
+3. Set `lambdaND` in 0.2, re-run 0.2, then verify with **3a.3 Verify λ**.
 
-### Section 3 — Parameter Tuning (drift data)
-Uses the long-term drift dataset to pin down `weightPower`, `fMinHz`/`fMaxHz`, and `lambdaND` before touching the science data.
+### Section 4 — Drift Fit
+Batch fits all drift files. `fileDecimation` is set at the top of cell 4.1 (default 1 = all files; increase to subsample during tuning). Results feed into the drift plot cells (4a.1–4a.7).
 
-Workflow:
-1. Run the **admittance stats** cell → look at CV(f) plot. Find the contiguous window where CV < 0.1 — that's your valid frequency range.
-2. Run the **variance power-law** cell → `weightPower` is printed directly.
-3. Run the **lambda sweep** + **L-curve** cells → pick the λ at the corner of the L-curve.
-4. Update Cell 2 with those three values, re-run Cell 2, then re-run the batch fit.
+### Section 5 — Concentration Analysis
+Batch fits all concentration files using the parameters locked in 0.2. Cells 5.1–5.4 produce g(k) overlays, area-normalised spectra, and fraction-folded vs [ligand]. Section 5a fits the biophysical model.
 
-> **Gotcha — params cell re-run order:** If you run Cell 2 *after* a cell that sets `lambdaND` to a different value, Cell 2 wins. Always re-run Cell 2 last when updating parameters.
-
-### Section 4 — Concentration Analysis
-Fits DCT spectra for all electrodes across the ligand concentration series. Results used downstream for fraction-folded and biophysical model fitting.
-
-File naming convention required: `E1_178uM.txt`, `E2_50uM.txt`, etc. The electrode prefix (`E1`/`E2`/`E3`) and the numeric concentration before `uM` are parsed for sorting and labelling.
-
-### Section 5 — Export
-Set `exportFigure = True` to write all plots as PDFs to `data/figures/`. Default is `False`.
+### Section 6 — Export
+Set `exportFigure = True` to write all plots as PDFs to a `figures/` folder next to `dataDir`.
 
 ---
 
 ## Data file format
 
-Plain-text, three columns, space or tab delimited:
+Plain-text, tab-delimited, with a header line:
 ```
-frequency_Hz    Re_Z_ohm    Im_Z_ohm
+Freq/Hz    Re(Z)/Ohm    -Im(Z)/Ohm
+1000.0     120.3        -45.2
+...
 ```
-No header line. Im[Z] should be **negative** in the inductive-free range (standard EIS convention). The importer reads these with `DCTDataImport`ImportEIS`.
+The importer (`DCTDataImport`ImportEIS`) normalises header strings and accepts common variants (`Re(Z)`, `Zre`, `Z'`, etc.). Im[Z] should be **negative** in the inductive-free range (standard EIS convention); the `-Im(Z)` column sign convention means the stored values are positive.
 
 ---
 
-## Biophysical model (concentration section)
+## Biophysical model (Section 5a)
 
-Two Langmuir-type models are fit to fraction-folded vs [ligand]:
+Two mechanistic kinetic models are fit to fraction-folded vs [ligand] using symbolic derivation in `analysis/Biophysics.wl`:
 
-| Model | Equation | Parameters |
+| Model | States | Parameters |
 |---|---|---|
-| A — no NF | `ff = f0 + (1-f0)/(1 + 10^(logKD - log10 c))` | KD only |
-| B — with NF | `ff = f0 + (1-NF)(1-f0)/(1 + 10^(logKD - log10 c))` | KD, NF |
+| 3-state | U ↔ F ↔ B | K_S (structural switching), K_D (ligand dissociation) |
+| 4-state | U ↔ F ↔ B + NF (non-folding) | K_S, K_D, NF |
 
-`f0` is the baseline fraction folded at zero ligand. `NF` (non-folding fraction) is the fraction of aptamers that never fold regardless of ligand concentration. Model A inflates KD when NF > 0; Model B is the physically correct form.
+Baseline fraction folded at zero ligand emerges from the model as K_S / (1 + K_S). The 4-state NF parameter absorbs the saturation shortfall, so its K_D is typically much smaller than the 3-state K_D.
+
+Both model equations are printed symbolically at runtime before fitting.
 
 ---
 
 ## Running tests
 
-```wolfram
-Get["tests/TestDataImport.wl"]
-Get["tests/TestNNLS.wl"]
-Get["tests/TestDCTKernel.wl"]
-```
+Open `runTests.wb` in VS Code and run all cells, or run individual test files from the terminal:
 
-Or run them from the terminal:
 ```
 wolframscript -file tests/TestDataImport.wl
+wolframscript -file tests/TestNNLS.wl
+wolframscript -file tests/TestDCTKernel.wl
+wolframscript -file tests/TestDCTInversion.wl
 ```
+
+All tests should report 0 failures.
