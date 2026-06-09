@@ -1,0 +1,777 @@
+{
+ "cells": [
+  {
+   "kind": 2,
+   "value": "Quiet[Remove[\"DCTDataImport`*\", \"NNLSFit`*\", \"DCTKernel`*\", \"DCT`*\",\r\n             \"DCTPlots`*\", \"DCTPeakAnalysis`*\", \"DCTSensitivity`*\", \"DCTDashboard`*\",\r\n             \"DCTAdmittanceStats`*\", \"DCTKKCheck`*\"]];\r\n$ContextPath = Select[$ContextPath, !StringMatchQ[#, \"DCT*\" | \"NNLSFit*\"] &];\r\nGet[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\DCT.wl\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699yvu-uu3e5xd\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "5578ead4-1c86-4119-882d-5129d3528ac3"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* ── PARAMETERS ── edit these, then re-run this cell ── *)\r\n\r\n(* Data directories *)\r\ndataDir          = \"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\drift_03252026\";  (* drift data — E1/E2/E3 subdirs *)\r\nconcentrationDir = \"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\spike\";           (* spike titration in PBS *)\r\n\r\n(* Representative file index (1-based) — used for KK check and sweep plots *)\r\nrepFileIdx = 1;\r\n\r\n(* Fit parameters — tuned on drift data in Sections 1–3, locked here for all fits *)\r\nlambdaND      = 1*^-3;  (* Tikhonov regularisation — from L-curve analysis *)\r\nfMinHz        = 0.5;    (* lower frequency cutoff [Hz] *)\r\nfMaxHz        = 1000.;  (* upper frequency cutoff [Hz] *)\r\nweightPower   = -0.75;  (* admittance weight exponent *)\r\nbinsPerDecade = 15;     (* tau grid density *)\r\ntauMinFactor  = 0.1;    (* tau grid lower extension factor *)\r\ntauMaxFactor  = 10.;    (* tau grid upper extension factor *)\r\n\r\n(* Drift batch decimation: 1 = all files, N = every Nth (faster while tuning) *)\r\nfileDecimation = 1;\r\n\r\n(* Natural sort: group by electrode subdir, then by numeric file number.\r\n   Plain Sort gives lexicographic order (118 before 15) which breaks time ordering. *)\r\nsortFiles[files_List] := SortBy[files,\r\n  {FileNameTake[#, {-2}],\r\n   Last[ToExpression /@ StringCases[FileNameTake[#], NumberString], 0]} &\r\n]",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## 1. KK Data Validation\nRun once on the representative file (`repFileIdx`). Residuals guide initial `fMinHz`/`fMaxHz` selection.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Load all drift files from all electrode subdirs — numeric sort so E1/E2/E3 stay grouped\n   and files within each electrode run in time order (not lexicographic) *)\ndriftFiles = sortFiles[FileNames[\"*.txt\", dataDir, Infinity]];\nPrint[\"Found \", Length[driftFiles], \" drift files in \", FileNameTake[dataDir]];\n\n(* KK check on representative file *)\nrepFile   = driftFiles[[repFileIdx]];\nkkRepData = DCTDataImport`ImportEIS[repFile];\nkkRep     = DCTKKCheck`KKCheck[kkRepData];\nPrint[Style[\n  \"KK check: \" <> FileNameTake[repFile] <>\n  \"  RMS Re = \" <> ToString[NumberForm[100. kkRep[\"RMSRe\"], {4,2}]] <> \"%, \" <>\n  \"Im = \"  <> ToString[NumberForm[100. kkRep[\"RMSIm\"], {4,2}]] <> \"%  \" <>\n  If[kkRep[\"OK\"], \"\\[Checkmark] OK\", \"\\[Times] FAIL\"],\n  Bold, If[kkRep[\"OK\"], Darker[Green], Red], 13\n]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699yx5-3ffaudi\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> drift files in </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: Found[formula] drift files indrift_03252026",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "9da2bc29-1230-4858-9c2d-485faaae4cae"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699yy2-4i6bhb5\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0tLIGNoZWNrOiBFMVxfRUlTXF8oMCkudHh0ICBSTVMgUmUgPSAxLjI2XCUsIEltID0gMC44MlwlICDinJMgT0t9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">KK check: E1_EIS_(0).txt RMS Re = 1.26%, Im = 0.82% ✓ OK</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "4e8ade0a-410f-46bd-8345-aaca73dcccf3"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "DCTPlots`PlotKKResiduals[kkRep]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"265\" data-out-n=\"1365\" data-sub-idx=\"0\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"4\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1365]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_4zez984x47uq.svg\" src=\"img/EAB_DCT_analysis/wl_4zez984x47uq.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\nDCTPlots`PlotKKResiduals[kkRep]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "f3aea749-759a-4557-89b9-7502a2d1f1b7"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Largest contiguous window where both residuals stay below threshold *)\n{kkFMin, kkFMax} = DCTKKCheck`KKValidFreqRange[kkRep];\nPrint[Style[\n  \"KK-valid range: \" <> ToString[NumberForm[kkFMin, {5,2}]] <>\n  \" \\[LongDash] \" <> ToString[NumberForm[kkFMax, {5,2}]] <> \" Hz\",\n  Bold, 13\n]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zhq-ublaqxc\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHtLSy12YWxpZCByYW5nZTogMC43OSAtLS0gMTAwMDAgSHp9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">KK-valid range: 0.79 — 10000 Hz</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "dca104b1-d56a-4186-9d23-3655290e2843"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Use the KK-valid lower bound directly — below kkFMin the Lin-KK residuals\n   exceed threshold, indicating measurement artefacts or inductive contributions. *)\nfMinHz = kkFMin;\nPrint[\"fMinHz \\[LeftArrow] \", fMinHz, \" Hz\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMinHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zjj-aquukq7\" data-page-width-em=\"52\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: fMinHz ←[formula] Hz",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "e6c0cad9-9469-4569-8280-14156b8e8228"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## 2. Admittance Statistics\nCompute per-frequency mean and variance of |Y(f)| across all drift files (undecimated). CV plot flags unreliable frequencies; power-law scatter derives `weightPower`. Update the params cell with the suggested values before proceeding.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Group files by electrode subdirectory, compute within-electrode variance stats,\n   then pool across electrodes for the power-law fit. Each electrode may have a\n   different absolute admittance level — pooling the (YMean, YVar) points across\n   all electrodes gives a better estimate of the noise scaling exponent alpha. *)\nelectrodeGroups = GroupBy[\n  sortFiles[FileNames[\"*.txt\", dataDir, Infinity]],\n  FileNameTake[#, {-2}] &   (* second-to-last path component = electrode name *)\n];\nPrint[\"Electrodes: \", Row[Keys[electrodeGroups], \", \"],\n  \"   files: \", Row[Length /@ Values[electrodeGroups], \" / \"]];\n\nelectrodeStats = Association @ KeyValueMap[\n  #1 -> DCTAdmittanceStats`ComputeAdmittanceStats[#2] &,\n  electrodeGroups\n];\n\ndriftStats = DCTAdmittanceStats`MergeAdmittanceStats[Values[electrodeStats]];\nIf[FailureQ[driftStats],\n  Print[Style[\"Failed: \" <> driftStats[\"Message\"], Red, Bold]],\n  Print[Style[\n    \"Done: \" <> ToString[driftStats[\"FilesOK\"]] <> \" / \" <>\n    ToString[driftStats[\"FilesTotal\"]] <> \" files across \" <>\n    ToString[Length[electrodeGroups]] <> \" electrodes, \" <>\n    ToString[Length[driftStats[\"FreqHz\"]]] <> \" pooled (freq, electrode) points.\",\n    Bold, Darker[Green]\n  ]]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Electrodes: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zkl-6ap5xfk\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7RTF9XHRleHR7LCB9XHRleHR7RTJ9XHRleHR7LCB9XHRleHR7RTN9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">E1</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E2</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E3</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   files: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq699zkm-udzh45v\" data-page-width-em=\"52\" data-latex-b64=\"MTU0XHRleHR7IC8gfTE1Mlx0ZXh0eyAvIH0xNTI=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">154</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: Electrodes:[formula]   files:[formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "f56e18b0-59fd-4986-8b7a-4f793fdf93d8"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a8gn-kyvv0lp\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0RvbmU6IDQ1OCAvIDQ1OCBmaWxlcyBhY3Jvc3MgMyBlbGVjdHJvZGVzLCAxNTMgcG9vbGVkIChmcmVxLCBlbGVjdHJvZGUpIHBvaW50cy59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Done: 458 / 458 files across 3 electrodes, 153 pooled (freq, electrode) points.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "cd0970d9-3f31-48ba-a63c-1fb015d7afd8"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Var vs |Y_mean| scatter — power-law fit gives weightPower *)\nDCTPlots`PlotVariancePowerLaw[driftStats]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"266\" data-out-n=\"1375\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"9\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1375]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_5bpp9w4dgcr5.svg\" src=\"img/EAB_DCT_analysis/wl_5bpp9w4dgcr5.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Var vs |Y_mean| scatter — power-law fit gives weightPower *)\nDCTPlots`PlotVariancePowerLaw[driftStats]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "08b52b4b-57fc-416c-8796-48018141c2d1"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Above ~500 Hz the variance-vs-mean curve inflects away from the power law:\n   admittance is dominated by Rs / parasitic capacitance, not charge transfer.\n   DCT resolves nothing useful there — tighten the upper cutoff. *)\nfMaxHz = 500.;\nPrint[\"fMaxHz \\[LeftArrow] \", fMaxHz, \" Hz\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMaxHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a8y0-hli0ute\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: fMaxHz ←[formula] Hz",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "90759f64-51ad-4757-8fc8-a6025ab88e94"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* All data shown; power-law fit and annotation use only [fMinHz, fMaxHz].\n   Dashed vertical lines mark the fit boundaries. *)\nDCTPlots`PlotVariancePowerLaw[driftStats, fMinHz, fMaxHz]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"267\" data-out-n=\"1378\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"11\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1378]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1r0isg7isvunc.svg\" src=\"img/EAB_DCT_analysis/wl_1r0isg7isvunc.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* All data shown; power-law fit and annotation use only [fMinHz, fMaxHz].\n   Dashed vertical lines mark the fit boundaries. *)\nDCTPlots`PlotVariancePowerLaw[driftStats, fMinHz, fMaxHz]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "9ef5074b-06a7-478f-8ae7-751a55baf462"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "fMinHz\r\nfMaxHz",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"268\" data-out-n=\"1379\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"12\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1379]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9hu-dwz0dmv\" data-page-width-em=\"51\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Out[1379]= 0.79433",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "f009730d-5339-4afa-bcf2-fc588b7b2c99"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"269\" data-out-n=\"1380\" data-sub-idx=\"1\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"12\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1380]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9j6-lz7r72m\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Out[1380]= 500.\\,",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "cb60e742-12d8-4479-a574-40bdac573b5b"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Derive weightPower from the power-law fit in [fMinHz, fMaxHz] *)\nModule[{s = DCTAdmittanceStats`FilterAdmittanceStats[driftStats, fMinHz, fMaxHz]},\n  weightPower = s[\"WeightPowerDerived\"];\n  Print[\"weightPower \\[LeftArrow] \", NumberForm[weightPower, {4, 2}],\n    \"   (\\[Alpha] = \", NumberForm[s[\"PowerLawAlpha\"], {4, 2}], \")\"]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">weightPower ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9js-b9x6zhj\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7LTEuMTF9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">-1.11</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   (α = </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9jt-oszc3kl\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MS4xMX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">1.11</span></span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: weightPower ←[formula]   (α =[formula])",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "5753fa00-87b8-4b2f-af9b-211a986dad46"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## 3. Parameter Tuning\nEach sweep fits the representative file over a range of one parameter (others locked from the params cell). Adjust ranges as needed, then update params cell.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Tau grid padding: the grid extends tauMinFactor/tauMaxFactor beyond the direct\n   1/(2pi*fMax) and 1/(2pi*fMin) limits. Extra range prevents Tikhonov edge artifacts\n   — peaks near the boundaries of the plot are outside the data window and suspect. *)\ntauMinFactor = 0.1;   (* decade below fMax: tau_min = tauMinFactor/(2pi*fMax) *)\ntauMaxFactor = 10.;   (* decade above fMin: tau_max = tauMaxFactor/(2pi*fMin) *)\n\nPrint[\"Tau grid: \",\n  NumberForm[tauMinFactor/(2 Pi fMaxHz), {3,2}], \" \\[LongDash] \",\n  NumberForm[tauMaxFactor/(2 Pi fMinHz), {3,2}], \" s  (data window: \",\n  NumberForm[1./(2 Pi fMaxHz), {3,4}], \" — \",\n  NumberForm[1./(2 Pi fMinHz), {3,2}], \" s)\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Tau grid: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9kl-oj53fds\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9km-unkqk1d\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7Mi4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">2.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s  (data window: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9kn-63fxrki\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMDAzfQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.0003</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69a9ko-ebwjbsf\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4yMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.20</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s)</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: Tau grid:[formula] —[formula] s  (data window:[formula] —[formula] s)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "4cb0189c-9ef2-401d-847e-e5333e8ba6e7"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Compute g(k) spectrum for each λ — used by the L-curve and verification plot below *)\nlambdas = {0, 1*^-5, 1*^-4, 3*^-4, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3};\nlSweep  = DCTSensitivity`LambdaSweep[repFile, lambdas,\n  \"FMinUse\"       -> fMinHz,\n  \"FMaxUse\"       -> fMaxHz,\n  \"WeightPower\"   -> weightPower,\n  \"BinsPerDecade\" -> binsPerDecade,\n  \"TauMinFactor\"  -> tauMinFactor,\n  \"TauMaxFactor\"  -> tauMaxFactor\n];\nlSweepSpecs = Map[\n  <|\"File\" -> \"\\[Lambda]=\" <> ToString[#[\"Lambda\"]], \"Spec\" -> #[\"Spec\"]|> &,\n  Select[lSweep, AssociationQ[#[\"Spec\"]] &]\n];\nPrint[Length[lSweepSpecs], \" \\[Lambda] values computed.\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aa5o-6a9ob2o\" data-page-width-em=\"52\" data-latex-b64=\"MTA=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">10</span></span></span></span></span></div></div><span class=\"wl-ps\"> λ values computed.</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula] λ values computed.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "082da2bb-c681-4038-acd5-cd713cffd092"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### L-curve: choosing λ\nPlot of roughness ∥D²g∥ (x-axis) vs data misfit ∥Y – Ŷ∥ (y-axis) for each λ tested above. λ increases from bottom-right (spiky spectrum, low misfit) toward top-left (smooth spectrum, high misfit). The **corner** — maximum curvature — is the optimal balance point.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* L-curve: roughness ||D²g|| vs weighted admittance misfit sqrt(sum w_i |DeltaY_i|^2)\n   The weighted misfit is what NNLS actually minimises — has more dynamic range than ObjY. *)\nlCurveData = Table[\n  Module[{sp = lSweepSpecs[[i, \"Spec\"]], yD, yF, w},\n    yD = sp[\"YIntData\"];\n    yF = sp[\"YIntFit\"];\n    w  = Abs[yD]^weightPower;  (* same weighting as inner NNLS solve *)\n    { Norm[Differences[Differences[sp[\"g\"]]]],           (* roughness: ||D²g||      *)\n      Sqrt[Total[w * (Re[yF-yD]^2 + Im[yF-yD]^2)]] }    (* weighted misfit: ||WDY|| *)\n  ], {i, Length[lSweepSpecs]}];\n\nListLogLogPlot[\n  lCurveData,\n  Joined         -> True,\n  PlotStyle      -> Directive[GrayLevel[0.65], AbsoluteThickness[1.5]],\n  PlotMarkers    -> {Graphics[{White, Disk[{0,0},1]}], 0.03},\n  Frame          -> True,\n  Axes           -> False,\n  Background     -> GrayLevel[0.12],\n  FrameStyle     -> Directive[White, AbsoluteThickness[1.2]],\n  LabelStyle     -> Directive[White, 13, FontFamily -> \"Arial\"],\n  FrameTicksStyle -> Directive[White, 13],\n  FrameLabel     -> {\n    {Style[\"Weighted misfit  \\[LeftDoubleBracketingBar]\\[Sqrt]w \\[CenterDot] \\[CapitalDelta]Y\\[RightDoubleBracketingBar]\", 14, White], None},\n    {Style[\"Roughness  \\[LeftDoubleBracketingBar]D\\[CenterDot]D\\[CenterDot]g\\[RightDoubleBracketingBar]  (F/dec)\", 14, White], None}\n  },\n  Epilog -> Join[\n    MapThread[\n      Style[Text[#2, {Log[#1[[1]]], Log[#1[[2]]]}, {-1.3, 0.5}], White, 11] &,\n      {lCurveData, lSweepSpecs[[All, \"File\"]]}],\n    {Style[Text[\"\\[LeftArrow] smoother\",  Scaled[{0.12, 0.95}], {-1, 1}], GrayLevel[0.55], 11],\n     Style[Text[\"better fit \\[RightArrow]\", Scaled[{0.88, 0.05}], {1, -1}], GrayLevel[0.55], 11]}\n  ],\n  PlotRangePadding -> Scaled[0.18],\n  ImageSize        -> 500,\n  AspectRatio      -> 0.8\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"270\" data-out-n=\"1390\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"18\" data-sub-start=\"11\" data-sub-end=\"36\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1390]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_13r5o9yodxcg.svg\" src=\"img/EAB_DCT_analysis/wl_13r5o9yodxcg.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* L-curve: roughness ||D²g|| vs weighted admittance misfit sqrt(sum w_i |DeltaY_i|^2)\n   The weighted misfit is what NNLS actually minimises — has more dynamic range than ObjY. *)\nlCurveData = Table[\n  Module[{sp = lSweepSpecs[[i, \"Spec\"]], yD, yF, w},\n    yD = sp[\"YIntData\"];\n    yF = sp[\"YIntFit\"];\n    w  = Abs[yD]^weightPower;  (* same weighting as inner NNLS solve *)\n    { Norm[Differences[Differences[sp[\"g\"]]]],           (* roughness: ||D²g||      *)\n      Sqrt[Total[w * (Re[yF-yD]^2 + Im[yF-yD]^2)]] }    (* weighted misfit: ||WDY|| *)\n  ], {i, Length[lSweepSpecs]}];\n\nListLogLogPlot[\n  lCurveData,\n  Joined         -> True,\n  PlotStyle      -> Directive[GrayLevel[0.65], AbsoluteThickness[1.5]],\n  PlotMarkers    -> {Graphics[{White, Disk[{0,0},1]}], 0.03},\n  Frame          -> True,\n  Axes           -> False,\n  Background     -> GrayLevel[0.12],\n  FrameStyle     -> Directive[White, AbsoluteThickness[1.2]],\n  LabelStyle     -> Directive[White, 13, FontFamily -> \"Arial\"],\n  FrameTicksStyle -> Directive[White, 13],\n  FrameLabel     -> {\n    {Style[\"Weighted misfit  \\[LeftDoubleBracketingBar]\\[Sqrt]w \\[CenterDot] \\[CapitalDelta]Y\\[RightDoubleBracketingBar]\", 14, White], None},\n    {Style[\"Roughness  \\[LeftDoubleBracketingBar]D\\[CenterDot]D\\[CenterDot]g\\[RightDoubleBracketingBar]  (F/dec)\", 14, White], None}\n  },\n  Epilog -> Join[\n    MapThread[\n      Style[Text[#2, {Log[#1[[1]]], Log[#1[[2]]]}, {-1.3, 0.5}], White, 11] &,\n      {lCurveData, lSweepSpecs[[All, \"File\"]]}],\n    {Style[Text[\"\\[LeftArrow] smoother\",  Scaled[{0.12, 0.95}], {-1, 1}], GrayLevel[0.55], 11],\n     Style[Text[\"better fit \\[RightArrow]\", Scaled[{0.88, 0.05}], {1, -1}], GrayLevel[0.55], 11]}\n  ],\n  PlotRangePadding -> Scaled[0.18],\n  ImageSize        -> 500,\n  AspectRatio      -> 0.8\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "0aa1528e-ec22-4d05-8b95-b0a8426e8290"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* From the L-curve above: corner is around λ ≈ 10⁻³ — roughness drops steeply below,\n   misfit is flat above. Lock it in for the drift fit. *)\nlambdaND = 1*^-3;\nPrint[Style[\"lambdaND ← \", Bold, White], Style[lambdaND, Bold, Darker[Green]]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aar7-q9avjgr\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyNmZmZmZmZ9e1x0ZXh0e2xhbWJkYU5EICRcZ2V0cyQgfX19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\" style=\"color:#ffffff;\"><span class=\"mord\" style=\"color:#ffffff;\">lambdaND </span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mrel\" style=\"color:#ffffff;\">←</span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mord\" style=\"color:#ffffff;\"> </span></span></span></span></span></span></div></div><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aar8-bmioij6\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1xmcmFjezF9ezEwMDB9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.0074em;vertical-align:-0.686em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1000</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"color:#00ff00;border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula][formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "baf00bf0-387c-4b27-8744-b9ef3dae028e"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Verify chosen λ: g(k) overlay (left) and Bode residuals (right) *)\nModule[{n, cols, styles, fTicks, magTraces, phaseTraces,\n        gkPlot, magPlot, phasePlot, darkBg, fgSt, lblSt},\n\n  darkBg = GrayLevel[0.12];\n  fgSt   = Directive[White, AbsoluteThickness[1.2]];\n  lblSt  = Directive[White, 13, FontFamily -> \"Arial\"];\n\n  n      = Length[lSweepSpecs];\n  cols   = Table[ColorData[\"Rainbow\"][u], {u, 0.05, 0.95, 0.90/Max[n-1,1]}];\n  styles = Directive[#, AbsoluteThickness[2.]] & /@ cols;\n  fTicks = Table[{10.^p, Superscript[10, p]},\n             {p, Floor[Log10[fMinHz]], Ceiling[Log10[fMaxHz]]}];\n\n  magTraces = Table[\n    Module[{sp = lSweepSpecs[[i, \"Spec\"]]},\n      Transpose[{sp[\"FreqHz\"],\n        100. Abs[sp[\"YIntFit\"] - sp[\"YIntData\"]] / Abs[sp[\"YIntData\"]]}]\n    ], {i, n}];\n\n  phaseTraces = Table[\n    Module[{sp = lSweepSpecs[[i, \"Spec\"]]},\n      Transpose[{sp[\"FreqHz\"],\n        (Arg[sp[\"YIntFit\"]] - Arg[sp[\"YIntData\"]]) * 180/Pi}]\n    ], {i, n}];\n\n  gkPlot = DCTPlots`PlotGK[lSweepSpecs, Automatic, ImageSize -> 460];\n\n  magPlot = ListLinePlot[magTraces, PlotStyle -> styles,\n    ScalingFunctions -> {\"Log10\", None},\n    Frame -> True, Axes -> False,\n    Background -> darkBg, FrameStyle -> fgSt, LabelStyle -> lblSt,\n    FrameTicks -> {{Automatic, None}, {fTicks, None}},\n    FrameTicksStyle -> Directive[White, 12],\n    FrameLabel -> {\n      {Style[\"|\" <> \"\\[CapitalDelta]\" <> \"Y| / |Y| (%)\", 13, White], None},\n      {Style[\"f (Hz)\", 13, White], None}},\n    PlotRange -> {Automatic, {0, Automatic}},\n    ImageSize -> 360, AspectRatio -> 0.6];\n\n  phasePlot = ListLinePlot[phaseTraces, PlotStyle -> styles,\n    ScalingFunctions -> {\"Log10\", None},\n    Frame -> True, Axes -> False,\n    Background -> darkBg, FrameStyle -> fgSt, LabelStyle -> lblSt,\n    FrameTicks -> {{Automatic, None}, {fTicks, None}},\n    FrameTicksStyle -> Directive[White, 12],\n    FrameLabel -> {\n      {Style[\"\\[CapitalDelta]Phase (\\[Degree])\", 13, White], None},\n      {Style[\"f (Hz)\", 13, White], None}},\n    ImageSize -> 360, AspectRatio -> 0.6];\n\n  Row[{gkPlot, Spacer[12], Column[{magPlot, phasePlot}, Spacings -> 0.3]},\n    Alignment -> Center]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"271\" data-out-n=\"1393\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"20\" data-sub-start=\"1\" data-sub-end=\"53\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1393]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_tmf6n8t0edw5.svg\" src=\"img/EAB_DCT_analysis/wl_tmf6n8t0edw5.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Verify chosen λ: g(k) overlay (left) and Bode residuals (right) *)\nModule[{n, cols, styles, fTicks, magTraces, phaseTraces,\n        gkPlot, magPlot, phasePlot, darkBg, fgSt, lblSt},\n\n  darkBg = GrayLevel[0.12];\n  fgSt   = Directive[White, AbsoluteThickness[1.2]];\n  lblSt  = Directive[White, 13, FontFamily -> \"Arial\"];\n\n  n      = Length[lSweepSpecs];\n  cols   = Table[ColorData[\"Rainbow\"][u], {u, 0.05, 0.95, 0.90/Max[n-1,1]}];\n  styles = Directive[#, AbsoluteThickness[2.]] & /@ cols;\n  fTicks = Table[{10.^p, Superscript[10, p]},\n             {p, Floor[Log10[fMinHz]], Ceiling[Log10[fMaxHz]]}];\n\n  magTraces = Table[\n    Module[{sp = lSweepSpecs[[i, \"Spec\"]]},\n      Transpose[{sp[\"FreqHz\"],\n        100. Abs[sp[\"YIntFit\"] - sp[\"YIntData\"]] / Abs[sp[\"YIntData\"]]}]\n    ], {i, n}];\n\n  phaseTraces = Table[\n    Module[{sp = lSweepSpecs[[i, \"Spec\"]]},\n      Transpose[{sp[\"FreqHz\"],\n        (Arg[sp[\"YIntFit\"]] - Arg[sp[\"YIntData\"]]) * 180/Pi}]\n    ], {i, n}];\n\n  gkPlot = DCTPlots`PlotGK[lSweepSpecs, Automatic, ImageSize -> 460];\n\n  magPlot = ListLinePlot[magTraces, PlotStyle -> styles,\n    ScalingFunctions -> {\"Log10\", None},\n    Frame -> True, Axes -> False,\n    Background -> darkBg, FrameStyle -> fgSt, LabelStyle -> lblSt,\n    FrameTicks -> {{Automatic, None}, {fTicks, None}},\n    FrameTicksStyle -> Directive[White, 12],\n    FrameLabel -> {\n      {Style[\"|\" <> \"\\[CapitalDelta]\" <> \"Y| / |Y| (%)\", 13, White], None},\n      {Style[\"f (Hz)\", 13, White], None}},\n    PlotRange -> {Automatic, {0, Automatic}},\n    ImageSize -> 360, AspectRatio -> 0.6];\n\n  phasePlot = ListLinePlot[phaseTraces, PlotStyle -> styles,\n    ScalingFunctions -> {\"Log10\", None},\n    Frame -> True, Axes -> False,\n    Background -> darkBg, FrameStyle -> fgSt, LabelStyle -> lblSt,\n    FrameTicks -> {{Automatic, None}, {fTicks, None}},\n    FrameTicksStyle -> Directive[White, 12],\n    FrameLabel -> {\n      {Style[\"\\[CapitalDelta]Phase (\\[Degree])\", 13, White], None},\n      {Style[\"f (Hz)\", 13, White], None}},\n    ImageSize -> 360, AspectRatio -> 0.6];\n\n  Row[{gkPlot, Spacer[12], Column[{magPlot, phasePlot}, Spacings -> 0.3]},\n    Alignment -> Center]\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "ab5d9d51-4f42-4561-a113-cf95f6c9881e"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## 4. Drift Fit\nRun once (or after changing parameters). `driftFiles` and `goodSpecs` are used by the plot cells below.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "driftFiles = sortFiles[\n  Take[\n    sortFiles[FileNames[\"*.txt\", dataDir, Infinity]],\n    ;; ;; fileDecimation\n  ]\n];\nPrint[\"Found \", Length[driftFiles], \" files (decimated) from \", FileNameTake[dataDir]];\n\nresults = Table[\n  Module[{spec},\n    If[Mod[i, Max[1, Round[Length[driftFiles]/10]]] == 1,\n      Print[i, \" / \", Length[driftFiles], \"  \", FileNameTake[driftFiles[[i]]]]\n    ];\n    spec = Quiet @ Check[\n      DCT`DCTSpectrum[driftFiles[[i]],\n        \"LambdaND\"      -> lambdaND,\n        \"FMinUse\"       -> fMinHz,\n        \"FMaxUse\"       -> fMaxHz,\n        \"WeightPower\"   -> weightPower,\n        \"BinsPerDecade\" -> binsPerDecade,\n        \"TauMinFactor\"  -> tauMinFactor,\n        \"TauMaxFactor\"  -> tauMaxFactor\n      ], $Failed\n    ];\n    <|\"File\" -> driftFiles[[i]], \"Spec\" -> spec, \"OK\" -> AssociationQ[spec]|>\n  ],\n  {i, Length[driftFiles]}\n];\n\ngoodSpecs = Select[results, #OK === True &];\nPrint[Style[ToString[Length[goodSpecs]] <> \" / \" <> ToString[Length[driftFiles]] <> \" fits succeeded.\", Bold, Darker[Green]]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69abc7-o1wqc5c\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files (decimated) from </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: Found[formula] files (decimated) fromdrift_03252026",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "80191b91-97ff-44c6-8699-f12cdc0d32fc"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69abcc-mcu8et6\" data-page-width-em=\"52\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69abcd-qk5shpq\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(0).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69adi8-dqxg3si\" data-page-width-em=\"52\" data-latex-b64=\"NDc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">47</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69adi9-v456av7\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(46).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69afol-gb1s3mx\" data-page-width-em=\"52\" data-latex-b64=\"OTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">93</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69afom-a9fe8l8\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(92).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ahv4-m1mu18c\" data-page-width-em=\"51\" data-latex-b64=\"MTM5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">139</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ahv4-5ahwy5b\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(138).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ak1o-225fivs\" data-page-width-em=\"52\" data-latex-b64=\"MTg1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">185</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69ak1p-s98asfl\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(30).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69am7j-z15mx1h\" data-page-width-em=\"52\" data-latex-b64=\"MjMx\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">231</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69am7k-kp9evmf\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(76).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aoeo-0efum0j\" data-page-width-em=\"52\" data-latex-b64=\"Mjc3\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">277</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aoep-r310vx9\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(122).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aqlx-s8qpafv\" data-page-width-em=\"52\" data-latex-b64=\"MzIz\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">323</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69aqlx-1c0gs7l\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(16).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69asqz-ociaqu9\" data-page-width-em=\"52\" data-latex-b64=\"MzY5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">369</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69asqz-tk9f0ue\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(62).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69auwg-lqrc2o2\" data-page-width-em=\"52\" data-latex-b64=\"NDE1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">415</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69auwh-21yj2du\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(108).txt</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula] /[formula]E1_EIS_(0).txt[formula] /[formula]E1_EIS_(46).txt[formula] /[formula]E1_EIS_(92).txt[formula] /[formula]E1_EIS_(138).txt[formula] /[formula]E2_EIS_(30).txt[formula] /[formula]E2_EIS_(76).txt[formula] /[formula]E2_EIS_(122).txt[formula] /[formula]E3_EIS_(16).txt[formula] /[formula]E3_EIS_(62).txt[formula] /[formula]E3_EIS_(108).txt",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "74ba314f-89a2-43d3-9b40-115777df27db"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69awzk-au72l8y\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezQ1OCAvIDQ1OCBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">458 / 458 fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "846a4f98-0df1-4f76-974b-55f9b0618f2f"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## Drift plots\nRun each cell independently. `goodSpecs` must exist (run the fit cell above first).",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* DCT spectrum — g(k) for E1 only, sorted by file number (= time order) *)\ne1Specs = SortBy[\n  Select[goodSpecs, FileNameTake[#[\"File\"], {-2}] === \"E1\" &],\n  Last[ToExpression /@ StringCases[FileNameTake[#[\"File\"]], NumberString], 0] &\n];\nDCTPlots`PlotGK[e1Specs]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"272\" data-out-n=\"1400\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"24\" data-sub-start=\"5\" data-sub-end=\"5\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1400]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_avuz8g31dgee.svg\" src=\"img/EAB_DCT_analysis/wl_avuz8g31dgee.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* DCT spectrum — g(k) for E1 only, sorted by file number (= time order) *)\ne1Specs = SortBy[\n  Select[goodSpecs, FileNameTake[#[\"File\"], {-2}] === \"E1\" &],\n  Last[ToExpression /@ StringCases[FileNameTake[#[\"File\"]], NumberString], 0] &\n];\nDCTPlots`PlotGK[e1Specs]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "e5e46f4a-bc82-4edc-b51e-49fd194b45a8"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Cumulative capacitance vs k *)\nDCTPlots`PlotCumulative[goodSpecs]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"273\" data-out-n=\"1401\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"25\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1401]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_15ukdritg0chw.svg\" src=\"img/EAB_DCT_analysis/wl_15ukdritg0chw.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Cumulative capacitance vs k *)\nDCTPlots`PlotCumulative[goodSpecs]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "a6562942-13b9-45fe-ac37-7a19de8caaca"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Nyquist + Bode for a single file — change index as needed *)\ni = 40; (* <── change this to pick a different file *)\nDCTPlots`PlotBode[goodSpecs[[i, \"Spec\"]]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"274\" data-out-n=\"1403\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"26\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1403]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_dly34k6kr0ri.svg\" src=\"img/EAB_DCT_analysis/wl_dly34k6kr0ri.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Nyquist + Bode for a single file — change index as needed *)\ni = 40; (* <── change this to pick a different file *)\nDCTPlots`PlotBode[goodSpecs[[i, \"Spec\"]]]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "e9210bd0-6538-4305-be54-0531e1e4f698"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Residuals for a single file *)\ni = 15; (* <── change this to pick a different file *)\nDCTPlots`PlotResiduals[goodSpecs[[i, \"Spec\"]]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"275\" data-out-n=\"1405\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"27\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1405]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_17wzyn2z49uwz.svg\" src=\"img/EAB_DCT_analysis/wl_17wzyn2z49uwz.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Residuals for a single file *)\ni = 15; (* <── change this to pick a different file *)\nDCTPlots`PlotResiduals[goodSpecs[[i, \"Spec\"]]]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "bb4ef15b-04bd-4513-9370-017e7fa8dbb0"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Rs and C0 vs time — one trace per electrode *)\nRow[{DCTPlots`PlotRsVsTime[goodSpecs], DCTPlots`PlotC0VsTime[goodSpecs]}, Spacer[20]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"276\" data-out-n=\"1406\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"28\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1406]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_17xa2uuoze779.svg\" src=\"img/EAB_DCT_analysis/wl_17xa2uuoze779.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Rs and C0 vs time — one trace per electrode *)\nRow[{DCTPlots`PlotRsVsTime[goodSpecs], DCTPlots`PlotC0VsTime[goodSpecs]}, Spacer[20]]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "48d5b870-60b8-411d-85e1-65cff556b5c3"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* k ranges for peak tracking — each window captures a distinct electron-transfer population *)\nkPeakRanges = {{20., 100.}, {100., 500.}};",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* k_peak vs time — one panel per k-range, one trace per electrode *)\nDCTPlots`PlotKPeakVsTime[goodSpecs, kPeakRanges]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"277\" data-out-n=\"1408\" data-sub-idx=\"1\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"30\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1408]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1iu88foes3wlh.svg\" src=\"img/EAB_DCT_analysis/wl_1iu88foes3wlh.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* k_peak vs time — one panel per k-range, one trace per electrode *)\nDCTPlots`PlotKPeakVsTime[goodSpecs, kPeakRanges]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "881d3228-4924-4153-b336-029c93f3f96a"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## 5. Concentration Analysis\nSet `concentrationDir` in the params cell first. Uses the same locked parameters as the drift fit.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Batch fit concentration files with locked parameters *)\nIf[concentrationDir === \"\",\n  Print[Style[\"concentrationDir is empty \\[LongDash] set it in the params cell.\", Red, Bold]],\n\n  (* helpers: extract electrode tag and numeric concentration from filename *)\n  concElec[f_]  := First[StringCases[FileNameTake[f], \"E\" ~~ d:DigitCharacter :> d], \"0\"];\n  concUM[f_]    := ToExpression @ First[\n    StringCases[FileNameTake[f], n:NumberString ~~ \"uM\" :> n], \"0\"];\n  concLabel[f_] := Module[{elec, conc},\n    elec = First[StringCases[FileNameTake[f], \"E\" ~~ d:DigitCharacter :> \"E\" <> d], \"?\"];\n    conc = First[StringCases[FileNameTake[f], n:NumberString ~~ \"uM\" :> n], \"?\"];\n    elec <> \" \" <> conc <> \" \\[Mu]M\"\n  ];\n\n  (* sort: electrode first, then by numeric concentration *)\n  concFiles = SortBy[\n    FileNames[\"*.txt\", concentrationDir],\n    {concElec[#], concUM[#]} &\n  ];\n  Print[\"Found \", Length[concFiles], \" concentration files.\"];\n\n  concResults = Table[\n    Module[{spec},\n      If[Mod[i, Max[1, Round[Length[concFiles]/6]]] == 1,\n        Print[i, \" / \", Length[concFiles], \"  \", concLabel[concFiles[[i]]]]\n      ];\n      spec = Quiet @ Check[\n        DCT`DCTSpectrum[concFiles[[i]],\n          \"LambdaND\"      -> lambdaND,\n          \"FMinUse\"       -> fMinHz,\n          \"FMaxUse\"       -> fMaxHz,\n          \"WeightPower\"   -> weightPower,\n          \"BinsPerDecade\" -> binsPerDecade,\n          \"TauMinFactor\"  -> tauMinFactor,\n          \"TauMaxFactor\"  -> tauMaxFactor\n        ], $Failed\n      ];\n      <|\"File\" -> concLabel[concFiles[[i]]], \"Spec\" -> spec, \"OK\" -> AssociationQ[spec]|>\n    ],\n    {i, Length[concFiles]}\n  ];\n\n  concGoodSpecs = Select[concResults, #OK === True &];\n  Print[Style[\n    ToString[Length[concGoodSpecs]] <> \" / \" <> ToString[Length[concFiles]] <>\n    \" concentration fits succeeded.\",\n    Bold, Darker[Green]\n  ]]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bea9-x8za5gz\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\"> concentration files.</span></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beaa-fcis003\" data-page-width-em=\"51\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beac-uqv1lsv\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69begl-u4hsggf\" data-page-width-em=\"51\" data-latex-b64=\"NQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">5</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69begm-fcmh5vd\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beno-njnlmnm\" data-page-width-em=\"51\" data-latex-b64=\"OQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">9</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69benp-vh3xex2\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beuh-1vrtuks\" data-page-width-em=\"51\" data-latex-b64=\"MTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">13</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69beui-3c7cwh5\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf16-2e7o87b\" data-page-width-em=\"51\" data-latex-b64=\"MTc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">17</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf17-vnk2x1q\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3 0 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf7i-tv2lgkg\" data-page-width-em=\"51\" data-latex-b64=\"MjE=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">21</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bf7i-o7ktq8t\" data-page-width-em=\"51\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3 178 μM</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bfdu-vcecmqy\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezI0IC8gMjQgY29uY2VudHJhdGlvbiBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">24 / 24 concentration fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: Found[formula] concentration files.[formula] /[formula]E1 0 μM[formula] /[formula]E1 178 μM[formula] /[formula]E2 0 μM[formula] /[formula]E2 178 μM[formula] /[formula]E3 0 μM[formula] /[formula]E3 178 μM[formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c07102c0-e7b9-4c66-979f-de8080d49c3e"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "fMinHz",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"279\" data-out-n=\"1411\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"34\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1411]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bfgu-m3o34a4\" data-page-width-em=\"51\" data-latex-b64=\"MC43OTQzMw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0.79433</span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Out[1411]= 0.79433",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "b8601c81-c94e-42b2-95a4-f7e93e0825c3"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Concentration g(k) spectra — one electrode *)\nconcE1 = Select[concGoodSpecs, StringStartsQ[#File, \"E1\"] &];\nDCTPlots`PlotGK[concE1]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"280\" data-out-n=\"1413\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"35\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1413]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_15l74qyrco0lq.svg\" src=\"img/EAB_DCT_analysis/wl_15l74qyrco0lq.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Concentration g(k) spectra — one electrode *)\nconcE1 = Select[concGoodSpecs, StringStartsQ[#File, \"E1\"] &];\nDCTPlots`PlotGK[concE1]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "7e2210c0-b285-49b2-9608-17626207da2c"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Concentration g(k) — area-normalised (each curve divided by its total capacitance) *)\nconcE1Norm = Table[\n  Module[{s, spec, area},\n    s    = concE1[[i]];\n    spec = s[\"Spec\"];\n    area = DCTPeakAnalysis`IntegrateSpectrum[spec];\n    <|s, \"Spec\" -> <|spec, \"g\" -> spec[\"g\"] / Max[area, 1*^-15]|>|>\n  ],\n  {i, Length[concE1]}\n];\nDCTPlots`PlotGK[concE1Norm, Automatic,\n  FrameLabel -> {\n    Style[Row[{\"Electron-transfer rate, k (\", Superscript[\"s\", -1], \")\"}], 16, White],\n    Style[Row[{\"g(k) / C\", Subscript[\"dist\", \"\"], \"  (\", Superscript[\"decade\", -1], \")\"}], 16, White]\n  }\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"281\" data-out-n=\"1415\" data-sub-idx=\"2\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"36\" data-sub-start=\"10\" data-sub-end=\"15\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1415]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1hv1v1dxy5j46.svg\" src=\"img/EAB_DCT_analysis/wl_1hv1v1dxy5j46.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Concentration g(k) — area-normalised (each curve divided by its total capacitance) *)\nconcE1Norm = Table[\n  Module[{s, spec, area},\n    s    = concE1[[i]];\n    spec = s[\"Spec\"];\n    area = DCTPeakAnalysis`IntegrateSpectrum[spec];\n    <|s, \"Spec\" -> <|spec, \"g\" -> spec[\"g\"] / Max[area, 1*^-15]|>|>\n  ],\n  {i, Length[concE1]}\n];\nDCTPlots`PlotGK[concE1Norm, Automatic,\n  FrameLabel -> {\n    Style[Row[{\"Electron-transfer rate, k (\", Superscript[\"s\", -1], \")\"}], 16, White],\n    Style[Row[{\"g(k) / C\", Subscript[\"dist\", \"\"], \"  (\", Superscript[\"decade\", -1], \")\"}], 16, White]\n  }\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "5816e6ed-3438-4566-8429-f555e2f0f8e9"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Fraction folded vs [ligand]\n   k_peak shifts from range 1 (~46 s-1, unbound) to range 2 (~184 s-1, bound).\n   ff = area(range 2) / (area(range 1) + area(range 2)) — naturally 0 to 1. *)\n\nareaWindow[spec_, kLo_, kHi_] := Module[{tau, g, k, logK, n},\n  tau = spec[\"Tau\"]; g = spec[\"g\"]; k = 1./tau; logK = Log10[k]; n = Length[g];\n  If[n < 2, Return[0.]];\n  Total @ Table[If[0.5(k[[j]]+k[[j+1]]) >= kLo && 0.5(k[[j]]+k[[j+1]]) <= kHi,\n    0.5(g[[j]]+g[[j+1]]) Abs[logK[[j+1]]-logK[[j]]], 0.], {j, n-1}]\n];\n\ngetLabelUM[lbl_] := ToExpression @ First[\n  StringCases[lbl, n:NumberString ~~ \" \\[Mu]M\" :> n], \"0\"];\n\nffPerElectrode = Table[\n  Module[{subs, concs, a1, a2, ff},\n    subs  = Select[concGoodSpecs, StringStartsQ[#File, e] &];\n    concs = N @ (getLabelUM /@ subs[[All, \"File\"]]);\n    a1    = areaWindow[#Spec, kPeakRanges[[1,1]], kPeakRanges[[1,2]]] & /@ subs;\n    a2    = areaWindow[#Spec, kPeakRanges[[2,1]], kPeakRanges[[2,2]]] & /@ subs;\n    ff    = MapThread[If[#1+#2 > 0., #2/(#1+#2), 0.] &, {a1, a2}];\n    Transpose[{concs, ff}]\n  ],\n  {e, {\"E1\", \"E2\", \"E3\"}}\n];\n\n(* exclude 0 µM from log-axis plot *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8]] & /@ {1,2,3};\n\nListLinePlot[ffPerElectrode[[All, posIdx]],\n  ScalingFunctions -> {\"Log10\", None},\n  Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n  Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n  LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n  FrameLabel -> {\n    Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n    Style[\"Fraction folded\", 14, White]},\n  PlotRange -> {{0.8, 1200}, {0, 1}},\n  PlotRangePadding -> Scaled[0.04],\n  ImageSize -> 500, AspectRatio -> 0.75,\n  PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n    LabelStyle -> Directive[White, 12], Background -> darkBg,\n    LegendFunction -> (Framed[#, Background->darkBg,\n                         FrameStyle->fgStyle]&)], Right]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"282\" data-out-n=\"1424\" data-sub-idx=\"10\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"37\" data-sub-start=\"34\" data-sub-end=\"49\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1424]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_zuzf1ogzpm61.svg\" src=\"img/EAB_DCT_analysis/wl_zuzf1ogzpm61.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Fraction folded vs [ligand]\n   k_peak shifts from range 1 (~46 s-1, unbound) to range 2 (~184 s-1, bound).\n   ff = area(range 2) / (area(range 1) + area(range 2)) — naturally 0 to 1. *)\n\nareaWindow[spec_, kLo_, kHi_] := Module[{tau, g, k, logK, n},\n  tau = spec[\"Tau\"]; g = spec[\"g\"]; k = 1./tau; logK = Log10[k]; n = Length[g];\n  If[n < 2, Return[0.]];\n  Total @ Table[If[0.5(k[[j]]+k[[j+1]]) >= kLo && 0.5(k[[j]]+k[[j+1]]) <= kHi,\n    0.5(g[[j]]+g[[j+1]]) Abs[logK[[j+1]]-logK[[j]]], 0.], {j, n-1}]\n];\n\ngetLabelUM[lbl_] := ToExpression @ First[\n  StringCases[lbl, n:NumberString ~~ \" \\[Mu]M\" :> n], \"0\"];\n\nffPerElectrode = Table[\n  Module[{subs, concs, a1, a2, ff},\n    subs  = Select[concGoodSpecs, StringStartsQ[#File, e] &];\n    concs = N @ (getLabelUM /@ subs[[All, \"File\"]]);\n    a1    = areaWindow[#Spec, kPeakRanges[[1,1]], kPeakRanges[[1,2]]] & /@ subs;\n    a2    = areaWindow[#Spec, kPeakRanges[[2,1]], kPeakRanges[[2,2]]] & /@ subs;\n    ff    = MapThread[If[#1+#2 > 0., #2/(#1+#2), 0.] &, {a1, a2}];\n    Transpose[{concs, ff}]\n  ],\n  {e, {\"E1\", \"E2\", \"E3\"}}\n];\n\n(* exclude 0 µM from log-axis plot *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8]] & /@ {1,2,3};\n\nListLinePlot[ffPerElectrode[[All, posIdx]],\n  ScalingFunctions -> {\"Log10\", None},\n  Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n  Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n  LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n  FrameLabel -> {\n    Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n    Style[\"Fraction folded\", 14, White]},\n  PlotRange -> {{0.8, 1200}, {0, 1}},\n  PlotRangePadding -> Scaled[0.04],\n  ImageSize -> 500, AspectRatio -> 0.75,\n  PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n    LabelStyle -> Directive[White, 12], Background -> darkBg,\n    LegendFunction -> (Framed[#, Background->darkBg,\n                         FrameStyle->fgStyle]&)], Right]\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "597f9870-ecf0-4340-b00c-2527dbf93ea2"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### Biophysical model fits\n\n**Model A** (no non-folding fraction): assumes all aptamers can fold — ff saturates at 1.  \n**Model B** (with non-folding fraction α): fraction α never folds regardless of ligand — ff saturates at f₀ + (1−α)(1−f₀).  \nBoth share the same baseline f₀ fixed from the 0 µM data.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Biophysical model fits — overlay on fraction folded data\n   Model A (no NF): ff(c) = f0 + (1-f0) / (1 + 10^(logKD - log10 c))   [all aptamers fold]\n   Model B (with NF): ff(c) = f0 + (1-NF)(1-f0) / (1 + 10^(logKD - log10 c))  [fraction NF never folds] *)\n\n(* baseline from 0 µM measurements — index 1 in ffPerElectrode is 0 µM *)\nf0 = Mean[ffPerElectrode[[All, 1, 2]]];\n\n(* all {log10(c), ff} points across all electrodes, positive concentrations only *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\nallLogPts = Flatten[\n  Map[{Log10[#[[1]]], #[[2]]} &, ffPerElectrode[[All, posIdx]], {2}],\n  1];\n\n(* Model A: only KD free — assumes all aptamers fold, ff → 1 at saturation *)\nfitA = NonlinearModelFit[allLogPts,\n  f0 + (1. - f0) / (1. + 10.^(logKdA - lx)),\n  {{logKdA, 2.9}}, lx];\nkdA = 10.^(logKdA /. fitA[\"BestFitParameters\"]);\n\n(* Model B: KD and non-folding fraction NF both free; NF bounded to (0,1) *)\nfitB = NonlinearModelFit[allLogPts,\n  f0 + (1. - nfB) * (1. - f0) / (1. + 10.^(logKdB - lx)),\n  {{logKdB, 2.}, {nfB, 0.4, 0., 0.99}}, lx];\nlogKdBval = logKdB /. fitB[\"BestFitParameters\"];\nnfBval    = nfB    /. fitB[\"BestFitParameters\"];\nkdB = 10.^logKdBval;\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n\nShow[\n  ListLinePlot[ffPerElectrode[[All, posIdx]],\n    ScalingFunctions -> {\"Log10\", None},\n    Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0.8, 1200}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White,12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right]\n  ],\n  (* Model A: dashed gray — no non-folding fraction *)\n  Plot[f0 + (1-f0)/(1 + 10^(Log10[kdA] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Axes -> False],\n  (* Model B: solid white — with non-folding fraction *)\n  Plot[f0 + (1-nfBval)*(1-f0)/(1 + 10^(Log10[kdB] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[White, AbsoluteThickness[2.]],\n    Axes -> False],\n  Epilog -> {\n    (* \"no NF\" label — top right *)\n    Text[Style[Row[{\"no NF:  K\", Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdA, 1.], {6,1}], \" \\[Mu]M\"}],\n      GrayLevel[0.65], 12, FontFamily->\"Arial\"], Scaled[{0.8, 0.80}]],\n    (* \"NF = ...\" label — middle, just above the plateau *)\n    Text[Style[Row[{\"NF = \", NumberForm[nfBval, {3,2}], \":  K\",\n      Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdB, 1.], {6,1}], \" \\[Mu]M\"}],\n      White, 12, FontFamily->\"Arial\"], Scaled[{0.42, 0.43}]]\n  }\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"289054\" data-output-id=\"283\" data-out-n=\"1438\" data-sub-idx=\"18\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"39\" data-sub-start=\"32\" data-sub-end=\"69\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1438]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1el35nyc4owie.svg\" src=\"img/EAB_DCT_analysis/wl_1el35nyc4owie.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Biophysical model fits — overlay on fraction folded data\n   Model A (no NF): ff(c) = f0 + (1-f0) / (1 + 10^(logKD - log10 c))   [all aptamers fold]\n   Model B (with NF): ff(c) = f0 + (1-NF)(1-f0) / (1 + 10^(logKD - log10 c))  [fraction NF never folds] *)\n\n(* baseline from 0 µM measurements — index 1 in ffPerElectrode is 0 µM *)\nf0 = Mean[ffPerElectrode[[All, 1, 2]]];\n\n(* all {log10(c), ff} points across all electrodes, positive concentrations only *)\nconcGrid = ffPerElectrode[[1, All, 1]];\nposIdx   = Select[Range[Length[concGrid]], concGrid[[#]] > 0 &];\nallLogPts = Flatten[\n  Map[{Log10[#[[1]]], #[[2]]} &, ffPerElectrode[[All, posIdx]], {2}],\n  1];\n\n(* Model A: only KD free — assumes all aptamers fold, ff → 1 at saturation *)\nfitA = NonlinearModelFit[allLogPts,\n  f0 + (1. - f0) / (1. + 10.^(logKdA - lx)),\n  {{logKdA, 2.9}}, lx];\nkdA = 10.^(logKdA /. fitA[\"BestFitParameters\"]);\n\n(* Model B: KD and non-folding fraction NF both free; NF bounded to (0,1) *)\nfitB = NonlinearModelFit[allLogPts,\n  f0 + (1. - nfB) * (1. - f0) / (1. + 10.^(logKdB - lx)),\n  {{logKdB, 2.}, {nfB, 0.4, 0., 0.99}}, lx];\nlogKdBval = logKdB /. fitB[\"BestFitParameters\"];\nnfBval    = nfB    /. fitB[\"BestFitParameters\"];\nkdB = 10.^logKdBval;\n\ndarkBg  = GrayLevel[0.12];\nfgStyle = Directive[White, AbsoluteThickness[1.1]];\neCols   = Directive[ColorData[97][#], AbsoluteThickness[1.8], Opacity[0.65]] & /@ {1,2,3};\n\nShow[\n  ListLinePlot[ffPerElectrode[[All, posIdx]],\n    ScalingFunctions -> {\"Log10\", None},\n    Joined -> True, PlotMarkers -> {Automatic, 8}, PlotStyle -> eCols,\n    Frame -> True, Axes -> False, Background -> darkBg, FrameStyle -> fgStyle,\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Ligand] (\\[Mu]M)\", 14, White],\n                   Style[\"Fraction folded\", 14, White]},\n    PlotRange -> {{0.8, 1200}, {0, 1}},\n    PlotRangePadding -> Scaled[0.04],\n    ImageSize -> 540, AspectRatio -> 0.75,\n    PlotLegends -> Placed[LineLegend[eCols, {\"E1\",\"E2\",\"E3\"},\n      LabelStyle -> Directive[White,12], Background -> darkBg,\n      LegendFunction -> (Framed[#, Background->darkBg,\n                           FrameStyle->fgStyle]&)], Right]\n  ],\n  (* Model A: dashed gray — no non-folding fraction *)\n  Plot[f0 + (1-f0)/(1 + 10^(Log10[kdA] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[GrayLevel[0.65], Dashed, AbsoluteThickness[2.]],\n    Axes -> False],\n  (* Model B: solid white — with non-folding fraction *)\n  Plot[f0 + (1-nfBval)*(1-f0)/(1 + 10^(Log10[kdB] - Log10[cx])), {cx, 0.8, 1200},\n    ScalingFunctions -> {\"Log10\", None},\n    PlotStyle -> Directive[White, AbsoluteThickness[2.]],\n    Axes -> False],\n  Epilog -> {\n    (* \"no NF\" label — top right *)\n    Text[Style[Row[{\"no NF:  K\", Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdA, 1.], {6,1}], \" \\[Mu]M\"}],\n      GrayLevel[0.65], 12, FontFamily->\"Arial\"], Scaled[{0.8, 0.80}]],\n    (* \"NF = ...\" label — middle, just above the plateau *)\n    Text[Style[Row[{\"NF = \", NumberForm[nfBval, {3,2}], \":  K\",\n      Subscript[\"D\",\"\"], \" = \",\n      NumberForm[Round[kdB, 1.], {6,1}], \" \\[Mu]M\"}],\n      White, 12, FontFamily->\"Arial\"], Scaled[{0.42, 0.43}]]\n  }\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "57febfe5-56ad-4edd-accc-9ea8388f1f80"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## 6. Export\nExports key figures as PDFs to a `figures/` folder next to `dataDir`.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "exportFigure = False; (* set to True to export all figures as PDFs *)\n\nIf[exportFigure,\n  figDir = FileNameJoin[{DirectoryName[dataDir], \"figures\"}];\n  If[!DirectoryQ[figDir], CreateDirectory[figDir]];\n  Print[\"Saving to: \", figDir];\n\n  exportFig[fig_, name_] := (\n    Export[FileNameJoin[{figDir, name <> \".pdf\"}], fig];\n    Print[\"✓ \", name]\n  );\n\n  (* Drift *)\n  exportFig[DCTPlots`PlotGK[goodSpecs],            \"drift_gK\"];\n  exportFig[DCTPlots`PlotTimeSeries[goodSpecs],    \"drift_timeSeries\"];\n  exportFig[DCTPlots`PlotDCTHeatmap[goodSpecs],    \"drift_heatmap\"];\n  exportFig[DCTPlots`PlotKKResiduals[kkRep],       \"drift_kkResiduals\"];\n\n  (* Concentration (skip if not fitted) *)\n  If[ValueQ[concGoodSpecs] && Length[concGoodSpecs] > 0,\n    exportFig[DCTPlots`PlotGK[concGoodSpecs], \"conc_gK\"]\n  ];\n\n  Print[Style[\"Export done.\", Bold, Darker[Green]]],\n\n  Print[Style[\"exportFigure = False — set to True to export.\", Italic, GrayLevel[0.6]]]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq69bhex-jojbxi5\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhpdHtcdGV4dGNvbG9yeyM5OTk5OTl9e1x0ZXh0e2V4cG9ydEZpZ3VyZSA9IEZhbHNlIC0tLSBzZXQgdG8gVHJ1ZSB0byBleHBvcnQufX19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#999999;\"><span class=\"mord\" style=\"color:#999999;\">exportFigure = False — set to True to export.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "01e273ce-0872-4d33-bf28-6a555e2ad482"
+    }
+   ],
+   "metadata": {}
+  }
+ ],
+ "metadata": {}
+}

@@ -1,4 +1,25 @@
+# Raw data
 *.txt
 *.zip
 *.nox
+
+# Exported figures and rendered outputs
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.svg
+
+# Wolfbook image cache (auto-generated SVGs, logs)
+img/
+
+# Wolfram kernel and debug logs
+*.log
+
+# Sandbox and legacy scratch files
 sandbox/
+legacy/
+
+# OS
+.DS_Store
+Thumbs.db
