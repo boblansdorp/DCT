@@ -208,7 +208,7 @@
   },
   {
    "kind": 1,
-   "value": "## Plot ticks\nStructural checks on `ThemeLogTicks` / `ThemeLinTicks` (outward ticks via vendored CustomTicks).",
+   "value": "## Plot ticks\nStructural checks on `ThemeLogTicks` / `ThemeLinTicks` (self-contained outward-tick generators in PlotTheme.wl; native log plots).",
    "languageId": "markdown",
    "outputs": [],
    "metadata": {}

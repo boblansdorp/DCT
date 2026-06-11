@@ -11,8 +11,8 @@
      PlotBode[spec]             GraphicsGrid: magnitude + phase side by side
 
    Theme-aware: default DCTPlots`$DCTTheme ("Dark" | "Publication"); override
-   one call with Theme -> "Publication". Log axes use ScalingFunctions so the
-   theme outward-tick generators apply.
+   one call with Theme -> "Publication". Log axes use native ListLogLogPlot /
+   ListLogLinearPlot; the theme supplies outward FrameTicks.
 *)
 
 BeginPackage["DCTPlots`"]
@@ -93,15 +93,13 @@ PlotBodeMag[spec_Association, opts : OptionsPattern[]] := Module[
   {fMin, fMax} = MinMax[freq];
   {zMin, zMax} = MinMax[Join[Abs[zData], Abs[zFit]]];
 
-  (* single ListLinePlot (not Show) so FrameTicks positions stay in real coords
-     under ScalingFunctions: data series = markers, fit series = line *)
-  ListLinePlot[
+  (* native log-log plot: data series = markers, fit series = line *)
+  ListLogLogPlot[
     {dataPts, fitPts},
     plotOpts,
-    Joined           -> {False, True},
-    PlotMarkers      -> {{Automatic, 5}, None},
-    PlotStyle        -> {dataStyleFor[fg], fitStyle},
-    ScalingFunctions -> {"Log10", "Log10"},
+    Joined      -> {False, True},
+    PlotMarkers -> {{Automatic, 5}, None},
+    PlotStyle   -> {dataStyleFor[fg], fitStyle},
     Sequence @@ ThemeChrome[th, 14, 1.1],
     FrameTicks  -> {{ThemeLogTicks[zMin, zMax, fg], None},
                     {ThemeLogTicks[fMin, fMax, fg], None}},
@@ -135,13 +133,12 @@ PlotBodePhase[spec_Association, opts : OptionsPattern[]] := Module[
   {fMin, fMax} = MinMax[freq];
   {pMin, pMax} = MinMax[Join[dataPts[[All, 2]], fitPts[[All, 2]]]];
 
-  ListLinePlot[
+  ListLogLinearPlot[
     {dataPts, fitPts},
     plotOpts,
-    Joined           -> {False, True},
-    PlotMarkers      -> {{Automatic, 5}, None},
-    PlotStyle        -> {dataStyleFor[fg], fitStyle},
-    ScalingFunctions -> {"Log10", None},
+    Joined      -> {False, True},
+    PlotMarkers -> {{Automatic, 5}, None},
+    PlotStyle   -> {dataStyleFor[fg], fitStyle},
     Sequence @@ ThemeChrome[th, 14, 1.1],
     FrameTicks  -> {{ThemeLinTicks[pMin, pMax, fg], None},
                     {ThemeLogTicks[fMin, fMax, fg], None}},

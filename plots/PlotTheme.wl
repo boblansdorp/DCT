@@ -20,6 +20,10 @@
     $PlotTheme (e.g. "BlackBackground"), which would otherwise force white
     frames/ticks onto a Publication (white-background) figure. Use ThemeChrome
     below, which includes it.
+
+    Ticks (ThemeLogTicks / ThemeLinTicks) are generated here directly — small,
+    self-contained, no external paclet. Positions are VALUE coordinates, so they
+    drop straight onto ScalingFunctions -> "Log10" and linear frame axes.
 *)
 
 BeginPackage["DCTPlots`"]
@@ -53,12 +57,12 @@ ThemeChrome[theme, fontSize, thickness] sets label size and frame thickness.";
 
 ThemeLogTicks::usage =
   "ThemeLogTicks[fmin, fmax] / ThemeLogTicks[fmin, fmax, color] returns outward \
-log-axis FrameTicks (CustomTicks, 10^n labels) coloured for the theme (default \
-Black). For ScalingFunctions -> \"Log10\" axes; positions are real coordinates.";
+log-axis FrameTicks (10^n labels, value coordinates) coloured for the theme \
+(default Black). For ScalingFunctions -> \"Log10\" axes.";
 
 ThemeLinTicks::usage =
   "ThemeLinTicks[vmin, vmax] / ThemeLinTicks[vmin, vmax, color] returns outward \
-linear-axis FrameTicks (CustomTicks) coloured for the theme (default Black).";
+linear-axis FrameTicks (value coordinates) coloured for the theme (default Black).";
 
 Begin["`Private`"]
 
@@ -99,19 +103,19 @@ ThemeChrome[th_Association, fontSize_ : 14, thickness_ : 1.2] := {
   Axes        -> False
 }
 
-(* ── Outward ticks (CustomTicks backend) ───────────────────────────── *)
-(* CustomTicks colours the tick *marks* via MajorTickStyle/MinorTickStyle;
-   the label text is coloured here by wrapping each non-empty label. *)
+(* ── Outward frame ticks (self-contained) ──────────────────────────────────
+   A tick is {position, label, {0, length}, {color}}.  Positions are VALUE
+   coordinates (right for ScalingFunctions -> "Log10" and linear axes); the
+   {0, length} length spec draws the mark *outward*; the label is coloured to
+   match the frame.  Major marks are longer and carry the number label, minor
+   marks are shorter and blank. *)
 
-colorTicks[ticks_, color_] :=
-  Replace[ticks,
-    {x_, lbl_, rest___} :> {x, If[lbl === "", "", Style[lbl, color]], rest},
-    {1}]
+$majorLen = 0.016;
+$minorLen = 0.008;
 
-(* Decade-only ticks are too sparse on narrow (< 2.5 decade) log axes — a Bode
-   panel can end up with one or even zero number labels. For such ranges we label
-   the 1-2-5 sub-decade positions (3/4/6-9 as unlabelled minor marks) so the axis
-   carries enough ticks and numbers. Positions are real coords (ScalingFunctions). *)
+mkTick[x_, lbl_, len_, color_] := {x, lbl, {0, len}, {color}}
+
+(* number label for a sub-decade (1-2-5) mark on a narrow log axis *)
 subDecadeLabel[x_] := Module[{e, m},
   e = Floor[Log10[x] + 10.^-9];  m = Round[x / 10.^e];
   If[-1 <= e <= 2,
@@ -120,41 +124,59 @@ subDecadeLabel[x_] := Module[{e, m},
   ]
 ]
 
-subDecadeLogTicks[fmin_, fmax_, color_] := Module[{lo, hi, pick},
+ThemeLogTicks[fmin_?Positive, fmax_?Positive, color_ : Black] := Module[
+  {lo, hi, inR, at},
   lo = Floor[Log10[fmin] + 10.^-9];
   hi = Ceiling[Log10[fmax] - 10.^-9];
-  pick[mults_] := Select[
-    Flatten @ Table[m 10.^e, {e, lo, hi}, {m, mults}],
-    fmin (1 - 10.^-6) <= # <= fmax (1 + 10.^-6) &];
-  Join[
-    ({#, Style[subDecadeLabel[#], color], {0, 0.016}, {color}} &) /@ pick[{1, 2, 5}],
-    ({#, "", {0, 0.008}, {color}} &) /@ pick[{3, 4, 6, 7, 8, 9}]
+  inR[x_] := fmin (1 - 10.^-6) <= x <= fmax (1 + 10.^-6);
+  at[mults_] := Select[Flatten @ Table[m 10.^e, {e, lo, hi}, {m, mults}], inR];
+  If[Log10[fmax] - Log10[fmin] >= 2.5,
+    (* wide axis: 10^n decade labels + unlabelled 2..9 minors *)
+    Join[
+      mkTick[#, Style[Superscript[10, Round[Log10[#]]], color], $majorLen, color] & /@ at[{1}],
+      mkTick[#, "", $minorLen, color] & /@ at[{2, 3, 4, 5, 6, 7, 8, 9}]
+    ],
+    (* narrow axis: 1-2-5 number labels + unlabelled 3-4-6..9 minors *)
+    Join[
+      mkTick[#, Style[subDecadeLabel[#], color], $majorLen, color] & /@ at[{1, 2, 5}],
+      mkTick[#, "", $minorLen, color] & /@ at[{3, 4, 6, 7, 8, 9}]
+    ]
   ]
 ]
 
-ThemeLogTicks[fmin_?Positive, fmax_?Positive, color_ : Black] :=
-  If[Log10[fmax] - Log10[fmin] >= 2.5,
-    colorTicks[
-      CustomTicks`LogTicks[fmin, fmax,
-        CustomTicks`LogPlot       -> True,    (* emit real coords for ScalingFunctions *)
-        CustomTicks`TickDirection -> Out,
-        CustomTicks`MajorTickLength -> 0.016,
-        CustomTicks`MinorTickLength -> 0.008,
-        CustomTicks`MajorTickStyle  -> {color},
-        CustomTicks`MinorTickStyle  -> {color}],
-      color],
-    subDecadeLogTicks[fmin, fmax, color]
-  ]
+(* nice 1-2-5 x 10^k step giving ~5 major divisions over the range *)
+niceStep[raw_?Positive] := Module[{e, f},
+  e = Floor[Log10[raw]];  f = raw / 10.^e;
+  10.^e Which[f < 1.5, 1., f < 3.5, 2., f < 7.5, 5., True, 10.]
+]
 
-ThemeLinTicks[vmin_?NumericQ, vmax_?NumericQ, color_ : Black] :=
-  colorTicks[
-    CustomTicks`LinTicks[vmin, vmax,
-      CustomTicks`TickDirection -> Out,
-      CustomTicks`MajorTickLength -> 0.016,
-      CustomTicks`MinorTickLength -> 0.008,
-      CustomTicks`MajorTickStyle  -> {color},
-      CustomTicks`MinorTickStyle  -> {color}],
-    color]
+(* Compact number label: divide out a shared power of ten (cexp) when the scale
+   is very small or very large, else a plain number. dec = mantissa decimals. *)
+linLabel[x_, cexp_, dec_] := Module[{m},
+  m = Round[N[x] / 10.^cexp, 10.^-(dec + 3)];
+  m = Which[m == 0, 0, Abs[m - Round[m]] < 10.^-9, Round[m], True, NumberForm[m, {16, dec}]];
+  If[cexp == 0 || m === 0, m, Row[{m, "\[Times]", Superscript[10, cexp]}]]
+]
+
+ThemeLinTicks[vmin_?NumericQ, vmax_?NumericQ, color_ : Black] := Module[
+  {step, mstep, majors, minors, inR, vmag, cexp, mdec},
+  If[!(vmax > vmin), Return[{}]];
+  step  = niceStep[(vmax - vmin) / 5.];
+  mstep = step / 5.;
+  inR[x_] := vmin - step 10.^-6 <= x <= vmax + step 10.^-6;
+  majors = Select[Range[Ceiling[vmin/step - 10.^-9] step,  vmax + step 10.^-6,  step],  inR];
+  minors = Complement[
+    Select[Range[Ceiling[vmin/mstep - 10.^-9] mstep, vmax + mstep 10.^-6, mstep], inR],
+    majors];
+  (* shared exponent only for extreme scales (< 1e-3 or >= 1e5) *)
+  vmag = Max[Abs /@ majors];
+  cexp = If[vmag > 0 && ! (10.^-3 <= vmag < 10.^5), Floor[Log10[vmag] + 10.^-9], 0];
+  mdec = Max[0, -Floor[Log10[step / 10.^cexp] + 10.^-9]];
+  Join[
+    mkTick[#, Style[linLabel[#, cexp, mdec], color], $majorLen, color] & /@ majors,
+    mkTick[#, "", $minorLen, color] & /@ minors
+  ]
+]
 
 End[]
 EndPackage[]

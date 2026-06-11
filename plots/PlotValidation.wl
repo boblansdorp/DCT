@@ -39,9 +39,8 @@ PlotCombValidation[kTrue_List, gTrue_List, recovered_Association,
   recStyle = Directive[fg, AbsoluteThickness[2.]];
 
   (* top: simulated (dashed) vs recovered (solid) g(k) *)
-  gkPanel = ListLinePlot[
+  gkPanel = ListLogLinearPlot[
     {Transpose[{kTrue, gTrue gScale}], Transpose[{kRec, gRec gScale}]},
-    ScalingFunctions -> {"Log10", None},
     Joined           -> True,
     PlotStyle        -> {simStyle, recStyle},
     Sequence @@ ThemeChrome[th, 14, 1.2],

@@ -51,12 +51,12 @@ PlotKKResiduals[kkResult_Association, threshold : (_?NumericQ) : 0.02,
      and lets the theme outward-tick generators apply. *)
   bandStyle = Directive[fg, Opacity[0.35], Dashing[{0.015, 0.01}], AbsoluteThickness[1.]];
 
-  ListLinePlot[
+  ListLogLinearPlot[
     {ptsRe, ptsIm,
      {{fMin, threshold},  {fMax, threshold}},
      {{fMin, -threshold}, {fMax, -threshold}}},
     plotOpts,
-    ScalingFunctions -> {"Log10", None},
+    Joined           -> True,
     PlotStyle        -> {$kkReStyle, $kkImStyle, bandStyle, bandStyle},
     Sequence @@ ThemeChrome[th, 13, 1.1],
     FrameTicks       -> {{ThemeLinTicks[-yMax, yMax, fg], None},

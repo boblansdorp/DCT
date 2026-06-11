@@ -10,6 +10,7 @@
       core/NNLSFit.wl           Non-negative least squares solver
       core/DCTKernel.wl         Maxwell ladder + Tikhonov kernel
       core/DCTSpectrum.wl       Outer Brent loop, DCTSpectrum[] entry point
+      core/CPEFit.wl            Equivalent-circuit (CPE) fit: Rs + Cdl||(Rct+CPE)
       analysis/PeakAnalysis.wl  Peak picking, spectrum integration
       analysis/Sensitivity.wl   Parameter sweep utilities
       analysis/Biophysics.wl    3/4-state aptamer folding model (symbolic derivation + fitting)
@@ -22,6 +23,7 @@
       tests/TestDataImport.wl
       tests/TestNNLS.wl
       tests/TestDCTKernel.wl
+      tests/TestCPEFit.wl
       tests/TestPlots.wl
 *)
 
@@ -36,6 +38,7 @@ Module[{here, load},
   load["core/KKCheck.wl"];
   load["core/DCTKernel.wl"];
   load["core/DCTSpectrum.wl"];
+  load["core/CPEFit.wl"];
 
   (* Analysis *)
   load["analysis/PeakAnalysis.wl"];
@@ -44,10 +47,6 @@ Module[{here, load},
   load["analysis/Biophysics.wl"];
 
   (* Plots *)
-  (* Mark Caprio, MIT; outward ticks. Quiet the shadow warnings: CustomTicks
-     exports LogPlot/TickDirection (also System` symbols) — we always reference
-     them as CustomTicks`LogPlot / CustomTicks`TickDirection. *)
-  Quiet[load["plots/vendor/CustomTicks/CustomTicks.m"], {General::shdw}];
   load["plots/PlotTheme.wl"];
   load["plots/PlotSpectrum.wl"];
   load["plots/PlotImpedance.wl"];

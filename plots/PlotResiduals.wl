@@ -47,10 +47,9 @@ PlotResidualMag[spec_Association, opts : OptionsPattern[]] := Module[
   pts   = Transpose[{freq, Abs[(zData - zFit) / zData]}];
   {fMin, fMax} = MinMax[freq];
 
-  ListLinePlot[
+  ListLogLogPlot[
     pts,
     plotOpts,
-    ScalingFunctions -> {"Log10", "Log10"},
     Joined           -> True,
     PlotStyle        -> resStyle,
     Sequence @@ ThemeChrome[th, 14, 1.1],
@@ -86,10 +85,9 @@ PlotResidualPhase[spec_Association, opts : OptionsPattern[]] := Module[
   {fMin, fMax} = MinMax[freq];
   yMax = Max[pts[[All, 2]]] * 1.05;
 
-  ListLinePlot[
+  ListLogLinearPlot[
     pts,
     plotOpts,
-    ScalingFunctions -> {"Log10", None},
     Joined           -> True,
     PlotStyle        -> resStyle,
     Sequence @@ ThemeChrome[th, 14, 1.1],
@@ -113,6 +111,90 @@ PlotResiduals[spec_Association, opts : OptionsPattern[]] := Module[
   th = ThemeFromOpts[{opts}];
   GraphicsGrid[
     {{PlotResidualMag[spec, Theme -> th], PlotResidualPhase[spec, Theme -> th]}},
+    ImageSize  -> 900,
+    Spacings   -> {0.5, 0.5},
+    Background -> th["Bg"]
+  ]
+]
+
+(* ------------------------------------------------------------------ *)
+(* Multi-spectrum overlays: every fit at once, semi-transparent, with  *)
+(* reference lines at 1% magnitude / 1 degree phase (the paper claim). *)
+(* ------------------------------------------------------------------ *)
+
+resOverlayStyle = Directive[Lighter[Blue, 0.2], Opacity[0.2], AbsoluteThickness[0.9]];
+resRefStyle[fg_] := Directive[fg, Dashing[{0.018, 0.014}], AbsoluteThickness[1.4]];
+
+PlotResidualMag[specs : {__Association}, opts : OptionsPattern[]] := Module[
+  {th, fg, plotOpts, traces, fMin, fMax},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
+
+  traces = Function[s,
+    Transpose[{s["FreqHz"], Abs[(s["ZData"] - s["ZFit"]) / s["ZData"]]}]] /@ specs;
+  {fMin, fMax} = MinMax[Flatten[traces[[All, All, 1]]]];
+
+  ListLogLogPlot[
+    traces,
+    plotOpts,
+    Joined           -> True,
+    PlotStyle        -> resOverlayStyle,
+    Sequence @@ ThemeChrome[th, 14, 1.1],
+    GridLines        -> {None, {{0.05, resRefStyle[fg]}}},   (* 5% amplitude bound *)
+    FrameTicks       -> {{ThemeLogTicks[10.^-4, 1., fg], None},
+                         {ThemeLogTicks[fMin, fMax, fg], None}},
+    FrameTicksStyle  -> Directive[fg, 12],
+    FrameLabel       -> {
+      Style["Frequency (Hz)", 14, fg],
+      Style["|(Z_data - Z_fit)/Z_data|", 14, fg]
+    },
+    PlotRange   -> {All, {10^-4, 1}},
+    AspectRatio -> resAspect,
+    ImageSize   -> resImageSize
+  ]
+]
+
+PlotResidualPhase[specs : {__Association}, opts : OptionsPattern[]] := Module[
+  {th, fg, plotOpts, traces, fMin, fMax, yMax},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
+
+  traces = Function[s,
+    Transpose[{s["FreqHz"],
+      Abs[(180. / Pi) Arg /@ s["ZData"] - (180. / Pi) Arg /@ s["ZFit"]]}]] /@ specs;
+  {fMin, fMax} = MinMax[Flatten[traces[[All, All, 1]]]];
+  (* headroom so the 3 degree reference line is always visible *)
+  yMax = Min[6., Max[3.4, Max[Flatten[traces[[All, All, 2]]]] * 1.1]];
+
+  ListLogLinearPlot[
+    traces,
+    plotOpts,
+    Joined           -> True,
+    PlotStyle        -> resOverlayStyle,
+    Sequence @@ ThemeChrome[th, 14, 1.1],
+    GridLines        -> {None, {{3., resRefStyle[fg]}}},   (* 3 degree phase bound *)
+    FrameTicks       -> {{ThemeLinTicks[0., yMax, fg], None},
+                         {ThemeLogTicks[fMin, fMax, fg], None}},
+    FrameTicksStyle  -> Directive[fg, 12],
+    FrameLabel       -> {
+      Style["Frequency (Hz)", 14, fg],
+      Style["|phase residual| (\[Degree])", 14, fg]
+    },
+    PlotRange   -> {Automatic, {0, yMax}},
+    AspectRatio -> resAspect,
+    ImageSize   -> resImageSize
+  ]
+]
+
+PlotResiduals[specs : {__Association}, opts : OptionsPattern[]] := Module[
+  {th},
+  th = ThemeFromOpts[{opts}];
+  GraphicsGrid[
+    {{PlotResidualMag[specs, Theme -> th], PlotResidualPhase[specs, Theme -> th]}},
     ImageSize  -> 900,
     Spacings   -> {0.5, 0.5},
     Background -> th["Bg"]

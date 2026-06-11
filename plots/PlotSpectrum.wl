@@ -9,10 +9,10 @@
      PlotGTau[goodSpecs]       rainbow overlay of g(tau)
      PlotCumulative[goodSpecs] cumulative capacitance vs k
 
-   Default colour scheme is dark (white-on-dark) for wolfbook display.
-   For light-background export, pass: Background->White,
-     FrameStyle->Directive[Black,AbsoluteThickness[1.2]],
-     LabelStyle->Directive[Black,16,FontFamily->"Arial"]
+   Log x-axis is drawn with native ListLogLinearPlot (Mathematica picks the
+   range/scaling); the theme sets colours + outward FrameTicks (ThemeLogTicks /
+   ThemeLinTicks). Default colour scheme is dark (white-on-dark); pass
+   Theme -> "Publication" for a white-background figure.
 *)
 
 BeginPackage["DCTPlots`"]
@@ -73,6 +73,15 @@ legendSubset[styles_List, lbls_List, maxN_Integer : 8] := Module[{keep, s, l},
   ]
 ]
 
+themedLegend[styles_, lbls_, th_, fg_] :=
+  Placed[LineLegend[styles, lbls,
+    LegendMarkerSize -> 24,
+    LabelStyle       -> Directive[fg, 13],
+    Background       -> th["Bg"],
+    LegendFunction   -> (Framed[#, Background -> th["Bg"],
+      FrameStyle -> Directive[fg, AbsoluteThickness[1.2]]] &)],
+    Right]
+
 (* ------------------------------------------------------------------ *)
 
 Options[PlotGK] = {Theme -> Automatic, "GScale" -> 1, "AreaNorm" -> False};
@@ -80,11 +89,11 @@ Options[PlotGK] = {Theme -> Automatic, "GScale" -> 1, "AreaNorm" -> False};
 PlotGK[goodSpecs_List, labels : (_List | Automatic) : Automatic,
        opts : OptionsPattern[]] := Module[
   {th, fg, plotOpts, gScale, areaNorm, gLabel, n, traces, cols, styles, lbls,
-   legStyles, legLbls, kMin, kMax, gPeak, yt0, ymaj, dy, gMax},
+   legStyles, legLbls, kMin, kMax, gPeak, gMax},
 
   th       = ThemeFromOpts[{opts}];   (* no OptionValue -> no nodef on pass-throughs *)
   fg       = th["Fg"];
-  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];  (* drop Theme; user opts win *)
+  plotOpts = FilterRules[{opts}, Options[ListLogLinearPlot]];  (* drop Theme; user opts win *)
 
   (* string-keyed options (a bare-symbol option would resolve to Global` in the
      notebook). GScale rescales g (e.g. 10^9 -> nF); AreaNorm divides each curve
@@ -107,13 +116,9 @@ PlotGK[goodSpecs_List, labels : (_List | Automatic) : Automatic,
   kMax = Max[Flatten[traces[[All, All, 1]]]];
 
   (* y cap from the 98th percentile of per-spectrum PEAK heights (not of all g
-     values) so outlier fits can't blow up the axis; then round UP to the next
-     major tick so the top tick sits exactly on the frame. *)
+     values) so an outlier fit can't blow up the axis. *)
   gPeak = Quantile[Max /@ traces[[All, All, 2]], 0.98];
-  yt0   = ThemeLinTicks[0., gPeak * 1.08, fg];
-  ymaj  = Sort @ Cases[yt0, {p_, l_, ___} /; l =!= "" :> p];
-  dy    = If[Length[ymaj] >= 2, ymaj[[-1]] - ymaj[[-2]], gPeak];
-  gMax  = Ceiling[gPeak * 1.02 / dy] * dy;
+  gMax  = gPeak * 1.1;
 
   gLabel = Which[
     areaNorm,        Row[{"g(k) / C", Subscript["dist", ""], "  (", Superscript["decade", -1], ")"}],
@@ -121,30 +126,24 @@ PlotGK[goodSpecs_List, labels : (_List | Automatic) : Automatic,
     True,            "g(k) (F/decade)"
   ];
 
-  ListLinePlot[
+  ListLogLinearPlot[
     traces,
     plotOpts,                                  (* user overrides win (first) *)
-    PlotStyle        -> styles,
-    ScalingFunctions -> {"Log10", None},
+    Joined      -> True,
+    PlotStyle   -> styles,
     Sequence @@ ThemeChrome[th, 16, 1.2],
     FrameTicks       -> {{ThemeLinTicks[0., gMax, fg], None},
                          {ThemeLogTicks[kMin, kMax, fg], None}},
     FrameTicksStyle  -> Directive[fg, 16],
-    FrameLabel       -> {
+    FrameLabel  -> {
       Style[Row[{"Electron-transfer rate, k (", Superscript["s", -1], ")"}], 16, fg],
       Style[gLabel, 16, fg]
     },
-    PlotRange        -> {Automatic, {0, gMax}},
+    PlotRange        -> {All, {0, gMax}},
     PlotRangePadding -> {{Scaled[0.02], Scaled[0.02]}, {Scaled[0.02], 0}},
     ImageSize        -> 600,
     AspectRatio      -> 0.65,
-    PlotLegends      -> Placed[LineLegend[legStyles, legLbls,
-      LegendMarkerSize -> 24,
-      LabelStyle       -> Directive[fg, 13],
-      Background       -> th["Bg"],
-      LegendFunction   -> (Framed[#, Background -> th["Bg"],
-        FrameStyle -> Directive[fg, AbsoluteThickness[1.2]]] &)],
-      Right]
+    PlotLegends      -> themedLegend[legStyles, legLbls, th, fg]
   ]
 ]
 
@@ -175,7 +174,7 @@ PlotCumulative[goodSpecs_List, labels : (_List | Automatic) : Automatic,
 
   th       = ThemeFromOpts[{opts}];
   fg       = th["Fg"];
-  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
+  plotOpts = FilterRules[{opts}, Options[ListLogLinearPlot]];
 
   n      = Length[goodSpecs];
   traces = cumulativeVsK /@ (goodSpecs[[All, "Spec"]]);
@@ -188,30 +187,24 @@ PlotCumulative[goodSpecs_List, labels : (_List | Automatic) : Automatic,
   kMax = Max[Flatten[traces[[All, All, 1]]]];
   cMax = Max[Flatten[traces[[All, All, 2]]]] * 1.05;
 
-  ListLinePlot[
+  ListLogLinearPlot[
     traces,
     plotOpts,
-    PlotStyle        -> styles,
-    ScalingFunctions -> {"Log10", None},
+    Joined      -> True,
+    PlotStyle   -> styles,
     Sequence @@ ThemeChrome[th, 16, 1.2],
     FrameTicks       -> {{ThemeLinTicks[0., cMax, fg], None},
                          {ThemeLogTicks[kMin, kMax, fg], None}},
     FrameTicksStyle  -> Directive[fg, 16],
-    FrameLabel       -> {
+    FrameLabel  -> {
       Style[Row[{"k (", Superscript["s", -1], ")"}], 16, fg],
       Style["Cumulative capacitance (F)", 16, fg]
     },
-    PlotRange        -> {Automatic, {0, cMax}},
+    PlotRange        -> {All, {0, cMax}},
     PlotRangePadding -> Scaled[0.04],
     ImageSize        -> 600,
     AspectRatio      -> 0.65,
-    PlotLegends      -> Placed[LineLegend[legStyles, legLbls,
-      LegendMarkerSize -> 24,
-      LabelStyle       -> Directive[fg, 13],
-      Background       -> th["Bg"],
-      LegendFunction   -> (Framed[#, Background -> th["Bg"],
-        FrameStyle -> Directive[fg, AbsoluteThickness[1.2]]] &)],
-      Right]
+    PlotLegends      -> themedLegend[legStyles, legLbls, th, fg]
   ]
 ]
 

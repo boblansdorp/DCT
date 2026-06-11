@@ -22,7 +22,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9adi9k-tx0l6v6\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9d9wq5-0yd0hfm\" data-page-width-em=\"107\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -30,7 +30,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "7b758c55-d978-4636-be7e-6d937e71463b"
+     "id": "121dd91e-ef2f-4fda-868b-851d83f28f3c"
     }
    ],
    "metadata": {}
@@ -64,7 +64,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"98\" data-out-n=\"600\" data-sub-idx=\"12\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"6\" data-sub-start=\"20\" data-sub-end=\"20\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[600]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1i8g33yi6k3qx.svg\" src=\"img/EAB_DCT_analysis/wl_1i8g33yi6k3qx.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"1\" data-out-n=\"46\" data-sub-idx=\"12\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"6\" data-sub-start=\"20\" data-sub-end=\"20\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[46]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1qxvqmpu789id.svg\" src=\"img/EAB_DCT_analysis/wl_1qxvqmpu789id.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -72,7 +72,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e1b179ce-490a-4d6f-9518-c08bad4e8937"
+     "id": "ba86116a-3545-4126-8879-58f086abee05"
     }
    ],
    "metadata": {}
@@ -85,11 +85,11 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"99\" data-out-n=\"607\" data-sub-idx=\"8\" data-output-format=\"SVGT\" data-output-is-graphics=\"0\" data-cell-idx=\"7\" data-sub-start=\"36\" data-sub-end=\"36\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[607]=</span></div><div class=\"wl-output-content\"><img class=\"vscode-wolfram-png-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_7r80y6ee1416.png\" src=\"img/EAB_DCT_analysis/wl_7r80y6ee1416.png\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"2\" data-out-n=\"53\" data-sub-idx=\"8\" data-output-format=\"SVGT\" data-output-is-graphics=\"0\" data-cell-idx=\"7\" data-sub-start=\"36\" data-sub-end=\"36\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[53]=</span></div><div class=\"wl-output-content\"><img class=\"vscode-wolfram-png-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_qk7jnyxa0izm.png\" src=\"img/EAB_DCT_analysis/wl_qk7jnyxa0izm.png\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       }
      ],
-     "id": "b1c1a4cb-9ffe-4a23-899d-a455220c7519"
+     "id": "8564739d-77ae-4bbc-b897-f1cc310e1d2a"
     }
    ],
    "metadata": {}
@@ -116,7 +116,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9adl4q-gt2gljt\" data-page-width-em=\"106\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> drift files (every </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9adl4s-q2pewg6\" data-page-width-em=\"106\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\">th) in </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9da0yp-f2ralo3\" data-page-width-em=\"106\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> drift files (every </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9da0yq-141a99x\" data-page-width-em=\"106\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\">th) in </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -124,7 +124,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "820702f5-800b-4567-af11-3adea6e2ef64"
+     "id": "688935d8-e329-4421-90fd-1660afa4f2e9"
     },
     {
      "items": [
@@ -137,12 +137,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "0af0b9e5-3b9c-409c-8e82-aa983a732e94"
+     "id": "0a5009c9-165c-46f4-aa57-7ee3d7ef03e3"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae61c-w0vi5c5\" data-page-width-em=\"52\" data-latex-b64=\"MTM5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">139</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae61d-4l2120p\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files pass Lin-KK overall.</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daavr-41j611g\" data-page-width-em=\"107\" data-latex-b64=\"MTM5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">139</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daavs-oenho35\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files pass Lin-KK overall.</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -150,12 +150,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "f9f2184e-6d3c-44a4-983c-8765d6a21ca8"
+     "id": "7991d5eb-fb5c-432e-9591-f997ed4f4b02"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae61h-edkzzmo\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e1JlcCBmaWxlIChFMVxfRUlTXF8oMCkudHh0KTogIFJNUyBSZSA9IDEuMjZcJSwgIEltID0gMC44MlwlICDinJMgT0t9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Rep file (E1_EIS_(0).txt): RMS Re = 1.26%, Im = 0.82% ✓ OK</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daavz-dtdzu7i\" data-page-width-em=\"107\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e1JlcCBmaWxlIChFMVxfRUlTXF8oMCkudHh0KTogIFJNUyBSZSA9IDEuMjZcJSwgIEltID0gMC44MlwlICDinJMgT0t9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Rep file (E1_EIS_(0).txt): RMS Re = 1.26%, Im = 0.82% ✓ OK</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -163,12 +163,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e49b9f4b-4cc5-49a4-9ca9-f02007a15ed0"
+     "id": "8eeb786d-4c16-4f1a-a13b-6cc5666a1d23"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"100\" data-out-n=\"620\" data-sub-idx=\"17\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"10\" data-sub-start=\"27\" data-sub-end=\"27\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[620]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1174hpry5n36e.svg\" src=\"img/EAB_DCT_analysis/wl_1174hpry5n36e.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"3\" data-out-n=\"66\" data-sub-idx=\"17\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"10\" data-sub-start=\"27\" data-sub-end=\"27\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[66]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_12076ak4y91z9.svg\" src=\"img/EAB_DCT_analysis/wl_12076ak4y91z9.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -176,7 +176,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "0a881bee-0e6b-449d-9991-c4fc2709b61d"
+     "id": "0a92edd2-8133-4fa3-b506-59f9d777f27c"
     }
    ],
    "metadata": {}
@@ -196,7 +196,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae6n2-7hhxzix\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhiZntcdGV4dHtMaW4tS0sgZk1pbiBkaXN0cmlidXRpb24gKHRocmVzaG9sZCA9IDIuXCUpOn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">Lin-KK fMin distribution (threshold = 2.%):</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dabac-dwljk95\" data-page-width-em=\"106\" data-latex-b64=\"XG1hdGhiZntcdGV4dHtMaW4tS0sgZk1pbiBkaXN0cmlidXRpb24gKHRocmVzaG9sZCA9IDIuXCUpOn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">Lin-KK fMin distribution (threshold = 2.%):</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -204,12 +204,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "a2c382c7-a662-4159-8c4d-54df0a6879f1"
+     "id": "9726ac35-3a5a-4aa0-b433-6f700fae8a71"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae6n9-iwh2k88\" data-page-width-em=\"51\" data-latex-b64=\"XGJlZ2lue2FycmF5fXt8Y3xjfH1caGxpbmVcbWF0aGJme1x0ZXh0e1BlcmNlbnRpbGV9fSAmIFxtYXRoYmZ7XHRleHR7Zk1pbiAoSHopfX1cXFxobGluZVx0ZXh0ezB0aH0gJiBcdGV4dHswLjEwMH1cXFxobGluZVx0ZXh0ezI1dGh9ICYgXHRleHR7MS4yNTl9XFxcaGxpbmVcdGV4dHs1MHRofSAmIFx0ZXh0ezIuNTEyfVxcXGhsaW5lXHRleHR7NzV0aH0gJiBcdGV4dHs2LjMxMH1cXFxobGluZVx0ZXh0ezkwdGh9ICYgXHRleHR7MTIuNTg5fVxcXGhsaW5lXHRleHR7OTV0aH0gJiBcdGV4dHsxNS44NDl9XFxcaGxpbmVcdGV4dHsxMDB0aH0gJiBcdGV4dHszMS42MjN9XFxcaGxpbmVcZW5ke2FycmF5fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:9.64em;vertical-align:-4.55em;\"></span><span class=\"mord\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:5.09em;\"><span style=\"top:-7.05em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"mtable\"><span class=\"vertical-separator\" style=\"height:9.6em;border-right-width:0.04em;border-right-style:solid;margin:0 -0.02em;vertical-align:-4.55em;\"></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"col-align-c\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:5.05em;\"><span style=\"top:-7.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">Percentile</span></span></span></span><span style=\"top:-6.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">0th</span></span></span></span><span style=\"top:-4.81em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">25th</span></span></span></span><span style=\"top:-3.61em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">50th</span></span></span></span><span style=\"top:-2.41em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">75th</span></span></span></span><span style=\"top:-1.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">90th</span></span></span></span><span style=\"top:-0.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">95th</span></span></span></span><span style=\"top:1.19em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">100th</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:4.55em;\"><span></span></span></span></span></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"vertical-separator\" style=\"height:9.6em;border-right-width:0.04em;border-right-style:solid;margin:0 -0.02em;vertical-align:-4.55em;\"></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"col-align-c\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:5.05em;\"><span style=\"top:-7.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">fMin (Hz)</span></span></span></span><span style=\"top:-6.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">0.100</span></span></span></span><span style=\"top:-4.81em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">1.259</span></span></span></span><span style=\"top:-3.61em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">2.512</span></span></span></span><span style=\"top:-2.41em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">6.310</span></span></span></span><span style=\"top:-1.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">12.589</span></span></span></span><span style=\"top:-0.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">15.849</span></span></span></span><span style=\"top:1.19em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">31.623</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:4.55em;\"><span></span></span></span></span></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"vertical-separator\" style=\"height:9.6em;border-right-width:0.04em;border-right-style:solid;margin:0 -0.02em;vertical-align:-4.55em;\"></span></span></span><span style=\"top:-2.5em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.7em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-4.9em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-6.1em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-7.3em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-8.5em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-9.7em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-10.9em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-12.1em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:4.55em;\"><span></span></span></span></span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dabaw-0rps48g\" data-page-width-em=\"106\" data-latex-b64=\"XGJlZ2lue2FycmF5fXt8Y3xjfH1caGxpbmVcbWF0aGJme1x0ZXh0e1BlcmNlbnRpbGV9fSAmIFxtYXRoYmZ7XHRleHR7Zk1pbiAoSHopfX1cXFxobGluZVx0ZXh0ezB0aH0gJiBcdGV4dHswLjEwMH1cXFxobGluZVx0ZXh0ezI1dGh9ICYgXHRleHR7MS4yNTl9XFxcaGxpbmVcdGV4dHs1MHRofSAmIFx0ZXh0ezIuNTEyfVxcXGhsaW5lXHRleHR7NzV0aH0gJiBcdGV4dHs2LjMxMH1cXFxobGluZVx0ZXh0ezkwdGh9ICYgXHRleHR7MTIuNTg5fVxcXGhsaW5lXHRleHR7OTV0aH0gJiBcdGV4dHsxNS44NDl9XFxcaGxpbmVcdGV4dHsxMDB0aH0gJiBcdGV4dHszMS42MjN9XFxcaGxpbmVcZW5ke2FycmF5fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:9.64em;vertical-align:-4.55em;\"></span><span class=\"mord\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:5.09em;\"><span style=\"top:-7.05em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"mtable\"><span class=\"vertical-separator\" style=\"height:9.6em;border-right-width:0.04em;border-right-style:solid;margin:0 -0.02em;vertical-align:-4.55em;\"></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"col-align-c\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:5.05em;\"><span style=\"top:-7.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">Percentile</span></span></span></span><span style=\"top:-6.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">0th</span></span></span></span><span style=\"top:-4.81em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">25th</span></span></span></span><span style=\"top:-3.61em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">50th</span></span></span></span><span style=\"top:-2.41em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">75th</span></span></span></span><span style=\"top:-1.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">90th</span></span></span></span><span style=\"top:-0.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">95th</span></span></span></span><span style=\"top:1.19em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">100th</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:4.55em;\"><span></span></span></span></span></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"vertical-separator\" style=\"height:9.6em;border-right-width:0.04em;border-right-style:solid;margin:0 -0.02em;vertical-align:-4.55em;\"></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"col-align-c\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:5.05em;\"><span style=\"top:-7.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">fMin (Hz)</span></span></span></span><span style=\"top:-6.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">0.100</span></span></span></span><span style=\"top:-4.81em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">1.259</span></span></span></span><span style=\"top:-3.61em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">2.512</span></span></span></span><span style=\"top:-2.41em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">6.310</span></span></span></span><span style=\"top:-1.21em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">12.589</span></span></span></span><span style=\"top:-0.01em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">15.849</span></span></span></span><span style=\"top:1.19em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">31.623</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:4.55em;\"><span></span></span></span></span></span><span class=\"arraycolsep\" style=\"width:0.5em;\"></span><span class=\"vertical-separator\" style=\"height:9.6em;border-right-width:0.04em;border-right-style:solid;margin:0 -0.02em;vertical-align:-4.55em;\"></span></span></span><span style=\"top:-2.5em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.7em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-4.9em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-6.1em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-7.3em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-8.5em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-9.7em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-10.9em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-12.1em;\"><span class=\"pstrut\" style=\"height:7.05em;\"></span><span class=\"hline\" style=\"border-bottom-width:0.04em;\"></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:4.55em;\"><span></span></span></span></span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -217,12 +217,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "0b8b9405-8f70-4e4d-a87f-7c778d7d4240"
+     "id": "8bdace6a-9a2c-4dd6-ae69-214780b683a7"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"101\" data-out-n=\"624\" data-sub-idx=\"6\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"12\" data-sub-start=\"14\" data-sub-end=\"14\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[624]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1xhlrdokal2h3.svg\" src=\"img/EAB_DCT_analysis/wl_1xhlrdokal2h3.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"4\" data-out-n=\"70\" data-sub-idx=\"6\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"12\" data-sub-start=\"14\" data-sub-end=\"14\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[70]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_bvup6altad.svg\" src=\"img/EAB_DCT_analysis/wl_bvup6altad.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -230,7 +230,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "cb1ff09b-5f64-4855-9587-e66241a47b2a"
+     "id": "6727fc46-bacf-497b-aa49-58b408835a5a"
     }
    ],
    "metadata": {}
@@ -250,7 +250,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMinHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae76d-g5kooid\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7Mi41MTJ9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">2.512</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz  </span><span class=\"wl-ps\">(</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae76e-s9dehri\" data-page-width-em=\"51\" data-latex-b64=\"NTA=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">50</span></span></span></span></span></div></div><span class=\"wl-ps\">th percentile of </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae76e-1crmd0f\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files)</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMinHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dabnx-1z0zy2e\" data-page-width-em=\"107\" data-latex-b64=\"XHRleHR7Mi41MTJ9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">2.512</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz  </span><span class=\"wl-ps\">(</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dabny-eoxdf7p\" data-page-width-em=\"107\" data-latex-b64=\"NTA=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">50</span></span></span></span></span></div></div><span class=\"wl-ps\">th percentile of </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dabnz-mojhs1x\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files)</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -258,7 +258,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "d54abc4e-3c46-4fa6-bea1-c2f90c731e23"
+     "id": "e09fa570-1096-47de-a7a7-de2880b4bca8"
     }
    ],
    "metadata": {}
@@ -285,7 +285,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Electrodes: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae7lg-fytutis\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7RTF9XHRleHR7LCB9XHRleHR7RTJ9XHRleHR7LCB9XHRleHR7RTN9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">E1</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E2</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E3</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   files: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ae7lh-mc21k02\" data-page-width-em=\"51\" data-latex-b64=\"MTU0XHRleHR7IC8gfTE1Mlx0ZXh0eyAvIH0xNTI=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">154</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Electrodes: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dabqz-v72pdic\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7RTF9XHRleHR7LCB9XHRleHR7RTJ9XHRleHR7LCB9XHRleHR7RTN9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">E1</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E2</span></span><span class=\"mord text\"><span class=\"mord\">, </span></span><span class=\"mord text\"><span class=\"mord\">E3</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   files: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dabr0-hqksh0l\" data-page-width-em=\"106\" data-latex-b64=\"MTU0XHRleHR7IC8gfTE1Mlx0ZXh0eyAvIH0xNTI=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord\">154</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span><span class=\"mord text\"><span class=\"mord\"> / </span></span><span class=\"mord\">152</span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -293,12 +293,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "ec456bb2-ef6c-4b38-9db1-e9db20df0e61"
+     "id": "33fa6fba-09d5-46bf-b846-4829d2747733"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aef9g-04ycvif\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0RvbmU6IDQ1OCAvIDQ1OCBmaWxlcyBhY3Jvc3MgMyBlbGVjdHJvZGVzLCAxNTMgcG9vbGVkIChmcmVxLCBlbGVjdHJvZGUpIHBvaW50cy59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Done: 458 / 458 files across 3 electrodes, 153 pooled (freq, electrode) points.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dajb8-ayt5rkl\" data-page-width-em=\"107\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0RvbmU6IDQ1OCAvIDQ1OCBmaWxlcyBhY3Jvc3MgMyBlbGVjdHJvZGVzLCAxNTMgcG9vbGVkIChmcmVxLCBlbGVjdHJvZGUpIHBvaW50cy59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Done: 458 / 458 files across 3 electrodes, 153 pooled (freq, electrode) points.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -306,7 +306,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "36db3c88-b6b7-496e-bedb-499770ea4b29"
+     "id": "3f064442-6e11-4ab2-a906-95fc7141ec2c"
     }
    ],
    "metadata": {}
@@ -326,7 +326,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"102\" data-out-n=\"632\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"19\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[632]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_zy0fd6wb6pjq.svg\" src=\"img/EAB_DCT_analysis/wl_zy0fd6wb6pjq.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"5\" data-out-n=\"78\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"19\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[78]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1i7i4zob15crz.svg\" src=\"img/EAB_DCT_analysis/wl_1i7i4zob15crz.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -334,7 +334,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "ed7cc51f-56f1-42c6-a7c1-7fa23641c55e"
+     "id": "ef6ebf8c-15c8-4e9c-b82f-4a020085fa09"
     }
    ],
    "metadata": {}
@@ -354,7 +354,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMaxHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aeg75-3i99lw7\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">fMaxHz ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dajwx-vbb5dpm\" data-page-width-em=\"106\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -362,7 +362,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "d7749ca5-0dd3-44e0-a2b2-d62b4b0c9b0e"
+     "id": "841cc8c8-cf53-4526-8561-c22cadca613e"
     }
    ],
    "metadata": {}
@@ -382,7 +382,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"103\" data-out-n=\"635\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"23\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[635]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_556fse2ujpah.svg\" src=\"img/EAB_DCT_analysis/wl_556fse2ujpah.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"6\" data-out-n=\"81\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"23\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[81]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_dqc9iimp8d86.svg\" src=\"img/EAB_DCT_analysis/wl_dqc9iimp8d86.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -390,7 +390,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "59671d85-2fb4-4185-800f-4691ba47a086"
+     "id": "977833d8-0e89-421d-9c94-ab64e830eef8"
     }
    ],
    "metadata": {}
@@ -410,28 +410,28 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"104\" data-out-n=\"636\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"25\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[636]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aehcl-45ktu6f\" data-page-width-em=\"51\" data-latex-b64=\"Mi41MTE5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">2.5119</span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"7\" data-out-n=\"82\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"25\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[82]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daklb-7iebdb2\" data-page-width-em=\"106\" data-latex-b64=\"Mi41MTE5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">2.5119</span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "Out[636]= 2.5119",
+       "data": "Out[82]= 2.5119",
        "mime": "text/plain"
       }
      ],
-     "id": "d13da9ca-8c2d-4ae1-a486-a52902e47be9"
+     "id": "48a1ed89-70fd-4427-9915-34093aac362f"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"105\" data-out-n=\"637\" data-sub-idx=\"1\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"25\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[637]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aeheb-xlrayu6\" data-page-width-em=\"51\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"8\" data-out-n=\"83\" data-sub-idx=\"1\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"25\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[83]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dakna-8pd0sk1\" data-page-width-em=\"106\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "Out[637]= 500.\\,",
+       "data": "Out[83]= 500.\\,",
        "mime": "text/plain"
       }
      ],
-     "id": "adf939a4-ab14-4f48-bb9b-1e989239c711"
+     "id": "b9af2d02-a137-45ec-a988-d8b2bbff1bfe"
     }
    ],
    "metadata": {}
@@ -451,7 +451,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">weightPower ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aehoz-93z96et\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7LTAuODd9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">-0.87</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   (α = </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aehp0-56s2rar\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC44N30=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.87</span></span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">weightPower ← </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daknw-itcqmmc\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7LTAuODd9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">-0.87</span></span></span></span></span></span></div></div><span class=\"wl-ps\">   (α = </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daknx-kiicg1r\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7MC44N30=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.87</span></span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -459,7 +459,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "a5ad773e-dfba-47f2-bc46-57f96ee0eb89"
+     "id": "242d47a2-c914-462d-8f1a-deb794141650"
     }
    ],
    "metadata": {}
@@ -486,7 +486,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Tau grid: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aei36-8io5c7q\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aei36-xliqbnu\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC42M30=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.63</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s  (data window: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aei37-nis063k\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wMDAzfQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.0003</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aei38-0td98mm\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHR7MC4wNn0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.06</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s)</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Tau grid: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dakq0-azvwixi\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7MC4wMH0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.00</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dakq1-p3lb6sk\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7MC42M30=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.63</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s  (data window: </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dakq3-74ycep5\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7MC4wMDAzfQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.0003</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> — </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dakq4-btzf36m\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7MC4wNn0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.06</span></span></span></span></span></span></div></div><span class=\"wl-ps\"> s)</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -494,7 +494,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "f7d1b521-bbe6-4845-bd35-057420ad8d1a"
+     "id": "b39566fd-ea20-4bf6-9f2d-06c6d26c5c59"
     }
    ],
    "metadata": {}
@@ -514,7 +514,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aeivt-swn00lg\" data-page-width-em=\"52\" data-latex-b64=\"MTA=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">10</span></span></span></span></span></div></div><span class=\"wl-ps\"> λ values computed.</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dal7f-5v2uyjw\" data-page-width-em=\"107\" data-latex-b64=\"MTA=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">10</span></span></span></span></span></div></div><span class=\"wl-ps\"> λ values computed.</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -522,7 +522,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "502540b2-2765-4dfc-9486-7e1f9c41b53f"
+     "id": "8769f74c-3686-4fae-9a68-9327f7339d8e"
     }
    ],
    "metadata": {}
@@ -549,7 +549,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"106\" data-out-n=\"647\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"35\" data-sub-start=\"11\" data-sub-end=\"11\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[647]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_ntxmoq9fuexg.svg\" src=\"img/EAB_DCT_analysis/wl_ntxmoq9fuexg.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"9\" data-out-n=\"93\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"35\" data-sub-start=\"11\" data-sub-end=\"11\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[93]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_11ro383u2ru5e.svg\" src=\"img/EAB_DCT_analysis/wl_11ro383u2ru5e.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -557,7 +557,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "cb030fe6-6e96-490f-bb7e-ab2d2740dde3"
+     "id": "1e0addc0-55f1-4b8c-95df-26581b9d6551"
     }
    ],
    "metadata": {}
@@ -577,7 +577,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aejrb-88kg0an\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyNmZmZmZmZ9e1x0ZXh0e2xhbWJkYU5EICRcZ2V0cyQgfX19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\" style=\"color:#ffffff;\"><span class=\"mord\" style=\"color:#ffffff;\">lambdaND </span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mrel\" style=\"color:#ffffff;\">←</span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mord\" style=\"color:#ffffff;\"> </span></span></span></span></span></span></div></div><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aejrd-k4p5e0d\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1xmcmFjezF9ezEwMDB9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.0074em;vertical-align:-0.686em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1000</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"color:#00ff00;border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dalkl-2ny83s3\" data-page-width-em=\"107\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyNmZmZmZmZ9e1x0ZXh0e2xhbWJkYU5EICRcZ2V0cyQgfX19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\" style=\"color:#ffffff;\"><span class=\"mord\" style=\"color:#ffffff;\">lambdaND </span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mrel\" style=\"color:#ffffff;\">←</span><span class=\"mspace\" style=\"color:#ffffff;margin-right:0.2778em;\"></span><span class=\"mord\" style=\"color:#ffffff;\"> </span></span></span></span></span></span></div></div><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dalkn-m7b8n4f\" data-page-width-em=\"107\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1xmcmFjezF9ezEwMDB9fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.0074em;vertical-align:-0.686em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.3214em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1000</span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"color:#00ff00;border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\" style=\"color:#00ff00;\"><span class=\"mord mathbf\" style=\"color:#00ff00;\">1</span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.686em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -585,7 +585,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "498b67f0-512c-4706-a83a-1d6a4765b681"
+     "id": "8663f40a-2c15-4710-8ca9-612419d3f19d"
     }
    ],
    "metadata": {}
@@ -605,7 +605,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"107\" data-out-n=\"650\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"39\" data-sub-start=\"2\" data-sub-end=\"6\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[650]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1sdkr8xzn6d00.svg\" src=\"img/EAB_DCT_analysis/wl_1sdkr8xzn6d00.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"10\" data-out-n=\"96\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"39\" data-sub-start=\"2\" data-sub-end=\"6\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[96]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_o7txv7oaw1mw.svg\" src=\"img/EAB_DCT_analysis/wl_o7txv7oaw1mw.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -613,7 +613,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "fe7474e3-ac7d-472a-9530-066dae169292"
+     "id": "74a6d8ba-635d-403b-b3b3-3b9f337be325"
     }
    ],
    "metadata": {}
@@ -640,7 +640,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ael2r-s0qrzrb\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files (decimated) from </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Found </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9damgb-dufm1wx\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\"> files (decimated) from </span><span class=\"wl-ps\">drift_03252026</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -648,12 +648,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "0287f37e-7255-4d2e-b534-71f714c23ce6"
+     "id": "55498068-745a-4daf-857c-86f245777388"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ael2w-33g9fo3\" data-page-width-em=\"51\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ael2w-besgnqj\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(0).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aemkg-vvj8avp\" data-page-width-em=\"51\" data-latex-b64=\"NDc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">47</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aemki-xc6jtoz\" data-page-width-em=\"51\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(46).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aeo64-zivlsb8\" data-page-width-em=\"52\" data-latex-b64=\"OTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">93</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aeo65-hk7h1rg\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(92).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aept2-qzpvxts\" data-page-width-em=\"52\" data-latex-b64=\"MTM5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">139</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aept3-5r3ny3c\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(138).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aerb4-9fecgs1\" data-page-width-em=\"52\" data-latex-b64=\"MTg1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">185</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aerb6-1nzjvl8\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(30).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aesvz-io92p32\" data-page-width-em=\"52\" data-latex-b64=\"MjMx\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">231</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aesw0-gefpgbk\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(76).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aeuhe-mngrmqd\" data-page-width-em=\"52\" data-latex-b64=\"Mjc3\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">277</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aeuhf-l3zj6cl\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(122).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aevyy-ih7j8oj\" data-page-width-em=\"52\" data-latex-b64=\"MzIz\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">323</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aevz0-2iokiq2\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(16).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aexhl-bu1pm9r\" data-page-width-em=\"52\" data-latex-b64=\"MzY5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">369</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aexhm-uyuh43h\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(62).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aez6p-wtx86ij\" data-page-width-em=\"52\" data-latex-b64=\"NDE1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">415</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9aez6q-9p9ky8q\" data-page-width-em=\"52\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(108).txt</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9damgg-7opm6eh\" data-page-width-em=\"107\" data-latex-b64=\"MQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">1</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9damgh-05iyje5\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(0).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dao2u-ks5qymq\" data-page-width-em=\"106\" data-latex-b64=\"NDc=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">47</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dao2v-77ljdwm\" data-page-width-em=\"106\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(46).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dapo5-csmtvhp\" data-page-width-em=\"107\" data-latex-b64=\"OTM=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">93</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dapo6-4s7nitx\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(92).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dar7t-rgvc0gk\" data-page-width-em=\"107\" data-latex-b64=\"MTM5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">139</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dar7u-pks7ppg\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E1_EIS_(138).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dastr-v2vagqr\" data-page-width-em=\"107\" data-latex-b64=\"MTg1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">185</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dasts-y1d0lb6\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(30).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daucf-b2qf6xf\" data-page-width-em=\"107\" data-latex-b64=\"MjMx\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">231</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daucg-bcnh5bi\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(76).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9davxt-jqk6jzo\" data-page-width-em=\"107\" data-latex-b64=\"Mjc3\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">277</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9davxu-1s198et\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E2_EIS_(122).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daxhd-n6vmygj\" data-page-width-em=\"107\" data-latex-b64=\"MzIz\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">323</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daxhe-az2xcd4\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(16).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daz0d-nwng259\" data-page-width-em=\"107\" data-latex-b64=\"MzY5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">369</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9daz0e-1lm4r6q\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(62).txt</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9db0kr-rj7lsqp\" data-page-width-em=\"107\" data-latex-b64=\"NDE1\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">415</span></span></span></span></span></div></div><span class=\"wl-ps\"> / </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9db0ks-c0nmsvh\" data-page-width-em=\"107\" data-latex-b64=\"NDU4\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">458</span></span></span></span></span></div></div><span class=\"wl-ps\">  </span><span class=\"wl-ps\">E3_EIS_(108).txt</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -661,12 +661,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "f0b2a234-39e6-4152-b227-18adb0b8d3ec"
+     "id": "cb473efb-6b80-4e5a-8352-760df5981393"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af0mu-saty5zz\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezQ1OCAvIDQ1OCBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">458 / 458 fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9db236-988i6cw\" data-page-width-em=\"107\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezQ1OCAvIDQ1OCBmaXRzIHN1Y2NlZWRlZC59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">458 / 458 fits succeeded.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -674,7 +674,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "41670e10-8a2b-4c65-98ad-62ed3e74c773"
+     "id": "1269b851-2d5a-4031-a13f-381dc81e2ab3"
     }
    ],
    "metadata": {}
@@ -701,7 +701,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"108\" data-out-n=\"658\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"45\" data-sub-start=\"6\" data-sub-end=\"6\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[658]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_uhu6j08slwvj.svg\" src=\"img/EAB_DCT_analysis/wl_uhu6j08slwvj.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"11\" data-out-n=\"104\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"45\" data-sub-start=\"6\" data-sub-end=\"6\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[104]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1g2n059y3wz4a.svg\" src=\"img/EAB_DCT_analysis/wl_1g2n059y3wz4a.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -709,7 +709,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "05b68e28-b614-4c50-9836-d4c4d7565a0c"
+     "id": "bae955a4-c683-4b04-815f-9ec0dcd0166b"
     }
    ],
    "metadata": {}
@@ -729,7 +729,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"109\" data-out-n=\"659\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"47\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[659]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_17ticir7qga0c.svg\" src=\"img/EAB_DCT_analysis/wl_17ticir7qga0c.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"12\" data-out-n=\"105\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"47\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[105]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_fq678z0n876r.svg\" src=\"img/EAB_DCT_analysis/wl_fq678z0n876r.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -737,7 +737,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e989d881-4212-4bc4-9ecd-5f10adee1cd3"
+     "id": "eb182860-1d58-43b2-8f70-6e5dcd040c76"
     }
    ],
    "metadata": {}
@@ -757,7 +757,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"110\" data-out-n=\"661\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"49\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[661]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_19jea6nlx58o.svg\" src=\"img/EAB_DCT_analysis/wl_19jea6nlx58o.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"13\" data-out-n=\"107\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"49\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[107]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_18u0b8ex91n6u.svg\" src=\"img/EAB_DCT_analysis/wl_18u0b8ex91n6u.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -765,7 +765,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "c1a7c2df-81ae-4683-8b1e-8c345c860866"
+     "id": "e1326d86-7ef9-436d-816f-14797d93c243"
     }
    ],
    "metadata": {}
@@ -779,21 +779,21 @@
   },
   {
    "kind": 2,
-   "value": "(* Residuals for a single file *)\ni = 15; (* <── change this to pick a different file *)\nDCTPlots`PlotResiduals[goodSpecs[[i, \"Spec\"]]]",
+   "value": "(* Residuals for ALL fits overlaid (semi-transparent), with reference lines at\n   5% amplitude and 3\\[Degree] phase \\[Dash] supports the reconstruction-accuracy claim (Fig. Sx).\n   Pass a single spec instead, e.g. goodSpecs[[15, \"Spec\"]], for one spectrum. *)\nDCTPlots`PlotResiduals[goodSpecs[[All, \"Spec\"]]]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"111\" data-out-n=\"663\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"51\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[663]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_15a4lnj8415ae.svg\" src=\"img/EAB_DCT_analysis/wl_15a4lnj8415ae.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"14\" data-out-n=\"108\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"51\" data-sub-start=\"3\" data-sub-end=\"3\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[108]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1c44a9jxvxmqz.svg\" src=\"img/EAB_DCT_analysis/wl_1c44a9jxvxmqz.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "(* output: graphics *)\n(* Residuals for a single file *)\ni = 15; (* <── change this to pick a different file *)\nDCTPlots`PlotResiduals[goodSpecs[[i, \"Spec\"]]]",
+       "data": "(* output: graphics *)\n(* Residuals for ALL fits overlaid (semi-transparent), with reference lines at\n   5% amplitude and 3\\[Degree] phase \\[Dash] supports the reconstruction-accuracy claim (Fig. Sx).\n   Pass a single spec instead, e.g. goodSpecs[[15, \"Spec\"]], for one spectrum. *)\nDCTPlots`PlotResiduals[goodSpecs[[All, \"Spec\"]]]",
        "mime": "text/plain"
       }
      ],
-     "id": "2f19aa17-6d3f-450c-8b7e-01d687b14283"
+     "id": "70f4ac4a-ad77-4f2e-9b64-ea3d58585bca"
     }
    ],
    "metadata": {}
@@ -813,7 +813,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"112\" data-out-n=\"664\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"53\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[664]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1re1tlc17vn6m.svg\" src=\"img/EAB_DCT_analysis/wl_1re1tlc17vn6m.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"15\" data-out-n=\"109\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"53\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[109]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_8wexdefqoqcr.svg\" src=\"img/EAB_DCT_analysis/wl_8wexdefqoqcr.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -821,7 +821,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "fa013f89-ff99-435f-ad93-6d8be90b40e1"
+     "id": "0f06f55f-88f9-4161-8451-eb69c75886db"
     }
    ],
    "metadata": {}
@@ -855,7 +855,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"113\" data-out-n=\"666\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"57\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[666]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1eo7eja3c7kly.svg\" src=\"img/EAB_DCT_analysis/wl_1eo7eja3c7kly.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"16\" data-out-n=\"111\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"57\" data-sub-start=\"1\" data-sub-end=\"1\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[111]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_ccggi9ah2h7a.svg\" src=\"img/EAB_DCT_analysis/wl_ccggi9ah2h7a.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -863,7 +863,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "8fdb8fd3-9460-4d6d-a0f5-cb465f3ddb5e"
+     "id": "92e30bc9-300f-4737-901a-cd7a1b334511"
     }
    ],
    "metadata": {}
@@ -890,7 +890,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Fitting concentration data (</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af8ej-47nwg83\" data-page-width-em=\"52\" data-latex-b64=\"Mi41MTE5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">2.5119</span></span></span></span></span></div></div><span class=\"wl-ps\"> – </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af8ek-99rlu65\" data-page-width-em=\"52\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz):</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Fitting concentration data (</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbaw6-mdl53q6\" data-page-width-em=\"106\" data-latex-b64=\"Mi41MTE5\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">2.5119</span></span></span></span></span></div></div><span class=\"wl-ps\"> – </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbaw6-7m4122b\" data-page-width-em=\"106\" data-latex-b64=\"NTAwLlws\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">500.</span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span></span></span></span></span></div></div><span class=\"wl-ps\"> Hz):</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -898,12 +898,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e339f26f-fbc8-43c3-bc2c-467a9f790bce"
+     "id": "b2c12397-d007-4a67-aa03-69d46b894322"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">  </span><span class=\"wl-ps\">spike</span><span class=\"wl-ps\">:  </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af8es-7qgv4cy\" data-page-width-em=\"52\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\"> files  (electrodes +</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af8et-9tufral\" data-page-width-em=\"52\" data-latex-b64=\"MA==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0</span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">  </span><span class=\"wl-ps\">2026-02-25-titration</span><span class=\"wl-ps\">:  </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af9al-bzpp03l\" data-page-width-em=\"52\" data-latex-b64=\"MTU=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">15</span></span></span></span></span></div></div><span class=\"wl-ps\"> files  (electrodes +</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af9am-a9o93tl\" data-page-width-em=\"52\" data-latex-b64=\"Mw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">3</span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">  </span><span class=\"wl-ps\">spike</span><span class=\"wl-ps\">:  </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbawf-kj1xadq\" data-page-width-em=\"106\" data-latex-b64=\"MjQ=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">24</span></span></span></span></span></div></div><span class=\"wl-ps\"> files  (electrodes +</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbawg-ijmppp4\" data-page-width-em=\"106\" data-latex-b64=\"MA==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">0</span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">  </span><span class=\"wl-ps\">2026-02-25-titration</span><span class=\"wl-ps\">:  </span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbbta-szt6sfz\" data-page-width-em=\"107\" data-latex-b64=\"MTU=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">15</span></span></span></span></span></div></div><span class=\"wl-ps\"> files  (electrodes +</span><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbbtb-4fkr9lc\" data-page-width-em=\"107\" data-latex-b64=\"Mw==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">3</span></span></span></span></span></div></div><span class=\"wl-ps\">)</span></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -911,12 +911,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "33722b91-9ab9-4dbe-893f-58cc60ed2e4e"
+     "id": "20fbebf3-8e17-47e0-b409-2f336f5fd9a0"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9af9vh-x8t97fz\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezM5IC8gMzkgZml0cyBzdWNjZWVkZWQg4oCTIGVsZWN0cm9kZXMgRTEsIEUyLCBFMywgRTQsIEU1LCBFNi59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">39 / 39 fits succeeded – electrodes E1, E2, E3, E4, E5, E6.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbccj-86cj85i\" data-page-width-em=\"107\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0ezM5IC8gMzkgZml0cyBzdWNjZWVkZWQg4oCTIGVsZWN0cm9kZXMgRTEsIEUyLCBFMywgRTQsIEU1LCBFNi59fX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">39 / 39 fits succeeded – electrodes E1, E2, E3, E4, E5, E6.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -924,7 +924,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "cd839772-d997-4251-890f-69cae8d4a63a"
+     "id": "8d29ba2c-86a8-4bb9-a489-a99abc179708"
     }
    ],
    "metadata": {}
@@ -944,7 +944,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"114\" data-out-n=\"677\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"62\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[677]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1grn5wv7h0y66.svg\" src=\"img/EAB_DCT_analysis/wl_1grn5wv7h0y66.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"17\" data-out-n=\"122\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"62\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[122]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_yjqq3twqjk70.svg\" src=\"img/EAB_DCT_analysis/wl_yjqq3twqjk70.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -952,7 +952,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "c1afc0a2-81db-45ac-a3a7-2e8a88bb7952"
+     "id": "5870e895-f448-4d2b-b2cc-03ab126aa7a8"
     }
    ],
    "metadata": {}
@@ -972,7 +972,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"115\" data-out-n=\"679\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"64\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[679]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_zj379xgr4vv.svg\" src=\"img/EAB_DCT_analysis/wl_zj379xgr4vv.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"18\" data-out-n=\"124\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"64\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[124]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_14rhtreksdsqw.svg\" src=\"img/EAB_DCT_analysis/wl_14rhtreksdsqw.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -980,7 +980,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "6f944f1a-8f4e-49cc-957f-54d9e6ea8dac"
+     "id": "dbb26189-3af2-43bf-9328-3462b4529914"
     }
    ],
    "metadata": {}
@@ -1000,7 +1000,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"116\" data-out-n=\"688\" data-sub-idx=\"11\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"66\" data-sub-start=\"34\" data-sub-end=\"48\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[688]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1ncxwi8hsargt.svg\" src=\"img/EAB_DCT_analysis/wl_1ncxwi8hsargt.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"19\" data-out-n=\"133\" data-sub-idx=\"11\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"66\" data-sub-start=\"34\" data-sub-end=\"48\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[133]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_15i9jvrj95oms.svg\" src=\"img/EAB_DCT_analysis/wl_15i9jvrj95oms.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1008,7 +1008,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "d715f00e-b09e-4414-8477-1400b6866cff"
+     "id": "db057b8a-7d86-4f55-9d57-0139e52301c4"
     }
    ],
    "metadata": {}
@@ -1035,7 +1035,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc8j-84zj6pu\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHszLXN0YXRlIG1vZGVsICAoVSAkXGxlZnRyaWdodGFycm93JCBGICRcbGVmdHJpZ2h0YXJyb3ckIEIpfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">3-state model (U </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> F </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> B)</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdp3-4aij9nf\" data-page-width-em=\"106\" data-latex-b64=\"XG1hdGhiZntcdGV4dHszLXN0YXRlIG1vZGVsICAoVSAkXGxlZnRyaWdodGFycm93JCBGICRcbGVmdHJpZ2h0YXJyb3ckIEIpfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">3-state model (U </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> F </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> B)</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1043,12 +1043,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "2cea7b76-9086-4bc8-8d52-fe3a02e0d006"
+     "id": "dec2e742-1078-4891-81bf-a6433d0676dc"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc8p-noobll8\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7Zn1fe1x0ZXh0e2Z9fVx0ZXh0eyA9IH1cZnJhY3tcbWF0aHJte0tTfVwsXGxlZnQoXG1hdGhybXtjb25jfStcbWF0aHJte0tEfVxyaWdodCl9e1xtYXRocm17S1N9XCxcbGVmdChcbWF0aHJte2NvbmN9K1xtYXRocm17S0R9XHJpZ2h0KStcbWF0aHJte0tEfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.363em;vertical-align:-0.936em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">f</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">f</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdpd-f7szmwg\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7Zn1fe1x0ZXh0e2Z9fVx0ZXh0eyA9IH1cZnJhY3tcbWF0aHJte0tTfVwsXGxlZnQoXG1hdGhybXtjb25jfStcbWF0aHJte0tEfVxyaWdodCl9e1xtYXRocm17S1N9XCxcbGVmdChcbWF0aHJte2NvbmN9K1xtYXRocm17S0R9XHJpZ2h0KStcbWF0aHJte0tEfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.363em;vertical-align:-0.936em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">f</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">f</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1056,12 +1056,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "cb16eee0-2080-4650-a55b-722b3d84cc66"
+     "id": "217a9eaf-ccd1-4525-afeb-f161d41f53bb"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc8t-a6uc53k\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHs0LXN0YXRlIG1vZGVsICAoVSAkXGxlZnRyaWdodGFycm93JCBGICRcbGVmdHJpZ2h0YXJyb3ckIEIsICBORiBub24tZm9sZGluZyl9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">4-state model (U </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> F </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> B, NF non-folding)</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdpi-g7rix4v\" data-page-width-em=\"106\" data-latex-b64=\"XG1hdGhiZntcdGV4dHs0LXN0YXRlIG1vZGVsICAoVSAkXGxlZnRyaWdodGFycm93JCBGICRcbGVmdHJpZ2h0YXJyb3ckIEIsICBORiBub24tZm9sZGluZyl9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\"><span class=\"mord\">4-state model (U </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> F </span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mrel\">↔</span><span class=\"mspace\" style=\"margin-right:0.2778em;\"></span><span class=\"mord\"> B, NF non-folding)</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1069,12 +1069,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "4937c591-6e13-4023-b5e7-4d19e67379a8"
+     "id": "e1ce0066-4795-4ca0-8c82-7ed6c52662f2"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc95-0hv46mu\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7Zn1fe1x0ZXh0e2Z9fVx0ZXh0eyA9IH1cZnJhY3tcbWF0aHJte0tTfVwsXGxlZnQoMS1cbWF0aHJte05GfVxyaWdodClcLFxsZWZ0KFxtYXRocm17Y29uY30rXG1hdGhybXtLRH1ccmlnaHQpfXtcbWF0aHJte0tTfVwsXGxlZnQoXG1hdGhybXtjb25jfStcbWF0aHJte0tEfVxyaWdodCkrXG1hdGhybXtLRH19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.363em;vertical-align:-0.936em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">f</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">f</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">NF</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdpt-c7mvw1v\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7Zn1fe1x0ZXh0e2Z9fVx0ZXh0eyA9IH1cZnJhY3tcbWF0aHJte0tTfVwsXGxlZnQoMS1cbWF0aHJte05GfVxyaWdodClcLFxsZWZ0KFxtYXRocm17Y29uY30rXG1hdGhybXtLRH1ccmlnaHQpfXtcbWF0aHJte0tTfVwsXGxlZnQoXG1hdGhybXtjb25jfStcbWF0aHJte0tEfVxyaWdodCkrXG1hdGhybXtLRH19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:2.363em;vertical-align:-0.936em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">f</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3361em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">f</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord\"><span class=\"mopen nulldelimiter\"></span><span class=\"mfrac\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:1.427em;\"><span style=\"top:-2.314em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span></span></span><span style=\"top:-3.23em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"frac-line\" style=\"border-bottom-width:0.04em;\"></span></span><span style=\"top:-3.677em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"><span class=\"mord\"><span class=\"mord mathrm\">KS</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\">1</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">−</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">NF</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"mspace\" style=\"margin-right:0.1667em;\"></span><span class=\"minner\"><span class=\"mopen delimcenter\" style=\"top:0em;\">(</span><span class=\"mord\"><span class=\"mord mathrm\">conc</span></span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mbin\">+</span><span class=\"mspace\" style=\"margin-right:0.2222em;\"></span><span class=\"mord\"><span class=\"mord mathrm\">KD</span></span><span class=\"mclose delimcenter\" style=\"top:0em;\">)</span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.936em;\"><span></span></span></span></span></span><span class=\"mclose nulldelimiter\"></span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1082,7 +1082,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "d55f8133-340b-434f-9b94-381680d668c4"
+     "id": "1d42c288-c11e-4227-aaf5-c4efc0d3fb92"
     },
     {
      "items": [
@@ -1095,12 +1095,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "dca7f5f7-36c6-4d10-a7d4-eb257869cd47"
+     "id": "bb0d486c-5789-4a86-9f95-37721796d9ec"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc9l-snbqayo\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHszLXN0YXRlIG1vZGVsfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">3-state model</span></span></span></span></span></span></div></div></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc9q-7m9zmsq\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7S31fe1x0ZXh0e1N9fVx0ZXh0eyA9IH1cdGV4dHswLjIwN31cdGV4dHsgICAgIH1cdGV4dHtLfV97XHRleHR7RH19XHRleHR7ID0gfVx0ZXh0ezUyLjR9XHRleHR7ICRcbXUkTX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">S</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">0.207</span></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">D</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">52.4</span></span><span class=\"mord text\"><span class=\"mord\"> </span><span class=\"mord mathnormal\">μ</span><span class=\"mord\">M</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc9s-eziimg6\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dHs0LXN0YXRlIG1vZGVsfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">4-state model</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9afc9u-3puo9t9\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7S31fe1x0ZXh0e1N9fVx0ZXh0eyA9IH1cdGV4dHswLjE0N31cdGV4dHsgICAgIH1cdGV4dHtLfV97XHRleHR7RH19XHRleHR7ID0gfVx0ZXh0ezguM31cdGV4dHsgJFxtdSRNfVx0ZXh0eyAgICAgTkYgPSB9XHRleHR7MC4zMn0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">S</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">0.147</span></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">D</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">8.3</span></span><span class=\"mord text\"><span class=\"mord\"> </span><span class=\"mord mathnormal\">μ</span><span class=\"mord\">M</span></span><span class=\"mord text\"><span class=\"mord\"> NF = </span></span><span class=\"mord text\"><span class=\"mord\">0.32</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdqb-ojtlvfq\" data-page-width-em=\"106\" data-latex-b64=\"XG1hdGhiZntcdGV4dHszLXN0YXRlIG1vZGVsfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">3-state model</span></span></span></span></span></span></div></div></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdqg-qxtcvj2\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7S31fe1x0ZXh0e1N9fVx0ZXh0eyA9IH1cdGV4dHswLjIwN31cdGV4dHsgICAgIH1cdGV4dHtLfV97XHRleHR7RH19XHRleHR7ID0gfVx0ZXh0ezUyLjR9XHRleHR7ICRcbXUkTX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">S</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">0.207</span></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">D</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">52.4</span></span><span class=\"mord text\"><span class=\"mord\"> </span><span class=\"mord mathnormal\">μ</span><span class=\"mord\">M</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdqj-dntg52q\" data-page-width-em=\"106\" data-latex-b64=\"XG1hdGhiZntcdGV4dHs0LXN0YXRlIG1vZGVsfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">4-state model</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbdql-azy2oe9\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7ICB9XHRleHR7S31fe1x0ZXh0e1N9fVx0ZXh0eyA9IH1cdGV4dHswLjE0N31cdGV4dHsgICAgIH1cdGV4dHtLfV97XHRleHR7RH19XHRleHR7ID0gfVx0ZXh0ezguM31cdGV4dHsgJFxtdSRNfVx0ZXh0eyAgICAgTkYgPSB9XHRleHR7MC4zMn0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8778em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">S</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">0.147</span></span><span class=\"mord text\"><span class=\"mord\"> </span></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">K</span></span><span class=\"msupsub\"><span class=\"vlist-t vlist-t2\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.3283em;\"><span style=\"top:-2.55em;margin-right:0.05em;\"><span class=\"pstrut\" style=\"height:2.7em;\"></span><span class=\"sizing reset-size6 size3 mtight\"><span class=\"mord mtight\"><span class=\"mord text mtight\"><span class=\"mord mtight\">D</span></span></span></span></span></span><span class=\"vlist-s\">​</span></span><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.15em;\"><span></span></span></span></span></span></span><span class=\"mord text\"><span class=\"mord\"> = </span></span><span class=\"mord text\"><span class=\"mord\">8.3</span></span><span class=\"mord text\"><span class=\"mord\"> </span><span class=\"mord mathnormal\">μ</span><span class=\"mord\">M</span></span><span class=\"mord text\"><span class=\"mord\"> NF = </span></span><span class=\"mord text\"><span class=\"mord\">0.32</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1108,12 +1108,12 @@
        "mime": "text/plain"
       }
      ],
-     "id": "556b6592-0e07-4527-bd54-90eda635e1c8"
+     "id": "d9ee6791-a693-4715-a51c-c10375f65a6a"
     },
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"117\" data-out-n=\"697\" data-sub-idx=\"12\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"69\" data-sub-start=\"26\" data-sub-end=\"69\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[697]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_6ids13r8e4ok.svg\" src=\"img/EAB_DCT_analysis/wl_6ids13r8e4ok.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"20\" data-out-n=\"142\" data-sub-idx=\"12\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"69\" data-sub-start=\"26\" data-sub-end=\"69\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[142]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_qau0q0peveu1.svg\" src=\"img/EAB_DCT_analysis/wl_qau0q0peveu1.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1121,7 +1121,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e5a2e291-d700-40bf-9dad-5f5d92a190df"
+     "id": "ac9a393c-ab47-47a8-8da3-a483103071ea"
     }
    ],
    "metadata": {}
@@ -1141,7 +1141,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"821465\" data-output-id=\"118\" data-out-n=\"699\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"71\" data-sub-start=\"50\" data-sub-end=\"50\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[699]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_14artotq3tv35.svg\" src=\"img/EAB_DCT_analysis/wl_14artotq3tv35.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"21\" data-out-n=\"144\" data-sub-idx=\"2\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"71\" data-sub-start=\"50\" data-sub-end=\"50\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[144]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1ewl97571nyck.svg\" src=\"img/EAB_DCT_analysis/wl_1ewl97571nyck.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -1149,9 +1149,143 @@
        "mime": "text/plain"
       }
      ],
-     "id": "e689b8f3-0827-4114-b7d7-9a9652f82aec"
+     "id": "fbc5c0e9-ef6b-4cfa-a94f-5656c05f910e"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 5b. Equivalent-circuit (CPE) fits\n\nClassical equivalent-circuit comparison to the DCT inversion. Each concentration spectrum is fit to **Rs + [C_DL || (Rct + CPE)]** via `CPEFit`FitCPE`. The faradaic branch gives an apparent electron-transfer rate **k_et = 1/(Q·Rct)** (Q is the CPE coefficient, i.e. Y_CPE; an exact RC rate for n=1, a proxy otherwise). The plot shows k_et vs [vancomycin] per electrode.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Fit every concentration spectrum to  Rs + [Cdl || (Rct + CPE)] *)\ncpeResults = <|\"File\" -> #File,\n   \"Fit\" -> CPEFit`FitCPE[#Spec[\"FreqHz\"], #Spec[\"ZData\"]]|> & /@ concGoodSpecs;\n\n(* electron-transfer rate proxy  k_et = 1/(Q Rct)  per spectrum, by electrode\n   (drop 0 uM so it can go on a log concentration axis) *)\ncpeConcUM[lbl_] := ToExpression @ First[StringCases[lbl, d : NumberString ~~ \" \\[Mu]M\" :> d], \"0\"];\nketByElectrode = Table[\n  Module[{subs},\n    subs = Select[cpeResults, StringStartsQ[#File, e] &];\n    Select[Transpose[{cpeConcUM /@ subs[[All, \"File\"]],\n                      1./(#Fit[\"Q\"] #Fit[\"Rct\"]) & /@ subs}], First[#] > 0 &]],\n  {e, concElectrodes}];\n\nModule[{eCols, allC, allK, cR, kR},\n  eCols = Directive[ColorData[97][#], AbsoluteThickness[1.8]] & /@ Range[Length[concElectrodes]];\n  allC  = Flatten[ketByElectrode[[All, All, 1]]];\n  allK  = Flatten[ketByElectrode[[All, All, 2]]];\n  cR = MinMax[allC]; kR = MinMax[allK];\n  ListLinePlot[ketByElectrode,\n    ScalingFunctions -> {\"Log10\", \"Log10\"}, Joined -> False,\n    PlotMarkers -> {Automatic, 10}, PlotStyle -> eCols,\n    Frame -> True, Axes -> False, Background -> GrayLevel[0.12],\n    FrameStyle -> Directive[White, AbsoluteThickness[1.1]],\n    FrameTicks -> {{DCTPlots`ThemeLogTicks[kR[[1]], kR[[2]], White], None},\n                   {DCTPlots`ThemeLogTicks[cR[[1]], cR[[2]], White], None}},\n    FrameTicksStyle -> Directive[White, 12],\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Vancomycin] (\\[Mu]M)\", 14, White],\n                   Style[\"k_et = 1/(Q R_ct)  (1/s)\", 14, White]},\n    ImageSize -> 540, AspectRatio -> 0.72, PlotRangePadding -> Scaled[0.06],\n    PlotLegends -> Placed[LineLegend[eCols, concElectrodes,\n      LabelStyle -> Directive[White, 12], Background -> GrayLevel[0.12],\n      LegendFunction -> (Framed[#, Background -> GrayLevel[0.12], FrameStyle -> Directive[White, AbsoluteThickness[1.1]]] &)], Right]]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"22\" data-out-n=\"148\" data-sub-idx=\"5\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"73\" data-sub-start=\"14\" data-sub-end=\"34\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[148]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_vw0qw78k283q.svg\" src=\"img/EAB_DCT_analysis/wl_vw0qw78k283q.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Fit every concentration spectrum to  Rs + [Cdl || (Rct + CPE)] *)\ncpeResults = <|\"File\" -> #File,\n   \"Fit\" -> CPEFit`FitCPE[#Spec[\"FreqHz\"], #Spec[\"ZData\"]]|> & /@ concGoodSpecs;\n\n(* electron-transfer rate proxy  k_et = 1/(Q Rct)  per spectrum, by electrode\n   (drop 0 uM so it can go on a log concentration axis) *)\ncpeConcUM[lbl_] := ToExpression @ First[StringCases[lbl, d : NumberString ~~ \" \\[Mu]M\" :> d], \"0\"];\nketByElectrode = Table[\n  Module[{subs},\n    subs = Select[cpeResults, StringStartsQ[#File, e] &];\n    Select[Transpose[{cpeConcUM /@ subs[[All, \"File\"]],\n                      1./(#Fit[\"Q\"] #Fit[\"Rct\"]) & /@ subs}], First[#] > 0 &]],\n  {e, concElectrodes}];\n\nModule[{eCols, allC, allK, cR, kR},\n  eCols = Directive[ColorData[97][#], AbsoluteThickness[1.8]] & /@ Range[Length[concElectrodes]];\n  allC  = Flatten[ketByElectrode[[All, All, 1]]];\n  allK  = Flatten[ketByElectrode[[All, All, 2]]];\n  cR = MinMax[allC]; kR = MinMax[allK];\n  ListLinePlot[ketByElectrode,\n    ScalingFunctions -> {\"Log10\", \"Log10\"}, Joined -> False,\n    PlotMarkers -> {Automatic, 10}, PlotStyle -> eCols,\n    Frame -> True, Axes -> False, Background -> GrayLevel[0.12],\n    FrameStyle -> Directive[White, AbsoluteThickness[1.1]],\n    FrameTicks -> {{DCTPlots`ThemeLogTicks[kR[[1]], kR[[2]], White], None},\n                   {DCTPlots`ThemeLogTicks[cR[[1]], cR[[2]], White], None}},\n    FrameTicksStyle -> Directive[White, 12],\n    LabelStyle -> Directive[White, 14, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"[Vancomycin] (\\[Mu]M)\", 14, White],\n                   Style[\"k_et = 1/(Q R_ct)  (1/s)\", 14, White]},\n    ImageSize -> 540, AspectRatio -> 0.72, PlotRangePadding -> Scaled[0.06],\n    PlotLegends -> Placed[LineLegend[eCols, concElectrodes,\n      LabelStyle -> Directive[White, 12], Background -> GrayLevel[0.12],\n      LegendFunction -> (Framed[#, Background -> GrayLevel[0.12], FrameStyle -> Directive[White, AbsoluteThickness[1.1]]] &)], Right]]\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "5bc6db58-e5c2-46e9-9073-3cc72e18c813"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* CPE-model reconstruction residuals, all concentration spectra overlaid\n   (directly comparable to the DCT residuals in 4a.4) *)\nDCTPlots`PlotResiduals[cpeResults[[All, \"Fit\"]]]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"23\" data-out-n=\"149\" data-sub-idx=\"1\" data-output-format=\"SVG\" data-output-is-graphics=\"1\" data-cell-idx=\"74\" data-sub-start=\"2\" data-sub-end=\"2\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[149]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_1udmsk76owc7n.svg\" src=\"img/EAB_DCT_analysis/wl_1udmsk76owc7n.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* CPE-model reconstruction residuals, all concentration spectra overlaid\n   (directly comparable to the DCT residuals in 4a.4) *)\nDCTPlots`PlotResiduals[cpeResults[[All, \"Fit\"]]]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "439855eb-4ee2-495e-b07e-2f5c3e3c321e"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 5c. DCT vs CPE comparison\n\nDCT (regularised g(k) inversion, resolving two k-peaks) vs the CPE circuit (unregularised, 5 free parameters, a single faradaic relaxation) on the **same** concentration spectra. Below: per-spectrum R_s, C_dl, and reconstruction error from each method. The DCT minimises *misfit + λ·roughness* — it trades fit quality for a smooth physical distribution — so a slightly lower CPE residual is expected and is not by itself evidence the CPE is the better model.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* DCT (regularised g(k) inversion) vs CPE (5-param circuit), same spectra *)\ndctRelResid[s_] := Sqrt[Mean[Abs[(s[\"ZFit\"] - s[\"ZData\"]) / s[\"ZData\"]]^2]];\ndctR = dctRelResid[#[\"Spec\"]] & /@ concGoodSpecs;\ncpeR = #[\"Fit\"][\"RelResid\"] & /@ cpeResults;\n\nPrint[Style[Row[{\"Median reconstruction error:   DCT = \",\n   NumberForm[100 Median[dctR], {4, 2}], \" %      CPE = \",\n   NumberForm[100 Median[cpeR], {4, 2}], \" %\"}], 14, Bold]];\nPrint[Row[{\"CPE lower-error on \",\n   Count[Transpose[{dctR, cpeR}], {a_, b_} /; b < a], \" of \", Length[dctR], \" spectra.\"}]];\n\nGrid[Prepend[\n  MapThread[\n    {#1[\"File\"], #1[\"Spec\"][\"Rs\"], #2[\"Fit\"][\"Rs\"],\n     #1[\"Spec\"][\"C0\"] 1.*^9, #2[\"Fit\"][\"Cdl\"] 1.*^9,\n     100. dctRelResid[#1[\"Spec\"]], 100. #2[\"Fit\"][\"RelResid\"]} &,\n    {concGoodSpecs, cpeResults}] /. x_?NumericQ :> NumberForm[N[x], 4],\n  Style[#, Bold] & /@ {\"Spectrum\", \"Rs DCT\", \"Rs CPE\", \"Cdl DCT (nF)\", \"Cdl CPE (nF)\", \"resid DCT %\", \"resid CPE %\"}],\n  Frame -> All, Alignment -> {{Left, Right, Right, Right, Right, Right, Right}},\n  Spacings -> {1.2, 0.35}, BaseStyle -> 10]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbuqp-q1plmb9\" data-page-width-em=\"106\" data-latex-b64=\"XG1hdGhiZntcdGV4dHtNZWRpYW4gcmVjb25zdHJ1Y3Rpb24gZXJyb3I6ICAgRENUID0gfVx0ZXh0ezIuMTB9XHRleHR7IFwlICAgICAgQ1BFID0gfVx0ZXh0ezEuMjJ9XHRleHR7IFwlfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8056em;vertical-align:-0.0556em;\"></span><span class=\"mord\"><span class=\"mord text\"><span class=\"mord\">Median reconstruction error: DCT = </span></span><span class=\"mord text\"><span class=\"mord\">2.10</span></span><span class=\"mord text\"><span class=\"mord\"> % CPE = </span></span><span class=\"mord text\"><span class=\"mord\">1.22</span></span><span class=\"mord text\"><span class=\"mord\"> %</span></span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "21985ed6-9928-4d8f-b243-8699918dc918"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dbuqu-0m14pu4\" data-page-width-em=\"106\" data-latex-b64=\"XHRleHR7Q1BFIGxvd2VyLWVycm9yIG9uIH0zOVx0ZXh0eyBvZiB9MzlcdGV4dHsgc3BlY3RyYS59\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\"><span class=\"mord\">CPE lower-error on </span></span><span class=\"mord\">39</span><span class=\"mord text\"><span class=\"mord\"> of </span></span><span class=\"mord\">39</span><span class=\"mord text\"><span class=\"mord\"> spectra.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "2bc77cb9-776a-4047-8a5c-2b5477fafe6c"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"932633\" data-output-id=\"24\" data-out-n=\"155\" data-sub-idx=\"6\" data-output-format=\"SVGT\" data-output-is-graphics=\"0\" data-cell-idx=\"76\" data-sub-start=\"11\" data-sub-end=\"19\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[155]=</span></div><div class=\"wl-output-content\"><img class=\"vscode-wolfram-png-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\EAB_DCT_analysis\\wl_634mgygzbroo.png\" src=\"img/EAB_DCT_analysis/wl_634mgygzbroo.png\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      }
+     ],
+     "id": "f14f6466-b3f5-4509-874e-815431c2f0c2"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### 5d. Two-relaxation model discrimination\n\nDoes the impedance actually require **two** faradaic relaxations? Each spectrum is refit to **Rs + [C_DL || (Rct1+CPE1) || (Rct2+CPE2)]** (`CPEFit`FitCPE2`) and compared to the single branch by a nested-model **F-test** (5 vs 8 parameters). If the second branch is real, the residual drops far beyond chance and two stable, distinct rates k_et = 1/(Q·Rct) emerge — one slow, one fast — whose amplitudes Y0 = Q redistribute with [vancomycin]. Spectra where a branch runs past the measurement band (k_et outside 5–3000 /s) are dropped as unresolved.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Refit each concentration spectrum with TWO faradaic branches and compare to\n   the single branch by an F-test (nested models, 5 vs 8 parameters). *)\ncpe2Conc[lbl_] := ToExpression @ First[StringCases[lbl, d : NumberString ~~ \" \\[Mu]M\" :> d], \"0\"];\ncpe2Results = <|\"Elec\" -> StringTake[#File, 2], \"Conc\" -> cpe2Conc[#File],\n   \"Fit1\" -> CPEFit`FitCPE[#Spec[\"FreqHz\"], #Spec[\"ZData\"]],\n   \"Fit2\" -> CPEFit`FitCPE2[#Spec[\"FreqHz\"], #Spec[\"ZData\"]]|> & /@ concGoodSpecs;\n(* keep spectra where both rates are resolvable within the band (5..3000 /s) *)\ncpe2Good = Select[cpe2Results, 5. < #Fit2[\"ket1\"] < 3000. && 5. < #Fit2[\"ket2\"] < 3000. &];\n\nModule[{fOf, fVals, df2},\n  fOf[r_] := Module[{n}, n = 2 Length[r[\"Fit1\"][\"FreqHz\"]];\n    ((r[\"Fit1\"][\"ChiSq\"] - r[\"Fit2\"][\"ChiSq\"]) / 3) / (r[\"Fit2\"][\"ChiSq\"] / (n - 8))];\n  fVals = fOf /@ cpe2Good;\n  df2 = 2 Length[concGoodSpecs[[1, \"Spec\"]][\"FreqHz\"]] - 8;\n  Print[Style[Row[{\"Median residual:   single-branch = \",\n     NumberForm[100 Median[#Fit1[\"RelResid\"] & /@ cpe2Good], {3, 2}], \" %       two-branch = \",\n     NumberForm[100 Median[#Fit2[\"RelResid\"] & /@ cpe2Good], {3, 2}], \" %\"}], Bold, 13]];\n  Print[Row[{\"Median F(3, \", df2, \") = \", NumberForm[Median[fVals], {6, 1}],\n     \"   vs  F_crit(p=0.001) \\[TildeEqual] \", NumberForm[Quantile[FRatioDistribution[3, df2], 0.999], {4, 1}],\n     \"   \\[Rule]  second relaxation justified in \", Length[cpe2Good], \"/\", Length[cpe2Results], \" spectra\"}]]\n];\n\n(* theme-aware diagnostic plots: dark on screen, white in the export block *)\ncpe2Cols = {RGBColor[0.30, 0.45, 0.95], RGBColor[0.95, 0.55, 0.15]};\ncpe2Sty[fg_, bg_] := Sequence[Frame -> True, Axes -> False, Background -> bg, PlotTheme -> \"Default\",\n   FrameStyle -> Directive[fg, AbsoluteThickness[1.1]], FrameTicksStyle -> Directive[fg, 12],\n   LabelStyle -> Directive[fg, 14, FontFamily -> \"Arial\"], ImageSize -> 520, AspectRatio -> 0.7,\n   PlotRangePadding -> Scaled[0.05]];\n\ncpe2KetPlot[] := Module[{pub, fg, bg, slow, fast},\n  pub = (DCTPlots`$DCTTheme === \"Publication\"); fg = If[pub, Black, White]; bg = If[pub, White, GrayLevel[0.12]];\n  slow = {#Conc, #Fit2[\"ket1\"]} & /@ cpe2Good;  fast = {#Conc, #Fit2[\"ket2\"]} & /@ cpe2Good;\n  ListPlot[{slow, fast}, ScalingFunctions -> {None, \"Log10\"},\n    PlotStyle -> (Directive[#, PointSize[0.02]] & /@ cpe2Cols), cpe2Sty[fg, bg],\n    FrameLabel -> {Style[\"[Vancomycin] (\\[Mu]M)\", 14, fg], Style[\"k_et = 1/(Q R_ct)  (1/s)\", 14, fg]},\n    PlotLegends -> Placed[PointLegend[cpe2Cols, {\"slow\", \"fast\"}, LabelStyle -> Directive[fg, 12]], {0.82, 0.5}]]];\n\ncpe2Y0Plot[] := Module[{pub, fg, bg, slow, fast},\n  pub = (DCTPlots`$DCTTheme === \"Publication\"); fg = If[pub, Black, White]; bg = If[pub, White, GrayLevel[0.12]];\n  slow = {#Conc, #Fit2[\"Q1\"]} & /@ cpe2Good;  fast = {#Conc, #Fit2[\"Q2\"]} & /@ cpe2Good;\n  ListPlot[{slow, fast}, ScalingFunctions -> {None, \"Log10\"},\n    PlotStyle -> (Directive[#, PointSize[0.02]] & /@ cpe2Cols), cpe2Sty[fg, bg],\n    FrameLabel -> {Style[\"[Vancomycin] (\\[Mu]M)\", 14, fg], Style[\"Y0 = Q  (S s^n)\", 14, fg]},\n    PlotLegends -> Placed[PointLegend[cpe2Cols, {\"slow\", \"fast\"}, LabelStyle -> Directive[fg, 12]], {0.82, 0.5}]]];\n\ncpe2RatioPlot[] := Module[{pub, fg, bg, elecs, eCols, byE},\n  pub = (DCTPlots`$DCTTheme === \"Publication\"); fg = If[pub, Black, White]; bg = If[pub, White, GrayLevel[0.12]];\n  elecs = concElectrodes; eCols = ColorData[97] /@ Range[Length[elecs]];\n  byE = Table[SortBy[{#Conc, #Fit2[\"Q2\"]/(#Fit2[\"Q1\"] + #Fit2[\"Q2\"])} & /@ Select[cpe2Good, #Elec === e &], First], {e, elecs}];\n  ListLinePlot[byE, Joined -> False, PlotMarkers -> {Automatic, 12},\n    PlotStyle -> (Directive[#, AbsoluteThickness[1.5]] & /@ eCols), cpe2Sty[fg, bg],\n    FrameLabel -> {Style[\"[Vancomycin] (\\[Mu]M)\", 14, fg], Style[\"Y0_fast / (Y0_fast + Y0_slow)\", 14, fg]},\n    PlotRange -> {Automatic, {0, 1}},\n    PlotLegends -> Placed[PointLegend[eCols, elecs, LabelStyle -> Directive[fg, 12]], Right]]];\n\n\"5d two-branch fits + plot functions defined\"",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* 5d.1  electron-transfer rates: two stable, distinct bands vs [vancomycin] *)\ncpe2KetPlot[]",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* 5d.2  CPE amplitudes Y0 = Q: slow shrinks, fast grows with [vancomycin] *)\ncpe2Y0Plot[]",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* 5d.3  fast-population fraction Y0_fast/(Y0_fast+Y0_slow) — the binding isotherm *)\ncpe2RatioPlot[]",
+   "languageId": "wolfram",
+   "outputs": [],
    "metadata": {}
   },
   {
@@ -1170,23 +1304,30 @@
   },
   {
    "kind": 2,
-   "value": "exportFigure = True; (* set to True to export all figures as PDF + PNG *)\n\nIf[exportFigure,\n  figDir = FileNameJoin[{DirectoryName[dataDir], \"figures\"}];\n  If[!DirectoryQ[figDir], CreateDirectory[figDir]];\n  Print[\"Saving to: \", figDir];\n\n  (* PDF = vector (for LaTeX / print); PNG = 300 dpi raster (paste into Google\n     Docs / Slides \\[Dash] those don't accept PDF or SVG natively). *)\n  exportFig[fig_, name_] := (\n    Export[FileNameJoin[{figDir, name <> \".pdf\"}], fig];\n    Export[FileNameJoin[{figDir, name <> \".png\"}], fig, ImageResolution -> 300];\n    Print[\"\\[Checkmark] \", name]\n  );\n\n  (* Figures in notebook order, Publication theme (white). *)\n  Block[{DCTPlots`$DCTTheme = \"Publication\"},\n\n    (* Method validation \\[Dash] synthetic recovery: figure + parameter table *)\n    If[ValueQ[simRec],\n      exportFig[DCTPlots`PlotCombValidation[simK, gSim, simRec], \"validation_comb\"]];\n    If[ValueQ[validationTable],\n      exportFig[validationTable, \"validation_table\"]];\n\n    (* Section 1 \\[Dash] Lin-KK residuals *)\n    exportFig[DCTPlots`PlotKKResiduals[kkRep], \"drift_kkResiduals\"];\n\n    (* 4a.1 \\[Dash] drift g(k): E1, hour-mark legend, nF/decade *)\n    exportFig[DCTPlots`PlotGK[e1Specs, DCTPlots`HourMarkLabels[e1Specs], \"GScale\" -> 1*^9],\n      \"drift_gK\"];\n\n    (* 4a.5 \\[Dash] Rs and C0 vs time, aligned time axes *)\n    exportFig[\n      Column[{\n        DCTPlots`PlotRsVsTime[goodSpecs, ImagePadding -> {{85, 20}, {38, 8}}],\n        DCTPlots`PlotC0VsTime[goodSpecs, ImagePadding -> {{85, 20}, {38, 8}}]\n      }, Alignment -> Left, Spacings -> 1],\n      \"drift_RsC0\"];\n\n    (* 4a.7 \\[Dash] k_peak vs time, per k-range *)\n    exportFig[DCTPlots`PlotKPeakVsTime[goodSpecs, kPeakRanges], \"drift_kPeak\"];\n\n    (* One g(k) heatmap per electrode, titled (rasterised \\[Dash] 100s of columns) *)\n    KeyValueMap[\n      (exportFig[\n         Rasterize[DCTPlots`PlotDCTHeatmap[#2, PlotLabel -> Style[#1, 18]],\n           ImageResolution -> 300],\n         \"drift_heatmap_\" <> #1] &),\n      GroupBy[goodSpecs, FileNameTake[#[\"File\"], {-2}] &]\n    ];\n\n    (* Section 5 \\[Dash] concentration g(k): E1, area-normalised *)\n    If[ValueQ[concE1] && Length[concE1] > 0,\n      exportFig[DCTPlots`PlotGK[concE1, Automatic, \"AreaNorm\" -> True], \"conc_gK\"]];\n\n    (* 5a.2 \\[Dash] fraction folded vs [ligand], linear, with 3/4-state model fits *)\n    If[ValueQ[fitResult] && ValueQ[ffPerElectrode],\n      exportFig[biophysLinearPlot[], \"biophys_linear\"]];\n  ];\n\n  Print[Style[\"Export done.\", Bold, Darker[Green]]],\n\n  Print[Style[\"exportFigure = False \\[Dash] set to True to export.\", Italic, GrayLevel[0.6]]]\n]",
+   "value": "exportFigure = True; (* set to True to export all figures as PDF + PNG *)\n\nIf[exportFigure,\n  figDir = FileNameJoin[{DirectoryName[dataDir], \"figures\"}];\n  If[!DirectoryQ[figDir], CreateDirectory[figDir]];\n  Print[\"Saving to: \", figDir];\n\n  (* PDF = vector (for LaTeX / print); PNG = 300 dpi raster (paste into Google\n     Docs / Slides \\[Dash] those don't accept PDF or SVG natively). *)\n  exportFig[fig_, name_] := (\n    Export[FileNameJoin[{figDir, name <> \".pdf\"}], fig];\n    Export[FileNameJoin[{figDir, name <> \".png\"}], fig, ImageResolution -> 300];\n    Print[\"\\[Checkmark] \", name]\n  );\n\n  (* Figures in notebook order, Publication theme (white). *)\n  Block[{DCTPlots`$DCTTheme = \"Publication\"},\n\n    (* Method validation \\[Dash] synthetic recovery: figure + parameter table *)\n    If[ValueQ[simRec],\n      exportFig[DCTPlots`PlotCombValidation[simK, gSim, simRec], \"validation_comb\"]];\n    If[ValueQ[validationTable],\n      exportFig[validationTable, \"validation_table\"]];\n\n    (* Section 1 \\[Dash] Lin-KK residuals *)\n    exportFig[DCTPlots`PlotKKResiduals[kkRep], \"drift_kkResiduals\"];\n\n    (* Section 1 \\[Dash] admittance-variance power law (fMin determination, SI) *)\n    If[ValueQ[driftStats],\n      exportFig[DCTPlots`PlotVariancePowerLaw[driftStats, fMinHz, fMaxHz], \"drift_variancePowerLaw\"]];\n\n    (* 4a.1 \\[Dash] drift g(k): E1, hour-mark legend, nF/decade *)\n    exportFig[DCTPlots`PlotGK[e1Specs, DCTPlots`HourMarkLabels[e1Specs], \"GScale\" -> 1*^9],\n      \"drift_gK\"];\n\n    (* 4a.4 \\[Dash] reconstruction residuals, all spectra overlaid (SI accuracy figure) *)\n    exportFig[DCTPlots`PlotResiduals[goodSpecs[[All, \"Spec\"]]], \"drift_residuals\"];\n\n    (* 4a.5 \\[Dash] Rs and C0 vs time, aligned time axes *)\n    exportFig[\n      Column[{\n        DCTPlots`PlotRsVsTime[goodSpecs, ImagePadding -> {{85, 20}, {38, 8}}],\n        DCTPlots`PlotC0VsTime[goodSpecs, ImagePadding -> {{85, 20}, {38, 8}}]\n      }, Alignment -> Left, Spacings -> 1],\n      \"drift_RsC0\"];\n\n    (* 4a.7 \\[Dash] k_peak vs time, per k-range *)\n    exportFig[DCTPlots`PlotKPeakVsTime[goodSpecs, kPeakRanges], \"drift_kPeak\"];\n\n    (* One g(k) heatmap per electrode, titled (rasterised \\[Dash] 100s of columns) *)\n    KeyValueMap[\n      (exportFig[\n         Rasterize[DCTPlots`PlotDCTHeatmap[#2, PlotLabel -> Style[#1, 18]],\n           ImageResolution -> 300],\n         \"drift_heatmap_\" <> #1] &),\n      GroupBy[goodSpecs, FileNameTake[#[\"File\"], {-2}] &]\n    ];\n\n    (* Section 5 \\[Dash] concentration g(k): E1, area-normalised *)\n    If[ValueQ[concE1] && Length[concE1] > 0,\n      exportFig[DCTPlots`PlotGK[concE1, Automatic, \"AreaNorm\" -> True], \"conc_gK\"]];\n\n    (* 5a.2 \\[Dash] fraction folded vs [vancomycin], linear, with 3/4-state model fits *)\n    If[ValueQ[fitResult] && ValueQ[ffPerElectrode],\n      exportFig[biophysLinearPlot[], \"biophys_linear\"]];\n\n    (* 5d \\[Dash] two-relaxation discrimination: k_et, Y0, fast-fraction vs conc *)\n    If[ValueQ[cpe2Good] && Length[cpe2Good] > 0,\n      exportFig[cpe2KetPlot[], \"cpe2_ket\"];\n      exportFig[cpe2Y0Plot[], \"cpe2_y0\"];\n      exportFig[cpe2RatioPlot[], \"cpe2_ratio\"]];\n  ];\n\n  Print[Style[\"Export done.\", Bold, Darker[Green]]],\n\n  Print[Style[\"exportFigure = False \\[Dash] set to True to export.\", Italic, GrayLevel[0.6]]]\n]",
    "languageId": "wolfram",
    "outputs": [
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Saving to: </span><span class=\"wl-ps\">c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\figures</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">validation_comb</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">validation_table</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_kkResiduals</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_gK</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_RsC0</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_kPeak</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_heatmap_E1</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_heatmap_E2</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_heatmap_E3</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">conc_gK</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">biophys_linear</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9ag8r8-ug9orlq\" data-page-width-em=\"51\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0V4cG9ydCBkb25lLn19fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Export done.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Saving to: </span><span class=\"wl-ps\">c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\figures</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">validation_comb</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">validation_table</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_kkResiduals</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_variancePowerLaw</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_gK</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_residuals</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_RsC0</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_kPeak</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_heatmap_E1</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_heatmap_E2</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">drift_heatmap_E3</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">conc_gK</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">✓ </span><span class=\"wl-ps\">biophys_linear</span></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq9dcy4b-cqh0y7b\" data-page-width-em=\"107\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e0V4cG9ydCBkb25lLn19fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">Export done.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
-       "data": "Print: Saving to:c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\figures✓validation_comb✓validation_table✓drift_kkResiduals✓drift_gK✓drift_RsC0✓drift_kPeak✓drift_heatmap_E1✓drift_heatmap_E2✓drift_heatmap_E3✓conc_gK✓biophys_linear[formula]",
+       "data": "Print: Saving to:c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\data\\\\figures✓validation_comb✓validation_table✓drift_kkResiduals✓drift_variancePowerLaw✓drift_gK✓drift_residuals✓drift_RsC0✓drift_kPeak✓drift_heatmap_E1✓drift_heatmap_E2✓drift_heatmap_E3✓conc_gK✓biophys_linear[formula]",
        "mime": "text/plain"
       }
      ],
-     "id": "e422524f-93ec-4668-bfee-8203b88df840"
+     "id": "202dca45-1d53-4050-a47c-689a948a1e4c"
     }
    ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "",
+   "languageId": "wolfram",
+   "outputs": [],
    "metadata": {}
   }
  ],

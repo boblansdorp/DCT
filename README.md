@@ -102,7 +102,9 @@ DCT/
 │   ├── PeakAnalysis.wl     — peak-finding, spectrum integration
 │   └── Sensitivity.wl      — lambda / freq-range / weight-power sweeps
 ├── plots/                  — all plot functions (theme-aware: dark + publication)
-│   └── vendor/CustomTicks/ — vendored outward-tick library (MIT; see Acknowledgments)
+│   └── vendor/CustomTicks/ — vendored tick library, retained (MIT); no longer on the
+│                              active path — ThemeLogTicks/ThemeLinTicks in PlotTheme.wl
+│                              now generate outward ticks self-contained (see Acknowledgments)
 ├── tests/
 │   ├── TestDataImport.wl
 │   ├── TestNNLS.wl
@@ -212,9 +214,12 @@ All tests should report 0 failures. Plot/tick regression tests live in
 
 ## Acknowledgments / third-party code
 
-- **CustomTicks** — outward, log-aware tick generation, vendored under
+- **CustomTicks** — log-aware tick generation, vendored under
   `plots/vendor/CustomTicks/`. © 2021 Mark A. Caprio, MIT License (full text in
-  `plots/vendor/CustomTicks/LICENSE.md`). Part of the LevelScheme package.
+  `plots/vendor/CustomTicks/LICENSE.md`). Part of the LevelScheme package. Retained
+  for reference; the live plots now use native `ListLogLinearPlot`/`ListLogLogPlot`
+  with self-contained outward-tick generators (`plots/PlotTheme.wl`), so CustomTicks
+  is no longer loaded.
 - **NNLS** (`core/NNLSFit.wl`) — adapted from **Michael Woodhams's** Mathematica
   implementation of the **Lawson–Hanson** active-set algorithm (Lawson & Hanson,
   *Solving Least Squares Problems*, Prentice-Hall 1974 / SIAM 1995), posted to

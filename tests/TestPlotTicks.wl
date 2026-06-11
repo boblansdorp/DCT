@@ -1,8 +1,8 @@
 (* ::Package:: *)
 
-(* Structural tests for DCTPlots`ThemeLogTicks / ThemeLinTicks — thin,
-   theme-coloured wrappers over CustomTicks (outward ticks). Assertions only;
-   the visual dark-vs-publication comparison lives in runTests.wb cells. *)
+(* Structural tests for DCTPlots`ThemeLogTicks / ThemeLinTicks — self-contained
+   theme-coloured outward-tick generators. Assertions only; the visual
+   dark-vs-publication comparison lives in runTests.wb cells. *)
 
 Needs["DCTPlots`"]
 

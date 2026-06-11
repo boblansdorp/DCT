@@ -56,10 +56,10 @@ PlotCV[stats_Association, cvThresh : (_?NumericQ) : 0.1,
   cvLineStyle  = Directive[ColorData["Rainbow"][0.55], AbsoluteThickness[2.2]];
   threshStyle  = Directive[Red, Dashed, AbsoluteThickness[1.8]];
 
-  ListLinePlot[
+  ListLogLinearPlot[
     {cvPairs, threshPair},
     plotOpts,
-    ScalingFunctions  -> {"Log10", None},
+    Joined            -> True,
     PlotStyle         -> {cvLineStyle, threshStyle},
     Sequence @@ ThemeChrome[th, 14, 1.2],
     FrameTicks        -> {{ThemeLinTicks[0., yMax, fg], None},

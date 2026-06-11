@@ -51,11 +51,11 @@ PlotLCurve[lCurveData_List, labels : (_List | None) : None,
   yLo  = If[ymaj === {}, yR[[1]], ymaj[[1]]  - dy];
   yHi  = If[ymaj === {}, yR[[2]], ymaj[[-1]] + dy];
 
-  (* point labels: x in Log10 (scaled) coords, y in linear (real) coords *)
+  (* point labels: native log-x plot places them in real-value coords *)
   pointLabels = If[labels === None, {},
     MapThread[
       Style[Text[FileNameTake[ToString[#2]],
-        {Log10[#1[[1]]], #1[[2]]}, {-1.3, 0.5}], fg, 10] &,
+        {#1[[1]], #1[[2]]}, {-1.3, 0.5}], fg, 10] &,
       {lCurveData, labels}]
   ];
 
@@ -65,10 +65,9 @@ PlotLCurve[lCurveData_List, labels : (_List | None) : None,
      Style[Text["better fit \[RightArrow]", Scaled[{0.88, 0.05}], { 1, -1}], Gray, 11]}
   ];
 
-  ListLinePlot[
+  ListLogLinearPlot[
     lCurveData,
     plotOpts,
-    ScalingFunctions -> {"Log10", None},
     Joined           -> True,
     PlotStyle        -> Directive[fg, Opacity[0.6], AbsoluteThickness[1.5]],
     PlotMarkers      -> {Graphics[{fg, Disk[{0, 0}, 1]}], 0.03},
@@ -120,11 +119,11 @@ PlotLambdaResiduals[lSweepSpecs_List, opts : OptionsPattern[]] := Module[
   magMax       = Max[Flatten[magTraces[[All, All, 2]]]] * 1.05;
   {phMin, phMax} = MinMax[Flatten[phaseTraces[[All, All, 2]]]];
 
-  panel[traces_, yLabel_, yLo_, yHi_] := ListLinePlot[
+  panel[traces_, yLabel_, yLo_, yHi_] := ListLogLinearPlot[
     traces,
     plotOpts,
+    Joined           -> True,
     PlotStyle        -> styles,
-    ScalingFunctions -> {"Log10", None},
     Sequence @@ ThemeChrome[th, 13, 1.2],
     FrameTicks       -> {{ThemeLinTicks[yLo, yHi, fg], None},
                          {ThemeLogTicks[fMin, fMax, fg], None}},
