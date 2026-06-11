@@ -4,6 +4,14 @@
    Non-negative least squares: minimise ||A x - f||^2 subject to x >= 0.
    Uses the active-set / Lawson-Hanson algorithm with QR decomposition.
 
+   Adapted from the Mathematica implementation by Michael Woodhams, posted to
+   comp.soft-sys.math.mathematica (2 Oct 2003), of the Lawson & Hanson active-set
+   algorithm ("Solving Least Squares Problems", Prentice-Hall 1974; SIAM 1995).
+   Woodhams placed his code in the public domain and asks that his authorship be
+   acknowledged.
+     Original: https://groups.google.com/g/comp.soft-sys.math.mathematica/c/cHFiKQ8ssaI
+     Repost:   https://mathematica.stackexchange.com/questions/269727
+
    Public API:
      NNLS[A, f]  ->  x  (real vector, length = Dimensions[A][[2]])
 *)

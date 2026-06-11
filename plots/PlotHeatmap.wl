@@ -22,10 +22,14 @@ x-axis: time (hours), y-axis: k (s^-1, log scale), colour: g (F/decade)."
 
 Begin["`Private`"]
 
-$darkBg = GrayLevel[0.12];
+Options[PlotDCTHeatmap] = {Theme -> Automatic};
 
-PlotDCTHeatmap[goodSpecs_List, nK_ : 150, opts : OptionsPattern[]] := Module[
-  {nExp, kAllMin, kAllMax, kGrid, tHr, gGrid, pts, kMin, kMax},
+PlotDCTHeatmap[goodSpecs_List, nK_Integer : 150, opts : OptionsPattern[]] := Module[
+  {th, fg, plotOpts, nExp, kAllMin, kAllMax, kGrid, tHr, gGrid, pts, kMin, kMax},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListDensityPlot]];
 
   nExp = Length[goodSpecs];
   If[nExp == 0, Return[$Failed]];
@@ -61,30 +65,29 @@ PlotDCTHeatmap[goodSpecs_List, nK_ : 150, opts : OptionsPattern[]] := Module[
 
   ListDensityPlot[
     pts,
+    plotOpts,
     ScalingFunctions   -> {None, "Log10"},
     InterpolationOrder -> 0,
-    Frame              -> True,
-    Axes               -> False,
-    Background         -> $darkBg,
-    FrameStyle         -> Directive[White, AbsoluteThickness[1.2]],
-    LabelStyle         -> Directive[White, 14, FontFamily -> "Arial"],
+    Sequence @@ ThemeChrome[th, 14, 1.2],
+    FrameTicks         -> {{ThemeLogTicks[kMin, kMax, fg], None},
+                           {ThemeLinTicks[Min[tHr], Max[tHr], fg], None}},
+    FrameTicksStyle    -> Directive[fg, 13],
     FrameLabel         -> {
-      Style["Time (hours)", 15, White],
-      Style[Row[{"k (", Superscript["s", -1], ")"}], 15, White]
+      Style["Time (hours)", 15, fg],
+      Style[Row[{"k (", Superscript["s", -1], ")"}], 15, fg]
     },
     PlotLegends -> Placed[
       BarLegend[Automatic,
-        LegendLabel      -> Style["g (F/decade)", 12, White],
-        LabelStyle       -> Directive[12, White],
+        LegendLabel      -> Style["g (F/decade)", 12, fg],
+        LabelStyle       -> Directive[12, fg],
         LegendMarkerSize -> 200,
-        LegendFunction   -> (Framed[#, Background -> $darkBg,
-          FrameStyle -> Directive[White, AbsoluteThickness[0.5]]] &)
+        LegendFunction   -> (Framed[#, Background -> th["Bg"],
+          FrameStyle -> Directive[fg, AbsoluteThickness[0.5]]] &)
       ],
       Right
     ],
     PlotRangePadding -> Scaled[0.02],
-    ImageSize        -> 750,
-    opts
+    ImageSize        -> 750
   ]
 ]
 

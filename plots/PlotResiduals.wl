@@ -8,10 +8,8 @@
      PlotResidualPhase[spec]   |phase_data - phase_fit| in degrees vs f
      PlotResiduals[spec]       GraphicsGrid: magnitude + phase side by side
 
-   Default colour scheme is dark (white-on-dark) for wolfbook display.
-   For light-background export pass: Background->White,
-     FrameStyle->Directive[Black,AbsoluteThickness[1.1]],
-     LabelStyle->Directive[Black,14,FontFamily->"Arial"]
+   Theme-aware: default DCTPlots`$DCTTheme ("Dark" | "Publication"); override
+   one call with Theme -> "Publication". See plots/PlotTheme.wl.
 *)
 
 BeginPackage["DCTPlots`"]
@@ -30,43 +28,53 @@ residual panels side by side."
 
 Begin["`Private`"]
 
-$darkBg       = GrayLevel[0.12];
-resFrameStyle = Directive[White, AbsoluteThickness[1.1]];
-resLabelStyle = Directive[White, 14, FontFamily -> "Arial"];
-resStyle      = Directive[Lighter[Blue, 0.4], AbsoluteThickness[1.8]];
-resImageSize  = 420;
-resAspect     = 0.72;
+resStyle     = Directive[Lighter[Blue, 0.4], AbsoluteThickness[1.8]];  (* data colour *)
+resImageSize = 420;
+resAspect    = 0.72;
+
+Options[PlotResidualMag] = {Theme -> Automatic};
 
 PlotResidualMag[spec_Association, opts : OptionsPattern[]] := Module[
-  {freq, zData, zFit, pts},
+  {th, fg, plotOpts, freq, zData, zFit, pts, fMin, fMax},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
 
   freq  = spec["FreqHz"];
   zData = spec["ZData"];
   zFit  = spec["ZFit"];
   pts   = Transpose[{freq, Abs[(zData - zFit) / zData]}];
+  {fMin, fMax} = MinMax[freq];
 
-  ListLogLogPlot[
+  ListLinePlot[
     pts,
-    Joined     -> True,
-    PlotStyle  -> resStyle,
-    Frame      -> True,
-    Axes       -> False,
-    Background -> $darkBg,
-    FrameStyle -> resFrameStyle,
-    LabelStyle -> resLabelStyle,
-    FrameLabel -> {
-      Style["Frequency (Hz)", 14, White],
-      Style["|(Z_data - Z_fit)/Z_data|", 14, White]
+    plotOpts,
+    ScalingFunctions -> {"Log10", "Log10"},
+    Joined           -> True,
+    PlotStyle        -> resStyle,
+    Sequence @@ ThemeChrome[th, 14, 1.1],
+    FrameTicks       -> {{ThemeLogTicks[10.^-4, 1., fg], None},
+                         {ThemeLogTicks[fMin, fMax, fg], None}},
+    FrameTicksStyle  -> Directive[fg, 12],
+    FrameLabel       -> {
+      Style["Frequency (Hz)", 14, fg],
+      Style["|(Z_data - Z_fit)/Z_data|", 14, fg]
     },
     PlotRange   -> {All, {10^-4, 1}},
     AspectRatio -> resAspect,
-    ImageSize   -> resImageSize,
-    opts
+    ImageSize   -> resImageSize
   ]
 ]
 
+Options[PlotResidualPhase] = {Theme -> Automatic};
+
 PlotResidualPhase[spec_Association, opts : OptionsPattern[]] := Module[
-  {freq, zData, zFit, pts},
+  {th, fg, plotOpts, freq, zData, zFit, pts, fMin, fMax, yMax},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
 
   freq  = spec["FreqHz"];
   zData = spec["ZData"];
@@ -75,35 +83,41 @@ PlotResidualPhase[spec_Association, opts : OptionsPattern[]] := Module[
     freq,
     Abs[(180. / Pi) Arg /@ zData - (180. / Pi) Arg /@ zFit]
   }];
+  {fMin, fMax} = MinMax[freq];
+  yMax = Max[pts[[All, 2]]] * 1.05;
 
-  ListLogLinearPlot[
+  ListLinePlot[
     pts,
-    Joined     -> True,
-    PlotStyle  -> resStyle,
-    Frame      -> True,
-    Axes       -> False,
-    Background -> $darkBg,
-    FrameStyle -> resFrameStyle,
-    LabelStyle -> resLabelStyle,
-    FrameLabel -> {
-      Style["Frequency (Hz)", 14, White],
-      Style["|phase residual| (\[Degree])", 14, White]
+    plotOpts,
+    ScalingFunctions -> {"Log10", None},
+    Joined           -> True,
+    PlotStyle        -> resStyle,
+    Sequence @@ ThemeChrome[th, 14, 1.1],
+    FrameTicks       -> {{ThemeLinTicks[0., yMax, fg], None},
+                         {ThemeLogTicks[fMin, fMax, fg], None}},
+    FrameTicksStyle  -> Directive[fg, 12],
+    FrameLabel       -> {
+      Style["Frequency (Hz)", 14, fg],
+      Style["|phase residual| (\[Degree])", 14, fg]
     },
-    PlotRange   -> All,
+    PlotRange   -> {Automatic, {0, yMax}},
     AspectRatio -> resAspect,
-    ImageSize   -> resImageSize,
-    opts
+    ImageSize   -> resImageSize
   ]
 ]
 
-PlotResiduals[spec_Association, opts : OptionsPattern[]] :=
+Options[PlotResiduals] = {Theme -> Automatic};
+
+PlotResiduals[spec_Association, opts : OptionsPattern[]] := Module[
+  {th},
+  th = ThemeFromOpts[{opts}];
   GraphicsGrid[
-    {{PlotResidualMag[spec], PlotResidualPhase[spec]}},
+    {{PlotResidualMag[spec, Theme -> th], PlotResidualPhase[spec, Theme -> th]}},
     ImageSize  -> 900,
     Spacings   -> {0.5, 0.5},
-    Background -> $darkBg,
-    opts
+    Background -> th["Bg"]
   ]
+]
 
 End[]
 EndPackage[]

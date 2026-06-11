@@ -10,10 +10,9 @@
      PlotBodePhase[spec]        Bode phase: angle(Z) vs f (degrees)
      PlotBode[spec]             GraphicsGrid: magnitude + phase side by side
 
-   Default colour scheme is dark (white-on-dark) for wolfbook display.
-   For light-background export pass: Background->White,
-     FrameStyle->Directive[Black,AbsoluteThickness[1.1]],
-     LabelStyle->Directive[Black,14,FontFamily->"Arial"]
+   Theme-aware: default DCTPlots`$DCTTheme ("Dark" | "Publication"); override
+   one call with Theme -> "Publication". Log axes use ScalingFunctions so the
+   theme outward-tick generators apply.
 *)
 
 BeginPackage["DCTPlots`"]
@@ -33,116 +32,144 @@ PlotBode::usage =
 
 Begin["`Private`"]
 
-bodeLabelStyle = Directive[White, 14, FontFamily -> "Arial"];
-bodeFrameStyle = Directive[White, AbsoluteThickness[1.1]];
-bodeImageSize  = 420;
-bodeAspect     = 0.72;
-$darkBg        = GrayLevel[0.12];
-dataStyle      = Directive[White, Opacity[0.7], PointSize[0.012]];
-fitStyle       = Directive[Orange, AbsoluteThickness[2.]];
+bodeImageSize = 420;
+bodeAspect    = 0.72;
+fitStyle      = Directive[Orange, AbsoluteThickness[2.]];      (* data colour, theme-independent *)
+dataStyleFor[fg_] := Directive[fg, Opacity[0.7], PointSize[0.012]];
 
 (* ------------------------------------------------------------------ *)
 
+Options[PlotNyquist] = {Theme -> Automatic};
+
 PlotNyquist[spec_Association, opts : OptionsPattern[]] := Module[
-  {zData, zFit, dataPts, fitPts},
+  {th, fg, plotOpts, zData, zFit, dataPts, fitPts, xr, yr},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
 
   zData   = spec["ZData"];
   zFit    = spec["ZFit"];
   dataPts = Transpose[{Re[zData], -Im[zData]}];
   fitPts  = Transpose[{Re[zFit],  -Im[zFit]}];
+  xr      = MinMax[dataPts[[All, 1]]];
+  yr      = MinMax[dataPts[[All, 2]]];
 
   Show[
-    ListPlot[dataPts,
-      PlotStyle   -> dataStyle,
-      PlotMarkers -> {Automatic, 6}
-    ],
-    ListLinePlot[fitPts, PlotStyle -> fitStyle],
-    Frame      -> True,
-    Axes       -> False,
-    Background -> $darkBg,
-    FrameStyle -> bodeFrameStyle,
-    LabelStyle -> bodeLabelStyle,
-    FrameLabel -> {
-      Style["Re[Z] (\[CapitalOmega])", 14, White],
-      Style["-Im[Z] (\[CapitalOmega])", 14, White]
+    ListPlot[dataPts, PlotTheme -> "Default",
+      PlotStyle -> dataStyleFor[fg], PlotMarkers -> {Automatic, 6}],
+    ListLinePlot[fitPts, PlotTheme -> "Default", PlotStyle -> fitStyle],
+    plotOpts,
+    Sequence @@ ThemeChrome[th, 14, 1.1],
+    FrameTicks  -> {{ThemeLinTicks[yr[[1]], yr[[2]], fg], None},
+                    {ThemeLinTicks[xr[[1]], xr[[2]], fg], None}},
+    FrameTicksStyle -> Directive[fg, 12],
+    FrameLabel  -> {
+      Style["Re[Z] (\[CapitalOmega])", 14, fg],
+      Style["-Im[Z] (\[CapitalOmega])", 14, fg]
     },
     AspectRatio -> 1,
     ImageSize   -> bodeImageSize,
-    PlotRange   -> All,
-    opts
+    PlotRange   -> All
   ]
 ]
 
 (* ------------------------------------------------------------------ *)
 
+Options[PlotBodeMag] = {Theme -> Automatic};
+
 PlotBodeMag[spec_Association, opts : OptionsPattern[]] := Module[
-  {freq, zData, zFit, dataPts, fitPts},
+  {th, fg, plotOpts, freq, zData, zFit, dataPts, fitPts, fMin, fMax, zMin, zMax},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
 
   freq    = spec["FreqHz"];
   zData   = spec["ZData"];
   zFit    = spec["ZFit"];
   dataPts = Transpose[{freq, Abs[zData]}];
   fitPts  = Transpose[{freq, Abs[zFit]}];
+  {fMin, fMax} = MinMax[freq];
+  {zMin, zMax} = MinMax[Join[Abs[zData], Abs[zFit]]];
 
-  Show[
-    ListLogLogPlot[dataPts, PlotStyle -> dataStyle, Joined -> False],
-    ListLogLogPlot[fitPts,  PlotStyle -> fitStyle,  Joined -> True],
-    Frame      -> True,
-    Axes       -> False,
-    Background -> $darkBg,
-    FrameStyle -> bodeFrameStyle,
-    LabelStyle -> bodeLabelStyle,
-    FrameLabel -> {
-      Style["Frequency (Hz)", 14, White],
-      Style["|Z| (\[CapitalOmega])", 14, White]
+  (* single ListLinePlot (not Show) so FrameTicks positions stay in real coords
+     under ScalingFunctions: data series = markers, fit series = line *)
+  ListLinePlot[
+    {dataPts, fitPts},
+    plotOpts,
+    Joined           -> {False, True},
+    PlotMarkers      -> {{Automatic, 5}, None},
+    PlotStyle        -> {dataStyleFor[fg], fitStyle},
+    ScalingFunctions -> {"Log10", "Log10"},
+    Sequence @@ ThemeChrome[th, 14, 1.1],
+    FrameTicks  -> {{ThemeLogTicks[zMin, zMax, fg], None},
+                    {ThemeLogTicks[fMin, fMax, fg], None}},
+    FrameTicksStyle -> Directive[fg, 12],
+    FrameLabel  -> {
+      Style["Frequency (Hz)", 14, fg],
+      Style["|Z| (\[CapitalOmega])", 14, fg]
     },
     AspectRatio -> bodeAspect,
     ImageSize   -> bodeImageSize,
-    PlotRange   -> All,
-    opts
+    PlotRange   -> All
   ]
 ]
 
 (* ------------------------------------------------------------------ *)
 
+Options[PlotBodePhase] = {Theme -> Automatic};
+
 PlotBodePhase[spec_Association, opts : OptionsPattern[]] := Module[
-  {freq, zData, zFit, dataPts, fitPts},
+  {th, fg, plotOpts, freq, zData, zFit, dataPts, fitPts, fMin, fMax, pMin, pMax},
+
+  th       = ThemeFromOpts[{opts}];
+  fg       = th["Fg"];
+  plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
 
   freq    = spec["FreqHz"];
   zData   = spec["ZData"];
   zFit    = spec["ZFit"];
   dataPts = Transpose[{freq, (180. / Pi) Arg /@ zData}];
   fitPts  = Transpose[{freq, (180. / Pi) Arg /@ zFit}];
+  {fMin, fMax} = MinMax[freq];
+  {pMin, pMax} = MinMax[Join[dataPts[[All, 2]], fitPts[[All, 2]]]];
 
-  Show[
-    ListLogLinearPlot[dataPts, PlotStyle -> dataStyle, Joined -> False],
-    ListLogLinearPlot[fitPts,  PlotStyle -> fitStyle,  Joined -> True],
-    Frame      -> True,
-    Axes       -> False,
-    Background -> $darkBg,
-    FrameStyle -> bodeFrameStyle,
-    LabelStyle -> bodeLabelStyle,
-    FrameLabel -> {
-      Style["Frequency (Hz)", 14, White],
-      Style["Phase (\[Degree])", 14, White]
+  ListLinePlot[
+    {dataPts, fitPts},
+    plotOpts,
+    Joined           -> {False, True},
+    PlotMarkers      -> {{Automatic, 5}, None},
+    PlotStyle        -> {dataStyleFor[fg], fitStyle},
+    ScalingFunctions -> {"Log10", None},
+    Sequence @@ ThemeChrome[th, 14, 1.1],
+    FrameTicks  -> {{ThemeLinTicks[pMin, pMax, fg], None},
+                    {ThemeLogTicks[fMin, fMax, fg], None}},
+    FrameTicksStyle -> Directive[fg, 12],
+    FrameLabel  -> {
+      Style["Frequency (Hz)", 14, fg],
+      Style["Phase (\[Degree])", 14, fg]
     },
     AspectRatio -> bodeAspect,
     ImageSize   -> bodeImageSize,
-    PlotRange   -> All,
-    opts
+    PlotRange   -> All
   ]
 ]
 
 (* ------------------------------------------------------------------ *)
 
-PlotBode[spec_Association, opts : OptionsPattern[]] :=
+Options[PlotBode] = {Theme -> Automatic};
+
+PlotBode[spec_Association, opts : OptionsPattern[]] := Module[
+  {th},
+  th = ThemeFromOpts[{opts}];
   GraphicsGrid[
-    {{PlotBodeMag[spec], PlotBodePhase[spec]}},
+    {{PlotBodeMag[spec, Theme -> th], PlotBodePhase[spec, Theme -> th]}},
     ImageSize  -> 900,
     Spacings   -> {0.5, 0.5},
-    Background -> $darkBg,
-    opts
+    Background -> th["Bg"]
   ]
+]
 
 End[]
 EndPackage[]

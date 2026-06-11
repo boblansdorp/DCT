@@ -101,12 +101,14 @@ DCT/
 │   ├── Biophysics.wl       — 3-state/4-state aptamer folding model (symbolic + fitting)
 │   ├── PeakAnalysis.wl     — peak-finding, spectrum integration
 │   └── Sensitivity.wl      — lambda / freq-range / weight-power sweeps
-├── plots/                  — all plot functions (dark background, white-on-dark)
+├── plots/                  — all plot functions (theme-aware: dark + publication)
+│   └── vendor/CustomTicks/ — vendored outward-tick library (MIT; see Acknowledgments)
 ├── tests/
 │   ├── TestDataImport.wl
 │   ├── TestNNLS.wl
 │   ├── TestDCTKernel.wl
-│   └── TestDCTInversion.wl
+│   ├── TestDCTInversion.wl
+│   └── TestPlotTicks.wl    — outward-tick regression tests (run via runTests.wb)
 ├── data/
 │   ├── drift_03252026/     — long-term drift data (E1/, E2/, E3/ subdirs)
 │   └── spike/              — ligand titration data (E1_178uM.txt style names)
@@ -203,4 +205,20 @@ wolframscript -file tests/TestDCTKernel.wl
 wolframscript -file tests/TestDCTInversion.wl
 ```
 
-All tests should report 0 failures.
+All tests should report 0 failures. Plot/tick regression tests live in
+`tests/TestPlotTicks.wl` and are run from `runTests.wb`.
+
+---
+
+## Acknowledgments / third-party code
+
+- **CustomTicks** — outward, log-aware tick generation, vendored under
+  `plots/vendor/CustomTicks/`. © 2021 Mark A. Caprio, MIT License (full text in
+  `plots/vendor/CustomTicks/LICENSE.md`). Part of the LevelScheme package.
+- **NNLS** (`core/NNLSFit.wl`) — adapted from **Michael Woodhams's** Mathematica
+  implementation of the **Lawson–Hanson** active-set algorithm (Lawson & Hanson,
+  *Solving Least Squares Problems*, Prentice-Hall 1974 / SIAM 1995), posted to
+  comp.soft-sys.math.mathematica on 2 Oct 2003. Woodhams **placed the code in the
+  public domain** and asks that his authorship be acknowledged.
+  [Original thread](https://groups.google.com/g/comp.soft-sys.math.mathematica/c/cHFiKQ8ssaI)
+  · [Stack Exchange repost](https://mathematica.stackexchange.com/questions/269727).

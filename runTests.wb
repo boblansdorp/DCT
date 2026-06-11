@@ -15,7 +15,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq6b8x8h-a78go3v\" data-page-width-em=\"50\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5bpn-ujb328o\" data-page-width-em=\"51\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -23,7 +23,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "b14baea6-b6e9-41e5-97c5-0d5cdd36c1b1"
+     "id": "ceb16a4f-53e2-4acd-8f7c-17c580ee7072"
     }
    ],
    "metadata": {}
@@ -191,8 +191,7 @@
     }
    ],
    "metadata": {}
-  }
-  ,
+  },
   {
    "kind": 1,
    "value": "## DCT inversion (end-to-end)",
@@ -205,6 +204,75 @@
    "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestDCTInversion.wl\"]",
    "languageId": "wolfram",
    "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## Plot ticks\nStructural checks on `ThemeLogTicks` / `ThemeLinTicks` (outward ticks via vendored CustomTicks).",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestPlotTicks.wl\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fby-q1dxoeq\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMb2dUaWNrczogbGlzdCBvZiB3ZWxsLWZvcm1lZCBvdXR3YXJkIHRpY2tzfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLogTicks: list of well-formed outward ticks</span></span></span></span></span></span></div></div></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fcj-lrp5hum\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMb2dUaWNrczogaGFzIGJvdGggbWFqb3IgYW5kIG1pbm9yIHRpY2tzfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLogTicks: has both major and minor ticks</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fck-drs6ln5\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMb2dUaWNrczogYSBtYWpvciB0aWNrIHBlciBkZWNhZGUgKDEsIDEwLCAxMDAsIDEwMDApfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLogTicks: a major tick per decade (1, 10, 100, 1000)</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fcm-qv1dr4x\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMb2dUaWNrczogbWFqb3IgbGFiZWxzIGFyZSBTdHlsZVtcXywgQmxhY2tdIGJ5IGRlZmF1bHR9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1.06em;vertical-align:-0.31em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLogTicks: major labels are Style[_, Black] by default</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fco-vz9ycfd\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMb2dUaWNrczogY29sb3VyIGFyZyByZWNvbG91cnMgbGFiZWxzIChXaGl0ZSl9fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLogTicks: colour arg recolours labels (White)</span></span></span></span></span></span></div></div></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fdf-9f3op6a\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMaW5UaWNrczogbGlzdCBvZiB3ZWxsLWZvcm1lZCBvdXR3YXJkIHRpY2tzfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLinTicks: list of well-formed outward ticks</span></span></span></span></span></span></div></div></div></div><div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fdn-lfnf6rx\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMaW5UaWNrczogaGFzIGJvdGggbWFqb3IgYW5kIG1pbm9yIHRpY2tzfX0=\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLinTicks: has both major and minor ticks</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fdp-9j0gk0u\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJMgVGhlbWVMaW5UaWNrczogYWxsIHRpY2tzIHdpdGhpbiBbMCwgMV19fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:1em;vertical-align:-0.25em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✓ ThemeLinTicks: all ticks within [0, 1]</span></span></span></span></span></span></div></div></div><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fdq-zq9eakp\" data-page-width-em=\"52\" data-latex-b64=\"XG1hdGhiZntcdGV4dGNvbG9yeyMwMGZmMDB9e1x0ZXh0e1Bsb3RUaWNrczogOCBwYXNzZWQsIDAgZmFpbGVkLn19fQ==\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">PlotTicks: 8 passed, 0 failed.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula][formula][formula][formula][formula][formula][formula][formula][formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "b359f3a4-663c-42f9-b7d0-5c778e5558e3"
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"320\" data-out-n=\"3613\" data-sub-idx=\"0\" data-output-format=\"WLLatex\" data-output-is-graphics=\"0\" data-cell-idx=\"13\" data-sub-start=\"0\" data-sub-end=\"0\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[3613]=</span></div><div class=\"wl-output-content\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mq7m5fem-zulig69\" data-page-width-em=\"52\" data-latex-b64=\"XHRleHR7IkRDVFRlc3RzJFxncmF2ZXsgfSRQbG90VGlja3MkXGdyYXZleyB9JFByaXZhdGUkXGdyYXZleyB9JCJ9\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6944em;\"></span><span class=\"mord text\"><span class=\"mord\">&quot;DCTTests</span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"></span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">ˋ</span></span></span></span></span></span></span><span class=\"mord\">PlotTicks</span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"></span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">ˋ</span></span></span></span></span></span></span><span class=\"mord\">Private</span><span class=\"mord accent\"><span class=\"vlist-t\"><span class=\"vlist-r\"><span class=\"vlist\" style=\"height:0.6944em;\"><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"mord\"></span></span><span style=\"top:-3em;\"><span class=\"pstrut\" style=\"height:3em;\"></span><span class=\"accent-body\" style=\"left:-0.25em;\"><span class=\"mord\">ˋ</span></span></span></span></span></span></span><span class=\"mord\">&quot;</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Out[3613]= \\text{\"DCTTests$\\grave{ }$PlotTicks$\\grave{ }$Private$\\grave{ }$\"}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "75195a00-b3e6-42e2-9451-4b274f5cf2fe"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### PlotGK theme test\nSame `PlotGK` call rendered dark (default `$DCTTheme`) and `Theme -> \"Publication\"`. Synthetic g(k) spectra.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "Module[{mkSpec, specs},\n  mkSpec[file_, kPeak_, amp_] := Module[{tau, k, g},\n    tau = 10.^Range[-4., 0., 0.08]; k = 1./tau;\n    g = amp Exp[-((Log10[k] - Log10[kPeak])^2)/(2 0.3^2)];\n    <|\"File\" -> file, \"Spec\" -> <|\"Tau\" -> tau, \"g\" -> g|>|>];\n  specs = {\n    mkSpec[\"E1_10uM.txt\", 50., 1.0*^-6],\n    mkSpec[\"E1_100uM.txt\", 120., 1.3*^-6],\n    mkSpec[\"E1_500uM.txt\", 300., 0.9*^-6]};\n  Column[{\n    DCTPlots`PlotGK[specs],\n    DCTPlots`PlotGK[specs, DCTPlots`Theme -> \"Publication\"]\n  }, Spacings -> 2]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"319475\" data-output-id=\"321\" data-out-n=\"3614\" data-sub-idx=\"0\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"15\" data-sub-start=\"0\" data-sub-end=\"13\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[3614]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\Bob Lansdorp\\Documents\\DCT\\img\\runTests\\wl_17jpnqf0evm8i.svg\" src=\"img/runTests/wl_17jpnqf0evm8i.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\nModule[{mkSpec, specs},\n  mkSpec[file_, kPeak_, amp_] := Module[{tau, k, g},\n    tau = 10.^Range[-4., 0., 0.08]; k = 1./tau;\n    g = amp Exp[-((Log10[k] - Log10[kPeak])^2)/(2 0.3^2)];\n    <|\"File\" -> file, \"Spec\" -> <|\"Tau\" -> tau, \"g\" -> g|>|>];\n  specs = {\n    mkSpec[\"E1_10uM.txt\", 50., 1.0*^-6],\n    mkSpec[\"E1_100uM.txt\", 120., 1.3*^-6],\n    mkSpec[\"E1_500uM.txt\", 300., 0.9*^-6]};\n  Column[{\n    DCTPlots`PlotGK[specs],\n    DCTPlots`PlotGK[specs, DCTPlots`Theme -> \"Publication\"]\n  }, Spacings -> 2]\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "1ae2a05a-e1e5-4a2d-ab32-6d8fe8a13786"
+    }
+   ],
    "metadata": {}
   }
  ],

@@ -11,10 +11,8 @@
      PlotKPeakVsTime[goodSpecs]   dominant peak rate k vs time
      PlotTimeSeries[goodSpecs]    GraphicsGrid with all three panels
 
-   Default colour scheme is dark (white-on-dark) for wolfbook display.
-   For light-background export pass: Background->White,
-     FrameStyle->Directive[Black,AbsoluteThickness[1.1]],
-     LabelStyle->Directive[Black,14,FontFamily->"Arial"]
+   Theme-aware: default DCTPlots`$DCTTheme ("Dark" | "Publication"); override
+   one call with Theme -> "Publication". Electrode colours are theme-independent.
 *)
 
 BeginPackage["DCTPlots`", {"DCTPeakAnalysis`"}]
@@ -24,7 +22,7 @@ PlotRsVsTime::usage =
 one trace per electrode."
 
 PlotC0VsTime::usage =
-  "PlotC0VsTime[goodSpecs] plots C0 (F) vs time (hours), \
+  "PlotC0VsTime[goodSpecs] plots C0 (nF) vs time (hours), \
 one trace per electrode."
 
 PlotKPeakVsTime::usage =
@@ -38,11 +36,8 @@ vs time panels, each electrode in a distinct colour."
 
 Begin["`Private`"]
 
-$darkBg      = GrayLevel[0.12];
-tsFrameStyle = Directive[White, AbsoluteThickness[1.1]];
-tsLabelStyle = Directive[White, 14, FontFamily -> "Arial"];
-tsImageSize  = 380;
-tsAspect     = 0.75;
+tsImageSize = 380;
+tsAspect    = 0.75;
 
 (* ── electrode grouping & colours ── *)
 
@@ -54,14 +49,14 @@ splitByElectrode[goodSpecs_List] := Module[{groups},
 electrodeStyles[n_Integer] :=
   Directive[ColorData[97][#], AbsoluteThickness[1.8]] & /@ Range[n]
 
-electrodeLegend[electrodes_List, styles_List] :=
+electrodeLegend[electrodes_List, styles_List, th_Association] :=
   Placed[
     LineLegend[styles, electrodes,
       LegendMarkerSize -> 18,
-      LabelStyle       -> Directive[White, 12],
-      Background       -> $darkBg,
-      LegendFunction   -> (Framed[#, Background -> $darkBg,
-                              FrameStyle -> tsFrameStyle] &)
+      LabelStyle       -> Directive[th["Fg"], 12],
+      Background       -> th["Bg"],
+      LegendFunction   -> (Framed[#, Background -> th["Bg"],
+        FrameStyle -> Directive[th["Fg"], AbsoluteThickness[1.1]]] &)
     ],
     Right
   ]
@@ -71,56 +66,65 @@ electrodeLegend[electrodes_List, styles_List] :=
 extractTimeHr[specs_] := (#Spec["FinishTimeS"] / 3600. &) /@ specs
 
 timeSeriesPanelMulti[
-    tracesList_, styles_List, yLabel_,
+    tracesList_, styles_List, yLabel_, th_Association,
     logY_ : False, legend_ : None, opts___] :=
-  Module[{plotFn},
-    plotFn = If[logY, ListLogPlot, ListLinePlot];
+  Module[{plotFn, fg = th["Fg"], plotOpts, allPts, tLo, tHi, yHi},
+    plotFn   = If[logY, ListLogPlot, ListLinePlot];
+    plotOpts = FilterRules[{opts}, Options[plotFn]];
+    allPts   = Flatten[tracesList, 1];
+    {tLo, tHi} = If[allPts === {}, {0., 1.}, MinMax[allPts[[All, 1]]]];
+    yHi        = If[allPts === {}, 1., Max[allPts[[All, 2]]] * 1.05];
     plotFn[
       tracesList,
+      plotOpts,
       Joined      -> True,
       PlotMarkers -> {Automatic, 7},
       PlotStyle   -> styles,
-      Frame       -> True,
-      Axes        -> False,
-      Background  -> $darkBg,
-      FrameStyle  -> tsFrameStyle,
-      LabelStyle  -> tsLabelStyle,
-      FrameLabel  -> {Style["Time (hours)", 14, White], Style[yLabel, 14, White]},
-      PlotRange   -> {Automatic, {0, Automatic}},
+      Sequence @@ ThemeChrome[th, 14, 1.1],
+      FrameTicks  -> {{ThemeLinTicks[0., yHi, fg], None},
+                      {ThemeLinTicks[tLo, tHi, fg], None}},
+      FrameTicksStyle -> Directive[fg, 12],
+      FrameLabel  -> {Style["Time (hours)", 14, fg], Style[yLabel, 14, fg]},
+      PlotRange   -> {Automatic, {0, yHi}},
       PlotRangePadding -> Scaled[0.05],
       ImageSize   -> tsImageSize,
       AspectRatio -> tsAspect,
-      Sequence @@ If[legend =!= None, {PlotLegends -> legend}, {}],
-      opts
+      Sequence @@ If[legend =!= None, {PlotLegends -> legend}, {}]
     ]
   ]
 
 (* ── Rs ── *)
 
+Options[PlotRsVsTime] = {Theme -> Automatic};
+
 PlotRsVsTime[goodSpecs_List, opts : OptionsPattern[]] := Module[
-  {electrodes, groups, n, styles, traces},
+  {th, electrodes, groups, n, styles, traces},
+  th = ThemeFromOpts[{opts}];
   {electrodes, groups} = splitByElectrode[goodSpecs];
   n      = Length[electrodes];
   styles = electrodeStyles[n];
   traces = Table[
     Transpose[{extractTimeHr[groups[[i]]], (#Spec["Rs"] &) /@ groups[[i]]}],
     {i, n}];
-  timeSeriesPanelMulti[traces, styles, "Rs (\[CapitalOmega])", False,
-    electrodeLegend[electrodes, styles], opts]
+  timeSeriesPanelMulti[traces, styles, "Rs (\[CapitalOmega])", th, False,
+    electrodeLegend[electrodes, styles, th], opts]
 ]
 
 (* ── C0 ── *)
 
+Options[PlotC0VsTime] = {Theme -> Automatic};
+
 PlotC0VsTime[goodSpecs_List, opts : OptionsPattern[]] := Module[
-  {electrodes, groups, n, styles, traces},
+  {th, electrodes, groups, n, styles, traces},
+  th = ThemeFromOpts[{opts}];
   {electrodes, groups} = splitByElectrode[goodSpecs];
   n      = Length[electrodes];
   styles = electrodeStyles[n];
   traces = Table[
-    Transpose[{extractTimeHr[groups[[i]]], (#Spec["C0"] &) /@ groups[[i]]}],
+    Transpose[{extractTimeHr[groups[[i]]], (1.*^9 #Spec["C0"] &) /@ groups[[i]]}],
     {i, n}];
-  timeSeriesPanelMulti[traces, styles, "C0 (F)", False,
-    electrodeLegend[electrodes, styles], opts]
+  timeSeriesPanelMulti[traces, styles, "C0 (nF)", th, False,
+    electrodeLegend[electrodes, styles, th], opts]
 ]
 
 (* ── k_peak ── *)
@@ -140,13 +144,44 @@ peakInRange[spec_Association, kMin_?NumericQ, kMax_?NumericQ] := Module[
   ]
 ]
 
+(* per-electrode k_peak panel (linear y, outward ticks) *)
+kPeakPanel[traces_, styles_, yLabel_, th_Association, yRange_, legend_, opts___] :=
+  Module[{fg = th["Fg"], plotOpts, allK, allT, kLo, kHi, tLo, tHi},
+    plotOpts = FilterRules[{opts}, Options[ListLinePlot]];
+    allK = Flatten[traces[[All, All, 2]]];
+    allT = Flatten[traces[[All, All, 1]]];
+    {kLo, kHi} = If[yRange === All, If[allK === {}, {1., 10.}, MinMax[allK]], yRange];
+    {tLo, tHi} = If[allT === {}, {0., 1.}, MinMax[allT]];
+    ListLinePlot[
+      traces,
+      plotOpts,
+      Joined      -> True,
+      PlotMarkers -> {Automatic, 7},
+      PlotStyle   -> styles,
+      Sequence @@ ThemeChrome[th, 14, 1.1],
+      FrameTicks  -> {{ThemeLinTicks[kLo, kHi, fg], None},
+                      {ThemeLinTicks[tLo, tHi, fg], None}},
+      FrameTicksStyle -> Directive[fg, 12],
+      FrameLabel  -> {Style["Time (hours)", 14, fg], yLabel},
+      PlotRange   -> {Automatic, {kLo, kHi}},
+      PlotRangePadding -> Scaled[0.05],
+      ImageSize   -> tsImageSize,
+      AspectRatio -> tsAspect,
+      Sequence @@ If[legend =!= None, {PlotLegends -> legend}, {}]
+    ]
+  ]
+
 (* Range-constrained overload: one panel per k-range, per-electrode colouring *)
+Options[PlotKPeakVsTime] = {Theme -> Automatic};
+
 PlotKPeakVsTime[goodSpecs_List, kRanges_List, opts : OptionsPattern[]] := Module[
-  {electrodes, groups, n, styles, legend, panels, kMin, kMax, traces, tHr, kVals},
+  {th, fg, electrodes, groups, n, styles, legend, panels, kMin, kMax, traces, tHr, kVals},
+  th = ThemeFromOpts[{opts}];
+  fg = th["Fg"];
   {electrodes, groups} = splitByElectrode[goodSpecs];
   n      = Length[electrodes];
   styles = electrodeStyles[n];
-  legend = electrodeLegend[electrodes, styles];
+  legend = electrodeLegend[electrodes, styles, th];
 
   panels = Table[
     kMin = kRanges[[r, 1]];  kMax = kRanges[[r, 2]];
@@ -155,28 +190,10 @@ PlotKPeakVsTime[goodSpecs_List, kRanges_List, opts : OptionsPattern[]] := Module
       kVals = peakInRange[#, kMin, kMax] & /@ groups[[i, All, "Spec"]];
       Select[Transpose[{tHr, kVals}], NumericQ[#[[2]]] &],
       {i, n}];
-    ListLogPlot[
-      traces,
-      Joined      -> True,
-      PlotMarkers -> {Automatic, 7},
-      PlotStyle   -> styles,
-      Frame       -> True,
-      Axes        -> False,
-      Background  -> $darkBg,
-      FrameStyle  -> tsFrameStyle,
-      LabelStyle  -> tsLabelStyle,
-      FrameLabel  -> {
-        Style["Time (hours)", 14, White],
-        Style[Row[{"k", Subscript["peak", ""], "  [",
-          kMin, "\[Dash]", kMax, "] (", Superscript["s", -1], ")"}], 13, White]
-      },
-      PlotRange        -> {Automatic, {kMin, kMax}},
-      PlotRangePadding -> Scaled[0.05],
-      ImageSize        -> tsImageSize,
-      AspectRatio      -> tsAspect,
-      Sequence @@ If[r == 1, {PlotLegends -> legend}, {}],
-      opts
-    ],
+    kPeakPanel[traces, styles,
+      Style[Row[{"k", Subscript["peak", ""], "  [",
+        kMin, "\[Dash]", kMax, "] (", Superscript["s", -1], ")"}], 13, fg],
+      th, {kMin, kMax}, If[r == 1, legend, None], opts],
     {r, Length[kRanges]}
   ];
 
@@ -184,7 +201,9 @@ PlotKPeakVsTime[goodSpecs_List, kRanges_List, opts : OptionsPattern[]] := Module
 ]
 
 PlotKPeakVsTime[goodSpecs_List, opts : OptionsPattern[]] := Module[
-  {electrodes, groups, n, styles, traces, tHr, peaks, kVals},
+  {th, fg, electrodes, groups, n, styles, traces, tHr, peaks, kVals},
+  th = ThemeFromOpts[{opts}];
+  fg = th["Fg"];
   {electrodes, groups} = splitByElectrode[goodSpecs];
   n      = Length[electrodes];
   styles = electrodeStyles[n];
@@ -194,40 +213,26 @@ PlotKPeakVsTime[goodSpecs_List, opts : OptionsPattern[]] := Module[
     kVals = Map[If[AssociationQ[#], #["kPeak"], Missing["NoPeak"]] &, peaks];
     Select[Transpose[{tHr, kVals}], NumericQ[#[[2]]] &],
     {i, n}];
-  ListLogPlot[
-    traces,
-    Joined      -> True,
-    PlotMarkers -> {Automatic, 7},
-    PlotStyle   -> styles,
-    Frame       -> True,
-    Axes        -> False,
-    Background  -> $darkBg,
-    FrameStyle  -> tsFrameStyle,
-    LabelStyle  -> tsLabelStyle,
-    FrameLabel  -> {
-      Style["Time (hours)", 14, White],
-      Style[Row[{"k", Subscript["", "peak"], " (", Superscript["s", -1], ")"}], 14, White]
-    },
-    PlotRange        -> All,
-    PlotRangePadding -> Scaled[0.05],
-    ImageSize        -> tsImageSize,
-    AspectRatio      -> tsAspect,
-    PlotLegends      -> electrodeLegend[electrodes, styles],
-    opts
-  ]
+  kPeakPanel[traces, styles,
+    Style[Row[{"k", Subscript["", "peak"], " (", Superscript["s", -1], ")"}], 14, fg],
+    th, All, electrodeLegend[electrodes, styles, th], opts]
 ]
 
 (* ── combined grid (legend on Rs panel only) ── *)
 
+Options[PlotTimeSeries] = {Theme -> Automatic};
+
 PlotTimeSeries[goodSpecs_List, opts : OptionsPattern[]] := Module[
-  {electrodes, groups, n, styles, legend,
+  {th, fg, electrodes, groups, n, styles, legend,
    rsTraces, c0Traces, kTraces, tHr, peaks, kVals,
    rsPlot, c0Plot, kPlot},
 
+  th = ThemeFromOpts[{opts}];
+  fg = th["Fg"];
   {electrodes, groups} = splitByElectrode[goodSpecs];
   n      = Length[electrodes];
   styles = electrodeStyles[n];
-  legend = electrodeLegend[electrodes, styles];
+  legend = electrodeLegend[electrodes, styles, th];
 
   rsTraces = Table[
     Transpose[{extractTimeHr[groups[[i]]], (#Spec["Rs"] &) /@ groups[[i]]}],
@@ -242,34 +247,23 @@ PlotTimeSeries[goodSpecs_List, opts : OptionsPattern[]] := Module[
     Select[Transpose[{tHr, kVals}], NumericQ[#[[2]]] &],
     {i, n}];
 
-  (* legend on Rs panel only to avoid repetition *)
-  rsPlot = timeSeriesPanelMulti[rsTraces, styles, "Rs (\[CapitalOmega])", False, legend];
-  c0Plot = timeSeriesPanelMulti[c0Traces, styles, "C0 (F)", False, None];
-  kPlot  = ListLogPlot[
-    kTraces,
-    Joined      -> True,
-    PlotMarkers -> {Automatic, 7},
-    PlotStyle   -> styles,
-    Frame       -> True,
-    Axes        -> False,
-    Background  -> $darkBg,
-    FrameStyle  -> tsFrameStyle,
-    LabelStyle  -> tsLabelStyle,
-    FrameLabel  -> {
-      Style["Time (hours)", 14, White],
-      Style[Row[{"k", Subscript["", "peak"], " (", Superscript["s", -1], ")"}], 14, White]
-    },
-    PlotRange        -> All,
-    PlotRangePadding -> Scaled[0.05],
-    ImageSize        -> tsImageSize,
-    AspectRatio      -> tsAspect];
+  (* panels without per-panel legends; one shared legend for the whole figure *)
+  rsPlot = timeSeriesPanelMulti[rsTraces, styles, "Rs (\[CapitalOmega])", th, False, None];
+  c0Plot = timeSeriesPanelMulti[c0Traces, styles, "C0 (F)", th, False, None];
+  kPlot  = kPeakPanel[kTraces, styles,
+    Style[Row[{"k", Subscript["", "peak"], " (", Superscript["s", -1], ")"}], 14, fg],
+    th, All, None];
 
-  GraphicsGrid[
-    {{rsPlot, c0Plot, kPlot}},
-    ImageSize  -> 1200,
-    Spacings   -> {0.4, 0.4},
-    Background -> $darkBg,
-    opts
+  (* One shared legend outside the grid (a per-panel legend shrank the Rs cell
+     and clipped its y-label). *)
+  Legended[
+    GraphicsGrid[
+      {{rsPlot, c0Plot, kPlot}},
+      ImageSize  -> 1200,
+      Spacings   -> {0.3, 0},
+      Background -> th["Bg"]
+    ],
+    legend
   ]
 ]
 

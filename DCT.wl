@@ -44,6 +44,11 @@ Module[{here, load},
   load["analysis/Biophysics.wl"];
 
   (* Plots *)
+  (* Mark Caprio, MIT; outward ticks. Quiet the shadow warnings: CustomTicks
+     exports LogPlot/TickDirection (also System` symbols) — we always reference
+     them as CustomTicks`LogPlot / CustomTicks`TickDirection. *)
+  Quiet[load["plots/vendor/CustomTicks/CustomTicks.m"], {General::shdw}];
+  load["plots/PlotTheme.wl"];
   load["plots/PlotSpectrum.wl"];
   load["plots/PlotImpedance.wl"];
   load["plots/PlotResiduals.wl"];
@@ -51,6 +56,7 @@ Module[{here, load},
   load["plots/PlotHeatmap.wl"];
   load["plots/PlotKK.wl"];
   load["plots/PlotAdmittanceStats.wl"];
+  load["plots/PlotTuning.wl"];
 
   Print[Style["\:2714 DCT package loaded.", Darker[Green], 13]];
 ]
