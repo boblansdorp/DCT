@@ -39,6 +39,13 @@ SolveLadderGivenRs::usage =
 binsPerDecade, tauMinFactor, tauMaxFactor, weightPower] fits the Maxwell \
 admittance ladder at fixed Rs and returns an Association with fit results."
 
+SimulateEIS::usage =
+  "SimulateEIS[gTrue, tau, rs, c0, freqHz] forward-models the EIS impedance Z(f) \
+for a known distribution gTrue on grid tau, series resistance rs and fast-limit \
+capacitance c0 \[Dash] the inverse of the inversion: \
+Y = i w c0 + dLog * Sum_k [ i w / (1 + i w tau_k) ] gTrue_k, Z = rs + 1/Y. \
+Returns a complex Z list, one per frequency."
+
 Begin["`Private`"]
 
 (* ------------------------------------------------------------------ *)
@@ -59,6 +66,22 @@ BuildTauGrid[freqHz_List, binsPerDecade_Integer,
 
   Developer`ToPackedArray @
     10.^Range[Log10[tauMinUse], Log10[tauMaxUse], 1. / binsPerDecade]
+]
+
+(* ------------------------------------------------------------------ *)
+(* Forward model: known g(k) -> EIS spectrum (inverse of the inversion) *)
+(* ------------------------------------------------------------------ *)
+
+SimulateEIS[gTrue_List, tau_List, rs_?NumericQ, c0_?NumericQ, freqHz_List] := Module[
+  {omega, dLog, kMat, yInt},
+  omega = 2. Pi freqHz;
+  dLog  = Mean[Abs[Differences[Log10[tau]]]];   (* log-decade bin width of the grid *)
+  kMat  = Table[
+    (I omega[[j]]) / (1 + I omega[[j]] tau[[k]]),
+    {j, Length[omega]}, {k, Length[tau]}
+  ];
+  yInt = (I omega) c0 + dLog (kMat . gTrue);     (* internal admittance *)
+  rs + 1. / yInt
 ]
 
 (* ------------------------------------------------------------------ *)

@@ -1,12 +1,14 @@
 (* ::Package:: *)
 
 (* DCTSpectrum
-   Top-level entry point: loads an EIS file and returns the best-fit DCT result.
+   Top-level entry point: fits EIS data with the Maxwell admittance ladder (DCT).
    Outer Brent loop optimises Rs; inner NNLS solve is delegated to DCTKernel.
 
    Public API (exported into DCT` context for backward compatibility):
-     DCTSpectrum[file]
+     DCTSpectrum[file]                fit an EIS .txt file
      DCTSpectrum[file, opts...]
+     DCTSpectrumData[freqHz, z]       fit in-memory data (freq list, complex Z list)
+     DCTSpectrumData[freqHz, z, opts...]
 
    Options:
      "BinsPerDecade"   -> 25         log-spaced tau bins per decade
@@ -30,6 +32,12 @@ DCTSpectrum::usage =
 ladder (DCT method). Returns an Association with Tau, g, C0, Rs, and \
 reconstructed impedance. See Options[DCTSpectrum] for tuning parameters."
 
+DCTSpectrumData::usage =
+  "DCTSpectrumData[freqHz, z] fits in-memory EIS data (a frequency list and a \
+complex impedance list) with the same Maxwell-ladder inversion as \
+DCTSpectrum[file] \[Dash] e.g. for simulated/synthetic spectra. Returns the same \
+Association (FinishTimeS is Missing). Accepts the same options as DCTSpectrum."
+
 Begin["`Private`"]
 
 Options[DCTSpectrum] = {
@@ -42,17 +50,15 @@ Options[DCTSpectrum] = {
   "WeightPower"   -> 0.75,
   "Debug"         -> False
 }
+Options[DCTSpectrumData] = Options[DCTSpectrum];
+
+(* ------------------------------------------------------------------ *)
+(* File entry: import then fit                                         *)
+(* ------------------------------------------------------------------ *)
 
 DCTSpectrum[file_String, opts : OptionsPattern[]] := Catch @ Module[
-  {
-    debug, bpd, fMin, fMax, tauMinF, tauMaxF, lambdaND, wPow,
-    dat, freqAll, zAll, timeS, finishTime,
-    keepInner, freqInner, zInner,
-    keepOuter, freqOuter, zOuter,
-    rs0, rsLo, rsHi, rsWindow,
-    objective, callCache, rsBest, refineSol, bestSolve,
-    out
-  },
+  {debug, bpd, fMin, fMax, tauMinF, tauMaxF, lambdaND, wPow,
+   dat, freqAll, zAll, timeS, finishTime},
 
   debug    = OptionValue["Debug"];
   bpd      = OptionValue["BinsPerDecade"];
@@ -63,16 +69,46 @@ DCTSpectrum[file_String, opts : OptionsPattern[]] := Catch @ Module[
   lambdaND = OptionValue["LambdaND"];
   wPow     = OptionValue["WeightPower"];
 
-  (* ---- Import ---- *)
   dat = DCTDataImport`ImportEIS[file, debug];
   If[FailureQ[dat],
     Throw[Failure["DCTSpectrum", <|"Message" -> "Import failed: " <> dat["Message"]|>]]
   ];
 
-  freqAll  = dat["FreqHz"];
-  zAll     = Developer`ToPackedArray[dat["Z"]];
-  timeS    = dat["TimeS"];
+  freqAll    = dat["FreqHz"];
+  zAll       = Developer`ToPackedArray[dat["Z"]];
+  timeS      = dat["TimeS"];
   finishTime = If[AllTrue[timeS, MissingQ], Missing["NoTime"], Max[Select[timeS, NumericQ]]];
+
+  fitFromData[freqAll, zAll, finishTime,
+    debug, bpd, fMin, fMax, tauMinF, tauMaxF, lambdaND, wPow]
+]
+
+(* ------------------------------------------------------------------ *)
+(* In-memory entry: fit freq/Z directly (e.g. simulated data)         *)
+(* ------------------------------------------------------------------ *)
+
+DCTSpectrumData[freqHz_List, z_List, opts : OptionsPattern[]] := Catch @
+  fitFromData[
+    freqHz, Developer`ToPackedArray[z], Missing["NoTime"],
+    OptionValue["Debug"], OptionValue["BinsPerDecade"],
+    N @ OptionValue["FMinUse"], N @ OptionValue["FMaxUse"],
+    OptionValue["TauMinFactor"], OptionValue["TauMaxFactor"],
+    OptionValue["LambdaND"], OptionValue["WeightPower"]
+  ]
+
+(* ------------------------------------------------------------------ *)
+(* Core fit (shared): freq window -> Rs Brent search -> ladder solve  *)
+(* ------------------------------------------------------------------ *)
+
+fitFromData[
+  freqAll_List, zAll_List, finishTime_,
+  debug_, bpd_, fMin_, fMax_, tauMinF_, tauMaxF_, lambdaND_, wPow_] := Module[
+  {
+    keepInner, freqInner, zInner,
+    keepOuter, freqOuter, zOuter,
+    rs0, rsLo, rsHi, rsWindow,
+    objective, callCache, rsBest, refineSol, bestSolve
+  },
 
   If[debug, Print["[DCT] freq range: ", {Min[freqAll], Max[freqAll]}]];
 

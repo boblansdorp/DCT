@@ -57,6 +57,7 @@ Module[{here, load},
   load["plots/PlotKK.wl"];
   load["plots/PlotAdmittanceStats.wl"];
   load["plots/PlotTuning.wl"];
+  load["plots/PlotValidation.wl"];
 
   Print[Style["\:2714 DCT package loaded.", Darker[Green], 13]];
 ]
