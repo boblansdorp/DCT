@@ -51,11 +51,14 @@ PlotLCurve[lCurveData_List, labels : (_List | None) : None,
   yLo  = If[ymaj === {}, yR[[1]], ymaj[[1]]  - dy];
   yHi  = If[ymaj === {}, yR[[2]], ymaj[[-1]] + dy];
 
-  (* point labels: native log-x plot places them in real-value coords *)
+  (* point labels placed at Scaled fractions of the (log-x, linear-y) frame.
+     Scaled coords render reliably on the native log plot, where data-coordinate
+     Epilog primitives silently vanish at this tiny y-scale (~1e-4). *)
   pointLabels = If[labels === None, {},
     MapThread[
       Style[Text[FileNameTake[ToString[#2]],
-        {#1[[1]], #1[[2]]}, {-1.3, 0.5}], fg, 10] &,
+        Scaled[{(Log10[#1[[1]]] - Log10[xLo]) / (Log10[xHi] - Log10[xLo]),
+                (#1[[2]] - yLo) / (yHi - yLo)}], {-1.3, 0.5}], fg, 10] &,
       {lCurveData, labels}]
   ];
 
