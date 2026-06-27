@@ -9,7 +9,7 @@
   },
   {
    "kind": 2,
-   "value": "(* Reload all packages fresh *)\r\nQuiet[Remove[\"DCTDataImport`*\", \"NNLSFit`*\", \"DCTKernel`*\", \"DCT`*\",\r\n             \"DCTPlots`*\", \"DCTPeakAnalysis`*\", \"DCTSensitivity`*\",\r\n             \"DCTAdmittanceStats`*\", \"DCTKKCheck`*\", \"DCTBiophysics`*\"]];\r\n$ContextPath = Select[$ContextPath, !StringMatchQ[#, \"DCT*\" | \"NNLSFit*\"] &];\r\nGet[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\DCT.wl\"]",
+   "value": "(* Reload all packages fresh *)\r\nQuiet[Remove[\"DCTDataImport`*\", \"NNLSFit`*\", \"DCTKernel`*\", \"DCT`*\",\r\n             \"DCTPlots`*\", \"DCTPeakAnalysis`*\", \"DCTSensitivity`*\",\r\n             \"DCTAdmittanceStats`*\", \"DCTKKCheck`*\", \"DCTBiophysics`*\"]];\r\n$ContextPath = Select[$ContextPath, !StringMatchQ[#, \"DCT*\" | \"NNLSFit*\"] &];\r\nGet[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"DCT.wl\"}]]",
    "languageId": "wolfram",
    "outputs": [
     {
@@ -37,7 +37,7 @@
   },
   {
    "kind": 2,
-   "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestBiophysics.wl\"]",
+   "value": "Get[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"tests\", \"TestBiophysics.wl\"}]]",
    "languageId": "wolfram",
    "outputs": [
     {
@@ -78,7 +78,7 @@
   },
   {
    "kind": 2,
-   "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestNNLS.wl\"]",
+   "value": "Get[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"tests\", \"TestNNLS.wl\"}]]",
    "languageId": "wolfram",
    "outputs": [
     {
@@ -119,7 +119,7 @@
   },
   {
    "kind": 2,
-   "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestDCTKernel.wl\"]",
+   "value": "Get[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"tests\", \"TestDCTKernel.wl\"}]]",
    "languageId": "wolfram",
    "outputs": [
     {
@@ -160,7 +160,7 @@
   },
   {
    "kind": 2,
-   "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestDataImport.wl\"]",
+   "value": "Get[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"tests\", \"TestDataImport.wl\"}]]",
    "languageId": "wolfram",
    "outputs": [
     {
@@ -201,7 +201,7 @@
   },
   {
    "kind": 2,
-   "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestDCTInversion.wl\"]",
+   "value": "Get[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"tests\", \"TestDCTInversion.wl\"}]]",
    "languageId": "wolfram",
    "outputs": [],
    "metadata": {}
@@ -215,7 +215,7 @@
   },
   {
    "kind": 2,
-   "value": "Get[\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\tests\\\\TestPlotTicks.wl\"]",
+   "value": "Get[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"tests\", \"TestPlotTicks.wl\"}]]",
    "languageId": "wolfram",
    "outputs": [
     {

@@ -1,0 +1,96 @@
+{
+ "cells": [
+  {
+   "kind": 1,
+   "value": "# Cyclic Voltammogram\nPublication-quality plot of WE current vs. WE potential for the CV data in `data/CV`, using the shared `DCTPlots` theme (`ThemeChrome` + outward `ThemeLinTicks`). Annotated with the EIS DC bias (midway between the anodic/cathodic peaks) and the AC perturbation swing (±√2 · 10 mV RMS ≈ ±14 mV peak).",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### Load packages",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Load DCT package for publication theming (ThemeChrome / ThemeLinTicks) *)\nGet[FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"DCT.wl\"}]];\nDCTPlots`$DCTTheme = \"Publication\";",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mqwlhf53-foa585a\" data-page-width-em=\"18\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c9681871-2af1-4040-ba27-df8c110ef6b1"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### Plot",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Import CV data: semicolon-delimited.\n   cols: 1 applied V | 2 time (s) | 3 WE(1).Current (A) | 4 WE(1).Potential (V) | 5 Scan | ... *)\ncvFile = FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"data\", \"CV\", \"sample_CV_bon.txt\"}];\nraw  = Import[cvFile, \"Table\", \"FieldSeparators\" -> \";\"];\ndata = Rest[raw];   (* drop header row *)\n\npts = {#[[4]], #[[3]]*10^9} & /@ data;   (* {potential (V), current (nA)} *)\n\n(* EIS is measured at a DC bias midway between the anodic and cathodic peaks,\n   with a small AC perturbation. The dimension arrow shows the true peak\n   excursion of the sinusoid (= Sqrt[2] x RMS). *)\neisRMS = 0.010;            (* EIS AC amplitude, V RMS *)\nswing  = Sqrt[2] eisRMS;    (* true peak excursion, V *)\nEa   = pts[[ Ordering[pts[[All, 2]], -1][[1]], 1 ]];   (* potential at max current = anodic peak *)\nEc   = pts[[ Ordering[pts[[All, 2]],  1][[1]], 1 ]];   (* potential at min current = cathodic peak *)\nEmid = (Ea + Ec)/2;\n\n{vmin, vmax} = MinMax[pts[[All, 1]]];\n{imin, imax} = MinMax[pts[[All, 2]]];\ndI = imax - imin;\n\n(* annotation geometry *)\nyDim   = imax + 0.12 dI;            (* dimension-line height *)\nbarH   = 0.05 dI;                   (* end-bar half height *)\nlead   = 0.030;                     (* arrow shaft length, V *)\nyBias  = imax + 0.30 dI;            (* bias label height *)\nyTop   = imax + 0.36 dI;            (* top of frame *)\nlabX   = Emid + 0.012;              (* bias label nudged right of the line *)\nswLabX = Emid + swing + lead + 0.008;  (* swing label sits right of the arrow *)\n\nth = DCTPlots`DCTThemeData[\"Publication\"];\n\ncvPlot = ListLinePlot[pts,\n  Evaluate @ DCTPlots`ThemeChrome[th, 14, 1.2],\n  FrameTicks -> {{DCTPlots`ThemeLinTicks[imin, imax], None},\n                 {DCTPlots`ThemeLinTicks[vmin, vmax], None}},\n  FrameLabel -> {\"Potential (V)\", \"Current (nA)\"},\n  PlotStyle -> Directive[RGBColor[0.12, 0.47, 0.71], AbsoluteThickness[1.5]],\n  PlotRange -> {{vmin, vmax}, {imin - 0.05 dI, yTop}},\n  AspectRatio -> 1,\n  ImageSize -> 460,\n  Epilog -> {\n    (* DC bias: dashed line midway between the two peaks *)\n    {Directive[Gray, Dashing[{0.012}], AbsoluteThickness[1.2]],\n     Line[{{Emid, imin}, {Emid, yBias - 0.03 dI}}]},\n    (* EIS swing: dimension end-bars + inward-facing arrows *)\n    {Directive[Black, AbsoluteThickness[1.1]],\n     Line[{{Emid - swing, yDim - barH}, {Emid - swing, yDim + barH}}],\n     Line[{{Emid + swing, yDim - barH}, {Emid + swing, yDim + barH}}]},\n    {Directive[Black, AbsoluteThickness[1.1]], Arrowheads[0.035],\n     Arrow[{{Emid - swing - lead, yDim}, {Emid - swing, yDim}}],\n     Arrow[{{Emid + swing + lead, yDim}, {Emid + swing, yDim}}]},\n    (* swing label: to the right of the arrow *)\n    Text[Style[Row[{\"\\[PlusMinus]\", Round[swing 1000], \" mV (\", Round[eisRMS 1000], \" mV RMS)\"}],\n         10.5, FontFamily -> \"Arial\", Black], {swLabX, yDim}, {-1, 0}],\n    (* bias label: above the line *)\n    Text[Style[Row[{\"EIS bias  \", NumberForm[Emid, {3, 2}], \" V\"}],\n         11, FontFamily -> \"Arial\", Black], {labX, yBias}, {-1, 0}]\n  }\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"646844\" data-output-id=\"0\" data-out-n=\"23\" data-sub-idx=\"23\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"4\" data-sub-start=\"32\" data-sub-end=\"59\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[23]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\bobla\\Documents\\DCT\\img\\CV_plot\\wl_117yo9nqbmfq1.svg\" src=\"img/CV_plot/wl_117yo9nqbmfq1.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Import CV data: semicolon-delimited.\n   cols: 1 applied V | 2 time (s) | 3 WE(1).Current (A) | 4 WE(1).Potential (V) | 5 Scan | ... *)\ncvFile = FileNameJoin[{$HomeDirectory, \"Documents\", \"DCT\", \"data\", \"CV\", \"sample_CV_bon.txt\"}];\nraw  = Import[cvFile, \"Table\", \"FieldSeparators\" -> \";\"];\ndata = Rest[raw];   (* drop header row *)\n\npts = {#[[4]], #[[3]]*10^9} & /@ data;   (* {potential (V), current (nA)} *)\n\n(* EIS is measured at a DC bias midway between the anodic and cathodic peaks,\n   with a small AC perturbation. The dimension arrow shows the true peak\n   excursion of the sinusoid (= Sqrt[2] x RMS). *)\neisRMS = 0.010;            (* EIS AC amplitude, V RMS *)\nswing  = Sqrt[2] eisRMS;    (* true peak excursion, V *)\nEa   = pts[[ Ordering[pts[[All, 2]], -1][[1]], 1 ]];   (* potential at max current = anodic peak *)\nEc   = pts[[ Ordering[pts[[All, 2]],  1][[1]], 1 ]];   (* potential at min current = cathodic peak *)\nEmid = (Ea + Ec)/2;\n\n{vmin, vmax} = MinMax[pts[[All, 1]]];\n{imin, imax} = MinMax[pts[[All, 2]]];\ndI = imax - imin;\n\n(* annotation geometry *)\nyDim   = imax + 0.12 dI;            (* dimension-line height *)\nbarH   = 0.05 dI;                   (* end-bar half height *)\nlead   = 0.030;                     (* arrow shaft length, V *)\nyBias  = imax + 0.30 dI;            (* bias label height *)\nyTop   = imax + 0.36 dI;            (* top of frame *)\nlabX   = Emid + 0.012;              (* bias label nudged right of the line *)\nswLabX = Emid + swing + lead + 0.008;  (* swing label sits right of the arrow *)\n\nth = DCTPlots`DCTThemeData[\"Publication\"];\n\ncvPlot = ListLinePlot[pts,\n  Evaluate @ DCTPlots`ThemeChrome[th, 14, 1.2],\n  FrameTicks -> {{DCTPlots`ThemeLinTicks[imin, imax], None},\n                 {DCTPlots`ThemeLinTicks[vmin, vmax], None}},\n  FrameLabel -> {\"Potential (V)\", \"Current (nA)\"},\n  PlotStyle -> Directive[RGBColor[0.12, 0.47, 0.71], AbsoluteThickness[1.5]],\n  PlotRange -> {{vmin, vmax}, {imin - 0.05 dI, yTop}},\n  AspectRatio -> 1,\n  ImageSize -> 460,\n  Epilog -> {\n    (* DC bias: dashed line midway between the two peaks *)\n    {Directive[Gray, Dashing[{0.012}], AbsoluteThickness[1.2]],\n     Line[{{Emid, imin}, {Emid, yBias - 0.03 dI}}]},\n    (* EIS swing: dimension end-bars + inward-facing arrows *)\n    {Directive[Black, AbsoluteThickness[1.1]],\n     Line[{{Emid - swing, yDim - barH}, {Emid - swing, yDim + barH}}],\n     Line[{{Emid + swing, yDim - barH}, {Emid + swing, yDim + barH}}]},\n    {Directive[Black, AbsoluteThickness[1.1]], Arrowheads[0.035],\n     Arrow[{{Emid - swing - lead, yDim}, {Emid - swing, yDim}}],\n     Arrow[{{Emid + swing + lead, yDim}, {Emid + swing, yDim}}]},\n    (* swing label: to the right of the arrow *)\n    Text[Style[Row[{\"\\[PlusMinus]\", Round[swing 1000], \" mV (\", Round[eisRMS 1000], \" mV RMS)\"}],\n         10.5, FontFamily -> \"Arial\", Black], {swLabX, yDim}, {-1, 0}],\n    (* bias label: above the line *)\n    Text[Style[Row[{\"EIS bias  \", NumberForm[Emid, {3, 2}], \" V\"}],\n         11, FontFamily -> \"Arial\", Black], {labX, yBias}, {-1, 0}]\n  }\n]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "6fb205e9-a2f4-44c4-a6c1-958f869f6391"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "### Export\nSet `exportFigure = True`, then run. Writes PDF + PNG (300 dpi) to a `figures/` folder next to the CV data.",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "exportFigure = True;   (* set to False to skip exporting *)\n\nIf[exportFigure,\n  figDir = FileNameJoin[{DirectoryName[cvFile], \"figures\"}];\n  If[! DirectoryQ[figDir], CreateDirectory[figDir]];\n  Export[FileNameJoin[{figDir, \"CV.pdf\"}], cvPlot];\n  Export[FileNameJoin[{figDir, \"CV.png\"}], cvPlot, ImageResolution -> 300];\n  Print[\"Saved CV.pdf + CV.png to: \", figDir],\n  Print[\"exportFigure = False \\[Dash] set to True to export.\"]\n]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><span class=\"wl-ps\">Saved CV.pdf + CV.png to: </span><span class=\"wl-ps\">C:\\\\Users\\\\bobla\\\\Documents\\\\DCT\\\\data\\\\CV\\\\figures</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: Saved CV.pdf + CV.png to:C:\\\\Users\\\\bobla\\\\Documents\\\\DCT\\\\data\\\\CV\\\\figures",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "92b0deac-1d67-47bc-b0c9-a304b3167988"
+    }
+   ],
+   "metadata": {}
+  }
+ ],
+ "metadata": {}
+}
