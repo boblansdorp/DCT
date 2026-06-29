@@ -111,21 +111,39 @@ $FF4State = Module[
 (* ================================================================ *)
 
 FitFoldedFraction[pts_List] := Module[
-  {model3, model4, fit3, fit4, p3, p4, fn3, fn4},
+  {model3, model4, posPts, warm3, warm4, fit3, fit4, p3, p4, fn3, fn4},
 
   (* substitute symbolic expressions with numeric variables *)
   model3 = $FF3State /. {conc -> cx, KS -> ks, KD -> kd};
   model4 = $FF4State /. {conc -> cx, KS -> ks, KD -> kd, NF -> nf};
 
-  fit3 = NonlinearModelFit[pts, model3,
+  (* The closed forms are 0/0 at (C = 0, KD = 0), so fitting data that includes a
+     zero-concentration point can trap the optimiser in a degenerate minimum: starting
+     from KD = 100 (far from the true KD) it collapses NF -> 0.  Warm start instead — fit
+     the positive-concentration subset first (no singularity, converges cleanly), then
+     reseed the all-data fit from those parameters, so the optimiser begins near the true
+     KD and never wanders toward the singular point.  If pts has no C = 0 point,
+     posPts == pts and this reduces to a single fit reseeded from itself. *)
+  posPts = Select[pts, First[#] > 0. &];
+
+  warm3 = NonlinearModelFit[posPts, model3,
     {{ks, 0.1, 0., Infinity}, {kd, 100., 0., Infinity}},
+    cx, MaxIterations -> 500];
+  warm4 = NonlinearModelFit[posPts, model4,
+    {{ks, 0.1, 0., Infinity}, {kd, 100., 0., Infinity}, {nf, 0.3, 0., 0.99}},
+    cx, MaxIterations -> 500];
+
+  fit3 = NonlinearModelFit[pts, model3,
+    {{ks, ks /. warm3["BestFitParameters"], 0., Infinity},
+     {kd, kd /. warm3["BestFitParameters"], 0., Infinity}},
     cx,
     MaxIterations -> 500
   ];
 
   fit4 = NonlinearModelFit[pts, model4,
-    {{ks, 0.1, 0., Infinity}, {kd, 100., 0., Infinity},
-     {nf, 0.3, 0., 0.99}},
+    {{ks, ks /. warm4["BestFitParameters"], 0., Infinity},
+     {kd, kd /. warm4["BestFitParameters"], 0., Infinity},
+     {nf, nf /. warm4["BestFitParameters"], 0., 0.99}},
     cx,
     MaxIterations -> 500
   ];
