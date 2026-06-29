@@ -22,7 +22,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mqwlhf53-foa585a\" data-page-width-em=\"18\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered wl-lb-pending\" data-lb-id=\"lb-mqwoigas-cqke49o\" data-page-width-em=\"36\" data-latex-b64=\"XHRleHRjb2xvcnsjMDBmZjAwfXtcdGV4dHvinJQgRENUIHBhY2thZ2UgbG9hZGVkLn19\" style=\"opacity:0.65;transition:opacity 0.35s\"><div class=\"wl-lb-content\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.8889em;vertical-align:-0.1944em;\"></span><span class=\"mord text\" style=\"color:#00ff00;\"><span class=\"mord\" style=\"color:#00ff00;\">✔ DCT package loaded.</span></span></span></span></span></span></div></div></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -30,7 +30,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "c9681871-2af1-4040-ba27-df8c110ef6b1"
+     "id": "ec7c88e0-2f1d-4487-8d3b-9a369939ec8b"
     }
    ],
    "metadata": {}
@@ -50,7 +50,7 @@
     {
      "items": [
       {
-       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"646844\" data-output-id=\"0\" data-out-n=\"23\" data-sub-idx=\"23\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"4\" data-sub-start=\"32\" data-sub-end=\"59\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[23]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\bobla\\Documents\\DCT\\img\\CV_plot\\wl_117yo9nqbmfq1.svg\" src=\"img/CV_plot/wl_117yo9nqbmfq1.svg\"/></div></div>",
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"375116\" data-output-id=\"188\" data-out-n=\"1054\" data-sub-idx=\"23\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"4\" data-sub-start=\"32\" data-sub-end=\"59\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[1054]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\Users\\bobla\\Documents\\DCT\\img\\CV_plot\\wl_res3t0c0i68h.svg\" src=\"img/CV_plot/wl_res3t0c0i68h.svg\"/></div></div>",
        "mime": "x-application/wolfram-language-html"
       },
       {
@@ -58,7 +58,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "6fb205e9-a2f4-44c4-a6c1-958f869f6391"
+     "id": "af761397-9ff3-4069-b6b4-f2d3a9625000"
     }
    ],
    "metadata": {}
@@ -86,7 +86,7 @@
        "mime": "text/plain"
       }
      ],
-     "id": "92b0deac-1d67-47bc-b0c9-a304b3167988"
+     "id": "8eddd80d-cd94-46a6-8dbd-01ab8c347d66"
     }
    ],
    "metadata": {}
