@@ -4,6 +4,10 @@ Electrochemical impedance spectroscopy (EIS) analysis toolkit for surface-immobi
 
 Initial application: EAB aptamer biosensors (concentration-dependent folding from g(k) peak shifts).
 
+![Raw EIS Bode spectra across the vancomycin concentration series](data/figures/conc_bode.png)
+
+*Raw EIS impedance (magnitude and phase) across the vancomycin concentration series — the measured spectra that DCT inverts into g(k).*
+
 ---
 
 ## Prerequisites

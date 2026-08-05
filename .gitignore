@@ -10,6 +10,9 @@
 *.jpeg
 *.svg
 
+# ...but keep figures that are embedded in the README
+!data/figures/conc_bode.png
+
 # Wolfbook image cache (auto-generated SVGs, logs)
 img/
 
