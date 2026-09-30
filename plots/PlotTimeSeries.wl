@@ -41,8 +41,13 @@ tsAspect    = 0.75;
 
 (* ── electrode grouping & colours ── *)
 
+(* electrode of a file: its E1_/E2_/... file-name prefix, else its parent folder
+   (older data sets kept each electrode in its own E1/E2/E3 subfolder) *)
+electrodeOfFile[file_String] := First[StringCases[FileNameTake[file],
+    StartOfString ~~ e : ("E" ~~ DigitCharacter ..) ~~ "_" :> e], FileNameTake[file, {-2}]];
+
 splitByElectrode[goodSpecs_List] := Module[{groups},
-  groups = GroupBy[goodSpecs, FileNameTake[#["File"], {-2}] &];
+  groups = GroupBy[goodSpecs, electrodeOfFile[#["File"]] &];
   {Keys[groups], Values[groups]}
 ]
 
@@ -51,7 +56,7 @@ electrodeStyles[n_Integer] :=
 
 electrodeLegend[electrodes_List, styles_List, th_Association] :=
   Placed[
-    LineLegend[styles, electrodes,
+    LineLegend[styles, DCTPlots`ElectrodeName /@ electrodes,
       LegendMarkerSize -> 18,
       LabelStyle       -> Directive[th["Fg"], 12],
       Background       -> th["Bg"],

@@ -86,7 +86,7 @@ Print @ checkTrue["SolveLadder same length as input",
   Length[sol["ZFit"]] == Length[fInner]
 ];
 
-(* relative fit residual — regularisation introduces some smoothing so allow 20% *)
+(* relative fit residual: regularisation introduces some smoothing so allow 20% *)
 relRes = Norm[sol["ZFit"] - zInner] / Norm[zInner];
 Print @ checkTrue["SolveLadder relative residual < 20%", relRes < 0.20];
 

@@ -29,7 +29,7 @@ EIS data Association (output of ImportEIS). Returns Association with keys: \
 FreqHz, Z, ZFit, YResRe, YResIm, RMSRe, RMSIm, M, OK."
 
 KKValidFreqRange::usage =
-  "KKValidFreqRange[kkResult, threshold:0.02] returns {fMin, fMax} — the \
+  "KKValidFreqRange[kkResult, threshold:0.02] returns {fMin, fMax}, the \
 largest contiguous frequency sub-range where both |YResRe| and |YResIm| stay \
 below threshold."
 

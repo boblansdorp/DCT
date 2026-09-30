@@ -7,7 +7,7 @@
      Z = Rs + 1 / (i*omega*C0 + g1*dLog * i*omega/(1 + i*omega*tau1))
 
    C0 must be large enough that omega_max * C0 >> sum(g*dLog/tau) so that
-   Re[Z] approaches Rs at the highest measured frequency — this is what
+   Re[Z] approaches Rs at the highest measured frequency; this is what
    makes the Rs estimate (Min[Re[Z]]) accurate and the Brent loop fast.
 
    This test deliberately avoids duplicating TestDCTKernel: it does not
@@ -41,8 +41,8 @@ check[name_String, got_, expected_, tol_: 5*10^-2] :=
 (* ==== Synthetic data ==== *)
 
 rsTrue  = 50.;
-c0True  = 1.0*^-5;   (* 10 µF — large enough that omega_max*C0 >> g*dLog/tau *)
-tau1    = 0.01;       (* s — single Maxwell peak *)
+c0True  = 1.0*^-5;   (* 10 µF, large enough that omega_max*C0 >> g*dLog/tau *)
+tau1    = 0.01;       (* s, single Maxwell peak *)
 g1      = 1.0*^-4;   (* F/decade *)
 dLog    = 1. / 15;   (* matches default binsPerDecade = 15 *)
 
@@ -101,10 +101,10 @@ If[!AssociationQ[spec],
   Print @ checkTrue["Spec g vector non-negative",  VectorQ[spec["g"], # >= -10^-12 &]];
   Print @ checkTrue["Spec ZFit is numeric vector", VectorQ[spec["ZFit"], NumericQ]];
 
-  (* Rs recovery — good because C0 is large so rs0 ~ rsTrue *)
+  (* Rs recovery: good because C0 is large so rs0 ~ rsTrue *)
   Print @ check["Rs within 5% of truth", spec["Rs"], rsTrue, 0.05];
 
-  (* Fit quality — noise-free data, expect very tight residual *)
+  (* Fit quality: noise-free data, expect very tight residual *)
   relRes = Norm[spec["ZFit"] - spec["ZData"]] / Norm[spec["ZData"]];
   Print @ checkTrue["Relative |Z| residual < 2%", relRes < 0.02];
 
@@ -116,7 +116,7 @@ If[!AssociationQ[spec],
     Abs[Log10[tauFit[[iPeak]]] - Log10[tau1]] < 0.4
   ];
 
-  (* C0 is only tested loosely — it can partially alias with nearby Maxwell bins *)
+  (* C0 is only tested loosely; it can partially alias with nearby Maxwell bins *)
   Print @ checkTrue["C0 is positive", TrueQ[spec["C0"] > 0]];
 ];
 

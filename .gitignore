@@ -1,7 +1,14 @@
-# Raw data
+# Raw data: ignored by default...
 *.txt
 *.zip
 *.nox
+
+# ...except the data the committed notebooks read (the paper's data sets)
+!data/1_TitrationA_2026-02-25/EIS/*.txt
+!data/1_TitrationA_2026-02-25/CV/*.txt
+!data/2_TitrationB_2026-03-24/EIS/*.txt
+!data/2_TitrationB_2026-03-24/CV/*.txt
+!data/3_Drift_2026-03-24/EIS/*.txt
 
 # Exported figures and rendered outputs
 *.pdf
@@ -13,8 +20,17 @@
 # ...but keep figures that are embedded in the README
 !data/figures/conc_bode.png
 
-# Wolfbook image cache (auto-generated SVGs, logs)
-img/
+# Wolfbook image cache: keep the plots the committed notebooks display, so they
+# show on first open; everything else in img/ (logs, debug images) stays out
+img/*
+!img/EAB_DCT_analysis/
+!img/cv_analysis/
+!img/CV_plot/
+!img/biophysics_sensitivity/
+!img/runTests/
+img/**/*.md
+!img/*/*.svg
+!img/*/*.png
 
 # Wolfram kernel and debug logs
 *.log
@@ -27,3 +43,4 @@ legacy/
 .DS_Store
 Thumbs.db
 .claude/settings.json
+.claude/settings.local.json

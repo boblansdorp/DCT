@@ -165,7 +165,7 @@ SolveLadderGivenRs[
 
   (* Design matrix: [iw*C0_column | Kuse] *)
   aMat = Join[Transpose[{I * omegaInner}], Kuse, 2];
-  (* NNLS has no weight argument — it minimises ||A x - b||^2 with equal weights.
+  (* NNLS has no weight argument; it minimises ||A x - b||^2 with equal weights.
      To get weighted least squares Sum[w_i * r_i^2], pre-scale both A and b by
      Sqrt[w]: then NNLS squares Sqrt[w_i]*r_i and recovers w_i * r_i^2. *)
   aW   = DiagonalMatrix[Sqrt[w]] . aMat;

@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* DCTPlots — admittance statistics visualisation
+(* DCTPlots: admittance statistics visualisation
    Two plots for Section 2 of the analysis notebook.
 
    Public API:
@@ -112,7 +112,7 @@ variancePowerLawShow[th_Association, singletonSets_, singletonStyles_,
         FrameTicksStyle   -> Directive[fg, 13],
         LabelStyle        -> Directive[fg, 14, FontFamily -> "Arial"],
         FrameLabel        -> {
-          {Style["Var(|Y(f)|) (S^2)", 14, fg], None},
+          {Style[Row[{"Var(|Y(f)|) (", Superscript["S", 2], ")"}], 14, fg], None},
           {Style["\[LeftAngleBracket]|Y(f)|\[RightAngleBracket] (S)", 14, fg], None}
         },
         PlotRangePadding  -> Scaled[0.04],
@@ -129,9 +129,9 @@ variancePowerLawShow[th_Association, singletonSets_, singletonStyles_,
     ]
   ]
 
+(* Var ~ |Y|^alpha: alpha is the EXPONENT of |Y|, so it is the superscript of |Y| *)
 annotLabelFor[alpha_] := Row[{
-  "Var \[Proportional] |Y|",
-  Superscript["\[Alpha]", ""],
+  "Var \[Proportional] ", Superscript["|Y|", "\[Alpha]"],
   ",  \[Alpha] = ", NumberForm[alpha, {4, 2}],
   "   \[DoubleRightArrow]   weightPower = ",
   NumberForm[-alpha, {4, 2}]
@@ -253,7 +253,7 @@ PlotVariancePowerLaw[stats_Association, fMin_?NumericQ, fMax_?NumericQ,
   xRange = MinMax[yMeanGood];
   yRange = MinMax[yVarGood];
 
-  (* vertical dashed lines at fMin/fMax — Log10 (scaled-axis) coordinates *)
+  (* vertical dashed lines at fMin/fMax, in Log10 (scaled-axis) coordinates *)
   idxFMin  = First @ Ordering[Abs[Log10[freqGood] - Log10[fMin]], 1];
   idxFMax  = First @ Ordering[Abs[Log10[freqGood] - Log10[fMax]], 1];
   xLineMin = Log10[yMeanGood[[idxFMin]]];

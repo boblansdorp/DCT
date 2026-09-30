@@ -5,10 +5,10 @@
 
    States
    ------
-     U  — unfolded (electrochemically slow, k_peak in range 1)
-     F  — folded, no ligand bound
-     B  — folded AND ligand bound
-     NF — permanently non-folding (optional 4th state)
+     U  : unfolded (electrochemically slow, k_peak in range 1)
+     F  : folded, no ligand bound
+     B  : folded AND ligand bound
+     NF : permanently non-folding (optional 4th state)
 
    Electrochemical observables
    ---------------------------
@@ -24,8 +24,8 @@
 
    Public API
    ----------
-     $FF3State       — symbolic ff(C, KS, KD): 3-state closed-form
-     $FF4State       — symbolic ff(C, KS, KD, NF): 4-state closed-form
+     $FF3State       : symbolic ff(C, KS, KD): 3-state closed-form
+     $FF4State       : symbolic ff(C, KS, KD, NF): 4-state closed-form
 
      FitFoldedFraction[pts]
        -> Association with keys Model3, Model4, each containing
@@ -119,7 +119,7 @@ FitFoldedFraction[pts_List] := Module[
 
   (* The closed forms are 0/0 at (C = 0, KD = 0), so fitting data that includes a
      zero-concentration point can trap the optimiser in a degenerate minimum: starting
-     from KD = 100 (far from the true KD) it collapses NF -> 0.  Warm start instead — fit
+     from KD = 100 (far from the true KD) it collapses NF -> 0.  Warm start instead: fit
      the positive-concentration subset first (no singularity, converges cleanly), then
      reseed the all-data fit from those parameters, so the optimiser begins near the true
      KD and never wanders toward the singular point.  If pts has no C = 0 point,

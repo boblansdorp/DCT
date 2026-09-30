@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* Structural tests for DCTPlots`ThemeLogTicks / ThemeLinTicks — self-contained
+(* Structural tests for DCTPlots`ThemeLogTicks / ThemeLinTicks, self-contained
    theme-coloured outward-tick generators. Assertions only; the visual
    dark-vs-publication comparison lives in runTests.wb cells. *)
 
@@ -98,7 +98,7 @@ ok["PlotVariancePowerLaw x-axis ticks all outward",
 ok["PlotVariancePowerLaw y-axis ticks all outward",
   With[{lt = frameAxisTicks[vplPlot, 1]}, lt =!= {} && AllTrue[lt, outwardQ]]];
 
-(* PlotLCurve: log x (roughness), linear y (narrow misfit range) — both outward. *)
+(* PlotLCurve: log x (roughness), linear y (narrow misfit range), both outward. *)
 lcData = Table[{10.^-x, 5.9*^-4 + 0.02*^-4 x}, {x, 5., 8., 0.3}];
 lcPlot = DCTPlots`PlotLCurve[lcData];
 

@@ -42,8 +42,10 @@ rainbowColors[n_Integer] :=
     Table[ColorData["Rainbow"][u], {u, 0.05, 0.95, 0.90 / (n - 1)}]
   ]
 
+(* "File" is normally a label string (file name or "B1 100 uM"); a typeset
+   expression such as Row[{Subscript["\[Lambda]", "ND"], " = 0.3"}] is passed through *)
 defaultLabels[goodSpecs_List] :=
-  FileNameTake /@ goodSpecs[[All, "File"]]
+  If[StringQ[#], DCTPlots`ElectrodeName[FileNameTake[#]], #] & /@ goodSpecs[[All, "File"]]
 
 HourMarkLabels[specs_List, step_ : 6] := Module[
   {t0, hrs, marks, idx, labels},
@@ -139,8 +141,10 @@ PlotGK[goodSpecs_List, labels : (_List | Automatic) : Automatic,
       Style[Row[{"Electron-transfer rate, k (", Superscript["s", -1], ")"}], 16, fg],
       Style[gLabel, 16, fg]
     },
-    PlotRange        -> {All, {0, gMax}},
-    PlotRangePadding -> {{Scaled[0.02], Scaled[0.02]}, {Scaled[0.02], 0}},
+    (* keep the g = 0 baseline clear of the bottom frame line: the flat zero
+       stretches of a two-peaked spectrum are data too and must stay visible *)
+    PlotRange        -> {All, {-0.04 gMax, gMax}},
+    PlotRangePadding -> {{Scaled[0.02], Scaled[0.02]}, {0, 0}},
     ImageSize        -> 600,
     AspectRatio      -> 0.65,
     PlotLegends      -> themedLegend[legStyles, legLbls, th, fg]

@@ -1,0 +1,64 @@
+{
+ "cells": [
+  {
+   "kind": 1,
+   "value": "# Cyclic voltammetry of the titration electrodes\nOne CV per electrode, recorded before each titration in 1x PBS + 0.7 mM MgCl2 at 37 C, 0 to -0.45 V and back at 100 mV/s (one scan, 380 points). Series A = `1_TitrationA_2026-02-25`, series B = `2_TitrationB_2026-03-24`, the same electrode naming as the EIS notebook. The reference electrode is not recorded in the exported files, so potentials are reported as measured.\n\nThe notebook loads the CVs and plots them, one panel per series; the figure is exported to `data/figures` as `cv_raw` (PDF and 300 dpi PNG).",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 1,
+   "value": "## 1. Load and plot",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Setup: project paths, constants, CV import. The .txt exports are semicolon separated\n   with a header row: E applied (V); time (s); current (A); E measured (V); scan; index; Q+; Q-; range.\n   Plots here are drawn black-on-white directly, so the shared DCTPlots theme is left alone\n   (this notebook may share a kernel with the EIS notebook). *)\nprojDir = NotebookDirectory[];   (* repository root: the folder this notebook is in *)\nGet[FileNameJoin[{projDir, \"plots\", \"PlotTheme.wl\"}]];\nfigDir = FileNameJoin[{projDir, \"data\", \"figures\"}];\n\ncvSets = {{\"A\", FileNameJoin[{projDir, \"data\", \"1_TitrationA_2026-02-25\", \"CV\"}]},\n          {\"B\", FileNameJoin[{projDir, \"data\", \"2_TitrationB_2026-03-24\", \"CV\"}]}};\n\nimportCV[file_] := Module[{data, rows},\n  data = Import[file, \"Table\", \"FieldSeparators\" -> \";\"];\n  rows = Select[Rest[data], Length[#] >= 4 && VectorQ[#[[;; 4]], NumericQ] &];\n  <|\"E\" -> N[rows[[All, 1]]], \"t\" -> N[rows[[All, 2]]], \"I\" -> N[rows[[All, 3]]], \"Emeas\" -> N[rows[[All, 4]]]|>];\n\ncvRecs = Flatten[Table[\n  Table[<|\"Tag\" -> s[[1]] <> First[StringCases[FileNameTake[f], \"_E\" ~~ d : DigitCharacter :> d]],\n          \"File\" -> f, \"Data\" -> importCV[f]|>,\n    {f, Sort[FileNames[\"*.txt\", s[[2]]]]}], {s, cvSets}], 1];\n\n(* scan rate = total potential traversed (forward and reverse, column 1) / total time\n   (column 2). Computed per file; they must agree, and the common value is used below. *)\nscanRateOf[rec_] := Total[Abs[Differences[rec[\"Data\", \"E\"]]]]/(Last[rec[\"Data\", \"t\"]] - First[rec[\"Data\", \"t\"]]);\nscanRates = scanRateOf /@ cvRecs;\nIf[Max[scanRates] - Min[scanRates] > 1*^-4, Print[Style[\"Scan rates differ between files: \" <> ToString[scanRates], Red]]];\nscanRate = Mean[scanRates];\n\nPrint[Length[cvRecs], \" CVs: \", StringRiffle[cvRecs[[All, \"Tag\"]], \", \"], \".   Scan rate = \",\n  NumberForm[Total[Abs[Differences[cvRecs[[1, \"Data\", \"E\"]]]]], {4, 4}], \" V traversed / \",\n  NumberForm[Last[cvRecs[[1, \"Data\", \"t\"]]] - First[cvRecs[[1, \"Data\", \"t\"]]], {5, 4}], \" s = \",\n  NumberForm[scanRate, {5, 4}], \" V/s (identical for all files).  \",\n  Length[cvRecs[[1, \"Data\", \"E\"]]], \" points, E from \", NumberForm[Min[cvRecs[[1, \"Data\", \"E\"]]], {3, 3}], \" to \",\n  NumberForm[Max[cvRecs[[1, \"Data\", \"E\"]]], {3, 3}], \" V.\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-print-output\"><div class=\"wl-print-line\"><div class=\"vscode-wolfram-wllatex-prerendered\" data-page-width-em=\"65\" data-latex-b64=\"Ng==\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">6</span></span></span></span></span></div><span class=\"wl-ps\"> CVs: </span><span class=\"wl-ps\">A1, A2, A3, B1, B2, B3</span><span class=\"wl-ps\">.   Scan rate = </span><div class=\"vscode-wolfram-wllatex-prerendered\" data-page-width-em=\"65\" data-latex-b64=\"XHRleHR7MC45MjUzfQ==\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.9253</span></span></span></span></span></span></div><span class=\"wl-ps\"> V traversed / </span><div class=\"vscode-wolfram-wllatex-prerendered\" data-page-width-em=\"65\" data-latex-b64=\"XHRleHR7OS4yNTI5fQ==\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">9.2529</span></span></span></span></span></span></div><span class=\"wl-ps\"> s = </span><div class=\"vscode-wolfram-wllatex-prerendered\" data-page-width-em=\"65\" data-latex-b64=\"XHRleHR7MC4xMDAwfQ==\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.1000</span></span></span></span></span></span></div><span class=\"wl-ps\"> V/s (identical for all files).  </span><div class=\"vscode-wolfram-wllatex-prerendered\" data-page-width-em=\"65\" data-latex-b64=\"Mzgw\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord\">380</span></span></span></span></span></div><span class=\"wl-ps\"> points, E from </span><div class=\"vscode-wolfram-wllatex-prerendered\" data-page-width-em=\"65\" data-latex-b64=\"XHRleHR7LTAuNDUyfQ==\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">-0.452</span></span></span></span></span></span></div><span class=\"wl-ps\"> to </span><div class=\"vscode-wolfram-wllatex-prerendered\" data-page-width-em=\"65\" data-latex-b64=\"XHRleHR7MC4wMTJ9\"><span class=\"katex-display\"><span class=\"katex\"><span class=\"katex-html\" aria-hidden=\"true\"><span class=\"base\"><span class=\"strut\" style=\"height:0.6444em;\"></span><span class=\"mord text\"><span class=\"mord\">0.012</span></span></span></span></span></span></div><span class=\"wl-ps\"> V.</span></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Print: [formula] CVs:A1, A2, A3, B1, B2, B3.   Scan rate =[formula] V traversed /[formula] s =[formula] V/s (identical for all files).[formula] points, E from[formula] to[formula] V.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "22eb3db0-6fe7-4d02-b3cf-ac9fcbf47c4d"
+    }
+   ],
+   "metadata": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* Raw CVs, one panel per series, current in nA. Publication style: white background,\n   outward ticks from the shared theme package. *)\nseriesCols = {RGBColor[0.20, 0.45, 0.85], RGBColor[0.15, 0.65, 0.35], RGBColor[0.85, 0.25, 0.20]};\n\ncvPanel[recs_, ttl_, yMax_] := Module[{fg = Black, bg = White, curves},\n  curves = Transpose[{#Data[\"E\"], 1.*^9 #Data[\"I\"]}] & /@ recs;\n  ListLinePlot[curves, Joined -> True,\n    PlotStyle -> (Directive[#, AbsoluteThickness[1.6]] & /@ seriesCols[[;; Length[recs]]]),\n    PlotTheme -> \"Default\", Frame -> True, Axes -> False, Background -> bg,\n    FrameStyle -> Directive[fg, AbsoluteThickness[1.1]],\n    FrameTicks -> {{DCTPlots`ThemeLinTicks[-yMax, yMax, fg], None}, {DCTPlots`ThemeLinTicks[-0.5, 0.05, fg], None}},\n    FrameTicksStyle -> Directive[fg, 12], LabelStyle -> Directive[fg, 13, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"Potential (V)\", 14, fg], Style[\"Current (nA)\", 14, fg]},\n    PlotLabel -> Style[ttl, 13, Bold, fg],\n    PlotRange -> {{-0.5, 0.05}, {-yMax, yMax}}, PlotRangePadding -> None,\n    PlotLegends -> Placed[LineLegend[seriesCols[[;; Length[recs]]], DCTPlots`ElectrodeName /@ recs[[All, \"Tag\"]],\n      LabelStyle -> Directive[fg, 11]], {0.22, 0.82}],\n    ImageSize -> 460, AspectRatio -> 0.75]];\n\ncvYMax = 1.1*^9 Max[Abs[Flatten[cvRecs[[All, \"Data\", \"I\"]]]]];\nrawFigure[] := Grid[{{cvPanel[Select[cvRecs, StringStartsQ[#Tag, \"A\"] &], \"Series A (2026-02-25)\", cvYMax],\n                      cvPanel[Select[cvRecs, StringStartsQ[#Tag, \"B\"] &], \"Series B (2026-03-24)\", cvYMax]}}, Spacings -> {1, 0}];\n\n(* publication export: PDF + 300 dpi PNG (a Grid, since a Row wraps when rasterised at 300 dpi) *)\nExport[FileNameJoin[{figDir, \"cv_raw.pdf\"}], rawFigure[]];\nExport[FileNameJoin[{figDir, \"cv_raw.png\"}], rawFigure[], ImageResolution -> 300];\nrawFigure[]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wl-output-block\"><div class=\"wl-output-header\" style=\"display:flex;align-items:center;gap:6px;width:100%;min-height:22px;\" data-session-epoch=\"23243\" data-output-id=\"87\" data-out-n=\"751\" data-sub-idx=\"8\" data-output-format=\"Auto\" data-output-is-graphics=\"1\" data-cell-idx=\"3\" data-sub-start=\"26\" data-sub-end=\"26\"><span style=\"font-size:10px;color:#888;margin-right:8px;\">Out[751]=</span></div><div class=\"wl-output-content\"><span class=\"vscode-wolfram-gfx-marker\" style=\"display:none;\"></span><img class=\"vscode-wolfram-svg-output\" data-wl-img=\"c:\\\\Users\\\\Bob Lansdorp\\\\Documents\\\\DCT\\\\img\\\\cv_analysis\\\\wl_np1sq7qj06ol.svg\" width=\"1244\" height=\"493\" src=\"img/cv_analysis/wl_np1sq7qj06ol.svg\"/></div></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(* output: graphics *)\n(* Raw CVs, one panel per series, current in nA. Publication style: white background,\n   outward ticks from the shared theme package. *)\nseriesCols = {RGBColor[0.20, 0.45, 0.85], RGBColor[0.15, 0.65, 0.35], RGBColor[0.85, 0.25, 0.20]};\n\ncvPanel[recs_, ttl_, yMax_] := Module[{fg = Black, bg = White, curves},\n  curves = Transpose[{#Data[\"E\"], 1.*^9 #Data[\"I\"]}] & /@ recs;\n  ListLinePlot[curves, Joined -> True,\n    PlotStyle -> (Directive[#, AbsoluteThickness[1.6]] & /@ seriesCols[[;; Length[recs]]]),\n    PlotTheme -> \"Default\", Frame -> True, Axes -> False, Background -> bg,\n    FrameStyle -> Directive[fg, AbsoluteThickness[1.1]],\n    FrameTicks -> {{DCTPlots`ThemeLinTicks[-yMax, yMax, fg], None}, {DCTPlots`ThemeLinTicks[-0.5, 0.05, fg], None}},\n    FrameTicksStyle -> Directive[fg, 12], LabelStyle -> Directive[fg, 13, FontFamily -> \"Arial\"],\n    FrameLabel -> {Style[\"Potential (V)\", 14, fg], Style[\"Current (nA)\", 14, fg]},\n    PlotLabel -> Style[ttl, 13, Bold, fg],\n    PlotRange -> {{-0.5, 0.05}, {-yMax, yMax}}, PlotRangePadding -> None,\n    PlotLegends -> Placed[LineLegend[seriesCols[[;; Length[recs]]], DCTPlots`ElectrodeName /@ recs[[All, \"Tag\"]],\n      LabelStyle -> Directive[fg, 11]], {0.22, 0.82}],\n    ImageSize -> 460, AspectRatio -> 0.75]];\n\ncvYMax = 1.1*^9 Max[Abs[Flatten[cvRecs[[All, \"Data\", \"I\"]]]]];\nrawFigure[] := Grid[{{cvPanel[Select[cvRecs, StringStartsQ[#Tag, \"A\"] &], \"Series A (2026-02-25)\", cvYMax],\n                      cvPanel[Select[cvRecs, StringStartsQ[#Tag, \"B\"] &], \"Series B (2026-03-24)\", cvYMax]}}, Spacings -> {1, 0}];\n\n(* publication export: PDF + 300 dpi PNG (a Grid, since a Row wraps when rasterised at 300 dpi) *)\nExport[FileNameJoin[{figDir, \"cv_raw.pdf\"}], rawFigure[]];\nExport[FileNameJoin[{figDir, \"cv_raw.png\"}], rawFigure[], ImageResolution -> 300];\nrawFigure[]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c1e29523-0cf8-4a14-8c4d-1971f8207f78"
+    }
+   ],
+   "metadata": {}
+  }
+ ],
+ "metadata": {
+  "createdBy": "wolfbook_newNotebook",
+  "createdAt": "2026-09-29T01:33:41.963Z"
+ }
+}

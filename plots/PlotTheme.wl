@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(*  DCTPlots`PlotTheme  —  shared plot theming.
+(*  DCTPlots`PlotTheme: shared plot theming.
 
     Single source of truth for colours/chrome across every DCTPlots figure.
     Plot functions read the active theme instead of hardcoding White/dark.
@@ -21,7 +21,7 @@
     frames/ticks onto a Publication (white-background) figure. Use ThemeChrome
     below, which includes it.
 
-    Ticks (ThemeLogTicks / ThemeLinTicks) are generated here directly — small,
+    Ticks (ThemeLogTicks / ThemeLinTicks) are generated here directly: small,
     self-contained, no external paclet. Positions are VALUE coordinates, so they
     drop straight onto ScalingFunctions -> "Log10" and linear frame axes.
 *)
@@ -64,9 +64,41 @@ ThemeLinTicks::usage =
   "ThemeLinTicks[vmin, vmax] / ThemeLinTicks[vmin, vmax, color] returns outward \
 linear-axis FrameTicks (value coordinates) coloured for the theme (default Black).";
 
+ElectrodeName::usage =
+  "ElectrodeName[s] rewrites a short electrode tag such as \"B1\" or \"B1 100 \[Mu]M\" \
+into display form (\"Electrode B1\", \"Electrode B1, 100 \[Mu]M\") for legends and titles. \
+The leading tag is looked up in $ElectrodeMap first, so raw on-disk names can be renamed \
+for display. Internal identifiers (file names, grouping keys) keep the short tag. A spectrum \
+file name such as \"E1_EIS_(17).txt\" becomes \"Electrode B1, spectrum 17\" (tag mapped the \
+same way). Any other string that does not start with letters+digits followed by a space or \
+end of string is returned unchanged.";
+
+$ElectrodeMap::usage =
+  "$ElectrodeMap is an Association of raw electrode tag -> display tag, applied by \
+ElectrodeName. Set it in the notebook when the on-disk directory names differ from the \
+electrode labels used in the manuscript (e.g. <|\"E1\" -> \"B1\"|>). Default: <||>.";
+
 Begin["`Private`"]
 
 If[!ValueQ[$DCTTheme], $DCTTheme = "Dark"];
+If[!ValueQ[$ElectrodeMap], $ElectrodeMap = <||>];
+
+(* spectrum file names of a time series: "E1_EIS_(17).txt" -> "Electrode B1, spectrum 17" *)
+ElectrodeName[s_String /; StringMatchQ[s,
+    (LetterCharacter .. ~~ DigitCharacter ..) ~~ "_" ~~ ___ ~~ "(" ~~ DigitCharacter .. ~~ ")" ~~ ___]] :=
+  First[StringCases[s, StartOfString ~~ t : (LetterCharacter .. ~~ DigitCharacter ..) ~~ "_" ~~ ___ ~~
+      "(" ~~ n : DigitCharacter .. ~~ ")" ~~ ___ :>
+    "Electrode " <> Lookup[$ElectrodeMap, t, t] <> ", spectrum " <> n, 1]];
+ElectrodeName[s_String] := Module[{m, tag, rest},
+  m = StringCases[s,
+    StartOfString ~~ t : (LetterCharacter .. ~~ DigitCharacter ..) ~~
+      r : (EndOfString | " " ~~ ___) :> {t, r}, 1];
+  If[m === {}, s,
+    {tag, rest} = First[m];
+    rest = StringTrim[rest];
+    "Electrode " <> Lookup[$ElectrodeMap, tag, tag] <>
+      If[rest === "", "", ", " <> rest]]];
+ElectrodeName[s_] := s;
 
 DCTThemeData["Dark"] = <|
   "Bg"   -> GrayLevel[0.12],

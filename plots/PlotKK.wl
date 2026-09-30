@@ -47,7 +47,7 @@ PlotKKResiduals[kkResult_Association, threshold : (_?NumericQ) : 0.02,
   yMax   = Max[1.5 threshold, 1.2 Max[Abs[resRe], Abs[resIm]]];
 
   (* threshold band drawn as 2-point data series so ScalingFunctions positions
-     it (real frequency coords) — avoids the old Show + Log[] coordinate hack
+     it (real frequency coords); this avoids the old Show + Log[] coordinate hack
      and lets the theme outward-tick generators apply. *)
   bandStyle = Directive[fg, Opacity[0.35], Dashing[{0.015, 0.01}], AbsoluteThickness[1.]];
 
@@ -107,7 +107,7 @@ PlotKKFMinHistogram[kkMins_List, opts : OptionsPattern[]] := Module[
                         {ThemeLinTicks[xMin, xMax, fg], None}},
     FrameTicksStyle -> Directive[fg, 12],
     FrameLabel      -> {Style["Lin-KK fMin (Hz)", 13, fg], Style["Files", 13, fg]},
-    PlotLabel       -> Style["Valid lower bound \[LongDash] all drift files", fg, 13],
+    PlotLabel       -> Style["Valid lower bound, all drift files", fg, 13],
     ImageSize       -> 440
   ]
 ]
